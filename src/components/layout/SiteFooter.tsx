@@ -26,6 +26,9 @@ export function SiteFooter() {
           <Link href="/multiplayer" className="hover:text-primary">
             Multiplayer
           </Link>
+          <Link href="/collections" className="hover:text-primary">
+            Collections
+          </Link>
           <Link href="/community" className="hover:text-primary">
             Community
           </Link>

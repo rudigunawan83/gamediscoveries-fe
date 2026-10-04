@@ -28,7 +28,7 @@ export function GameBreadcrumbs({ gameTitle, categories }: GameBreadcrumbsProps)
             <li aria-hidden="true">/</li>
             <li>
               <Link
-                href={`/games?category=${encodeURIComponent(category.name)}`}
+                href={`/games/${category.slug}`}
                 className="hover:text-primary"
               >
                 {category.name}

@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
 import { GameCommunitySection } from "@/features/community/components/GameCommunitySection";
 import { fetchGameBySlug } from "@/features/games/api/games.api";
-import { createMetadata } from "@/lib/seo/metadata";
+import {
+  createMetadata,
+  generateCommunityMetadata,
+} from "@/lib/seo/metadata";
+import { communityGameTitle } from "@/lib/seo/titles";
+import { SEO_CONFIG } from "@/lib/seo/config";
 
 interface GameCommunityPageProps {
   params: Promise<{ slug: string }>;
@@ -18,11 +23,12 @@ export async function generateMetadata({ params }: GameCommunityPageProps) {
     });
   }
 
-  return createMetadata({
-    title: `${game.title} Community`,
+  return generateCommunityMetadata({
+    title: communityGameTitle(game.title),
     description: `Discuss ${game.title}, share tips, and read player conversations on GameDiscoveries.`,
     path: `/game/${slug}/community`,
     image: game.thumbnailUrl ?? game.coverUrl,
+    indexable: SEO_CONFIG.enableCommunityIndexing,
   });
 }
 

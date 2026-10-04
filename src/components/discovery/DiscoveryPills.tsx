@@ -9,7 +9,8 @@ const pills = [
   { href: "/exclusive-games", label: "Exclusive" },
   { href: "/new", label: "New" },
   { href: "/multiplayer", label: "Multiplayer" },
-  { href: "/games?category=Puzzle", label: "Puzzle" },
+  { href: "/games/puzzle", label: "Puzzle" },
+  { href: "/collections", label: "Collections" },
 ] as const;
 
 export function DiscoveryPills() {

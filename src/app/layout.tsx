@@ -4,11 +4,12 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
 import {
   BRAND_THEME_COLOR,
-  SITE_DESCRIPTION,
   SITE_NAME,
-  SITE_TAGLINE,
 } from "@/lib/seo/constants";
-import { env } from "@/config/env";
+import {
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/structured-data";
 import { AppProviders } from "@/providers/AppProviders";
 import "./globals.css";
 
@@ -29,12 +30,23 @@ const mono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = createMetadata();
+export const metadata: Metadata = {
+  ...createMetadata(),
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: SITE_NAME,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: BRAND_THEME_COLOR,
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
   viewportFit: "cover",
   colorScheme: "dark",
 };
@@ -50,33 +62,7 @@ export default function RootLayout({
       className={`dark ${display.variable} ${sans.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
-        <JsonLd
-          data={[
-            {
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: SITE_NAME,
-              alternateName: ["Game Discoveries", SITE_TAGLINE],
-              url: env.NEXT_PUBLIC_APP_URL,
-              description: SITE_DESCRIPTION,
-              inLanguage: "en",
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${env.NEXT_PUBLIC_APP_URL}/search?q={search_term_string}`,
-                "query-input": "required name=search_term_string",
-              },
-            },
-            {
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: SITE_NAME,
-              url: env.NEXT_PUBLIC_APP_URL,
-              logo: `${env.NEXT_PUBLIC_APP_URL}/favicon.png`,
-              description: SITE_DESCRIPTION,
-              sameAs: [],
-            },
-          ]}
-        />
+        <JsonLd data={[websiteJsonLd(), organizationJsonLd()]} />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

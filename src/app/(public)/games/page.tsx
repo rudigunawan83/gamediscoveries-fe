@@ -2,7 +2,9 @@ import { GamesCatalog } from "@/features/games/components/GamesCatalog";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
-  title: "Games",
+  title: "Games — Play Free Online",
+  description:
+    "Browse free HTML5 browser games on GameDiscoveries. Filter by category via SEO-friendly /games/[category] URLs.",
   path: "/games",
 });
 

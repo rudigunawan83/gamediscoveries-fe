@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  Compass,
   Gamepad2,
   Home,
   LogIn,
@@ -32,12 +31,16 @@ import { cn } from "@/lib/utils";
 
 const navIcons: Record<string, typeof Home> = {
   "/": Home,
-  "/discover": Compass,
+  "/community": Users,
   "/games": Gamepad2,
   "/trending": TrendingUp,
   "/new": Sparkles,
   "/mobile": Smartphone,
   "/multiplayer": Users,
+  "/hot-games": TrendingUp,
+  "/best-games": Sparkles,
+  "/most-played": Gamepad2,
+  "/exclusive-games": Sparkles,
 };
 
 const extraItems = [

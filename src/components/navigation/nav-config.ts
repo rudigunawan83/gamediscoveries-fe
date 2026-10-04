@@ -1,6 +1,5 @@
 export const desktopNavItems = [
   { href: "/", label: "Home" },
-  { href: "/discover", label: "Discover" },
   { href: "/community", label: "Community" },
   { href: "/hot-games", label: "Hot" },
   { href: "/best-games", label: "Best" },
@@ -12,7 +11,7 @@ export const desktopNavItems = [
 
 export const mobileBottomNavItems = [
   { href: "/", label: "Home", icon: "home" },
-  { href: "/discover", label: "Discover", icon: "compass" },
+  { href: "/community", label: "Community", icon: "users" },
   { href: "/search", label: "Search", icon: "search" },
   { href: "/my-games", label: "My Games", icon: "gamepad" },
 ] as const;

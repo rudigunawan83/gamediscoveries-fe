@@ -145,11 +145,35 @@ ApiResponse<T> = {
 }
 ```
 
+## PWA + Performance Budgets
+
+GameDiscoveries ships as an installable PWA (`manifest.webmanifest` + `/sw.js`) on top of the existing Next.js Server Components architecture.
+
+Practical budgets (mobile mid-tier, 4G):
+
+| Metric | Target |
+| --- | --- |
+| LCP | ≤ 2.5s |
+| INP | ≤ 200ms |
+| CLS | ≤ 0.1 |
+| Initial JS (critical route) | keep lean; prefer Server Components |
+| Hero / LCP image | responsive, prioritized only above the fold |
+| Fonts | Montserrat subset via `next/font` |
+| Third-party scripts | deferred / non-blocking |
+
+Cache strategy (service worker `gd-v1`):
+
+- Static (`/_next/static`, icons): Cache First
+- Same-origin images: Stale While Revalidate
+- Navigations: Network First → `/offline` fallback
+- Authenticated / private routes: never intercepted for shared caching
+
 ## Deployment
 
 1. Set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_APP_URL`
-2. Run `pnpm build`
-3. Serve with `pnpm start` or the standalone Docker image
+2. Serve over HTTPS (required for service worker / installability)
+3. Run `pnpm build`
+4. Serve with `pnpm start` or the standalone Docker image
 
 Recommended branch model:
 

@@ -17,7 +17,7 @@ export function EmptyHistory() {
         Start playing games and your recent activity will appear here.
       </p>
       <Button asChild className="mt-6 bg-brand-gradient text-[#1a1205]">
-        <Link href="/discover">Discover Games</Link>
+        <Link href="/">Discover Games</Link>
       </Button>
     </section>
   );

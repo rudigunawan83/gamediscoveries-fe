@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { DesktopNav } from "@/components/navigation/DesktopNav";
 import { SearchButton } from "@/components/navigation/SearchButton";
 import { UserMenu } from "@/components/navigation/UserMenu";
@@ -12,6 +13,7 @@ export function DesktopHeader() {
           <DesktopNav />
         </div>
         <div className="flex items-center gap-3">
+          <InstallAppButton compact className="hidden xl:inline-flex" />
           <SearchButton />
           <UserMenu />
         </div>

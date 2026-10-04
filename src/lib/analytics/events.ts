@@ -34,4 +34,10 @@ export const ANALYTICS_EVENTS = {
   communityUserFollowed: "community_user_followed",
   communityLeaderboardViewed: "community_leaderboard_viewed",
   communityReportCreated: "community_report_created",
+  pwaInstallPromptShown: "pwa_install_prompt_shown",
+  pwaInstalled: "pwa_installed",
+  pwaLaunch: "pwa_launch",
+  pwaUpdateAvailable: "pwa_update_available",
+  pwaOffline: "pwa_offline",
+  pwaOnline: "pwa_online",
 } as const satisfies Record<string, AnalyticsEventName>;

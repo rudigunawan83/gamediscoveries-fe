@@ -43,6 +43,23 @@ export type AnalyticsEventName =
   | "community_challenge_started"
   | "community_challenge_completed"
   | "community_leaderboard_viewed"
-  | "community_report_created";
+  | "community_report_created"
+  | "pwa_install_prompt_shown"
+  | "pwa_install_prompt_accepted"
+  | "pwa_install_prompt_dismissed"
+  | "pwa_installed"
+  | "pwa_launch"
+  | "pwa_update_available"
+  | "pwa_update_accepted"
+  | "pwa_offline"
+  | "pwa_online"
+  | "organic_landing"
+  | "share_clicked"
+  | "share_completed"
+  | "return_session"
+  | "game_completed"
+  | "community_joined"
+  | "review_created"
+  | "install_prompt_shown";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>;

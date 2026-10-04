@@ -17,7 +17,7 @@ export function ForYouSection() {
       title="Recommended For You"
       description="Personalized picks based on your play history and favorites."
       games={data?.games ?? []}
-      href="/discover"
+      href="/"
       variant="discovery"
     />
   );
@@ -31,7 +31,7 @@ export function HiddenGemsSection() {
       title="Hidden Gems"
       description="Strong games with lower exposure across the catalog."
       games={data?.games ?? []}
-      href="/discover"
+      href="/"
       variant="discovery"
     />
   );

@@ -15,6 +15,7 @@ import {
 } from "@/features/games/mock/games.mock";
 import type { Game } from "@/types/game";
 import type { HomeDiscoveriesDto } from "@/lib/api/types.games";
+import type { ApiMeta } from "@/lib/api/types";
 
 // Opt-in only. Default is live API so production builds never bake mock catalogs.
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
@@ -32,13 +33,36 @@ export type HomeDiscoveries = {
   exclusiveGames: Game[];
 };
 
+export type GamesPageResult = {
+  games: Game[];
+  meta: ApiMeta | null;
+};
+
 export async function fetchGames(params: ListGamesParams = {}): Promise<Game[]> {
+  const page = await fetchGamesPage(params);
+  return page.games;
+}
+
+export async function fetchGamesPage(
+  params: ListGamesParams = {},
+): Promise<GamesPageResult> {
   if (USE_MOCK) {
-    return mockGames;
+    return {
+      games: mockGames,
+      meta: {
+        page: 1,
+        pageSize: mockGames.length,
+        total: mockGames.length,
+        totalPages: 1,
+      },
+    };
   }
 
   const response = await getGames({ page: 1, pageSize: 500, ...params });
-  return mapGameSummaries(response.data ?? []);
+  return {
+    games: mapGameSummaries(response.data ?? []),
+    meta: response.meta,
+  };
 }
 
 export async function fetchGameBySlug(slug: string): Promise<Game | null> {

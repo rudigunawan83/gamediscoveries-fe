@@ -6,7 +6,11 @@ import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
   title: "Search",
+  description:
+    "Search free online games on GameDiscoveries. Results pages are not indexed to prevent query-parameter URL explosion.",
   path: "/search",
+  noIndex: true,
+  follow: true,
 });
 
 interface SearchPageProps {

@@ -6,7 +6,7 @@ export function DiscoveryHero() {
   return (
     <section
       aria-labelledby="discovery-hero-heading"
-      className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 isolate min-h-[32rem] overflow-hidden md:min-h-[38rem] lg:min-h-[42rem]"
+      className="relative left-1/2 isolate w-screen max-w-[100vw] -translate-x-1/2 -mt-6 min-h-[32rem] overflow-hidden md:min-h-[38rem] lg:min-h-[42rem]"
     >
       <Image
         src="/images/hero-background.jpg"

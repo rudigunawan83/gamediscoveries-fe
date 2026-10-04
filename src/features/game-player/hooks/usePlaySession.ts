@@ -7,6 +7,7 @@ import type { PlaySessionPhase } from "@/features/game-player/types/game-player.
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import { recordHistory } from "@/features/my-games/api/historyApi";
 import { myGamesKeys } from "@/features/my-games/api/myGamesKeys";
+import { markPlayed } from "@/lib/pwa/install";
 import { useQueryClient } from "@tanstack/react-query";
 
 type UsePlaySessionArgs = {
@@ -63,6 +64,7 @@ export function usePlaySession({
     }
     phaseRef.current = "game_started";
     startedAtRef.current = Date.now();
+    markPlayed();
     analytics.track("game_started", { gameId, gameSlug });
     phaseRef.current = "play_session_active";
 

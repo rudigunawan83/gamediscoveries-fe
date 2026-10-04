@@ -79,9 +79,10 @@ export function GamePlayer({
     <div
       ref={shellRef}
       className={cn(
-        "flex h-[100dvh] w-full flex-col bg-[#060914] text-white",
+        "flex h-[100dvh] w-full flex-col overscroll-none bg-[#060914] text-white",
         isFullscreen && "fixed inset-0 z-[100]",
       )}
+      style={{ touchAction: state === "playing" ? "none" : "manipulation" }}
     >
       <GamePlayerToolbar
         title={title}
@@ -93,7 +94,7 @@ export function GamePlayer({
         }}
       />
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-black">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden overscroll-none bg-black pb-[env(safe-area-inset-bottom)]">
         {state === "error" && errorKind ? (
           <GamePlayerError kind={errorKind} backHref={backHref} onRetry={retry} />
         ) : (
