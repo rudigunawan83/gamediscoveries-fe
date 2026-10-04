@@ -4,10 +4,7 @@ import { fetchCategories } from "@/features/seo/api/categories.api";
 import { fetchIndexableCollections } from "@/features/seo/api/collections.api";
 import { SEO_CONFIG } from "@/lib/seo/config";
 import { shouldIndexCategory, shouldIndexCollection } from "@/lib/seo/indexability";
-import {
-  gamesSitemapPartitionCount,
-  sitemapEntry,
-} from "@/lib/seo/sitemap-utils";
+import { sitemapEntry } from "@/lib/seo/sitemap-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -31,78 +28,57 @@ const STATIC_ROUTES: Array<{
   { path: "/exclusive-games", priority: 0.7, changeFrequency: "weekly" },
 ];
 
-/** id 0 = static + categories + collections; id >= 1 = game partitions */
-export async function generateSitemaps() {
+/**
+ * Single sitemap with batched game fetches (no full-table load).
+ * Partitioned generateSitemaps can be re-enabled once index route is verified in Next 16.
+ */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) =>
+    sitemapEntry(route.path, {
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }),
+  );
+
   try {
-    const first = await fetchGamesPage({
-      page: 1,
-      pageSize: 1,
-      sort: "newest",
-    });
-    const total = first.meta?.total ?? 0;
-    const partitions = gamesSitemapPartitionCount(total);
-    return Array.from({ length: partitions + 1 }, (_, id) => ({ id }));
-  } catch {
-    return [{ id: 0 }, { id: 1 }];
-  }
-}
+    const [categories, collections] = await Promise.all([
+      fetchCategories(),
+      fetchIndexableCollections(),
+    ]);
 
-export default async function sitemap(props: {
-  id: number | string;
-}): Promise<MetadataRoute.Sitemap> {
-  const id = Number(props.id);
-
-  if (id === 0) {
-    const entries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) =>
-      sitemapEntry(route.path, {
-        changeFrequency: route.changeFrequency,
-        priority: route.priority,
-      }),
-    );
-
-    try {
-      const [categories, collections] = await Promise.all([
-        fetchCategories(),
-        fetchIndexableCollections(),
-      ]);
-
-      for (const category of categories) {
-        if (!shouldIndexCategory(category).index) continue;
-        entries.push(
-          sitemapEntry(`/games/${category.slug}`, {
-            lastModified: category.lastContentAt,
-            changeFrequency: "daily",
-            priority: 0.75,
-          }),
-        );
-      }
-
-      for (const collection of collections) {
-        if (!shouldIndexCollection(collection).index) continue;
-        entries.push(
-          sitemapEntry(`/collections/${collection.slug}`, {
-            lastModified: collection.updatedAt,
-            changeFrequency: "weekly",
-            priority: 0.7,
-          }),
-        );
-      }
-    } catch {
-      // Keep static routes if catalog APIs are temporarily unavailable.
+    for (const category of categories) {
+      if (!shouldIndexCategory(category).index) continue;
+      entries.push(
+        sitemapEntry(`/games/${category.slug}`, {
+          lastModified: category.lastContentAt,
+          changeFrequency: "daily",
+          priority: 0.75,
+        }),
+      );
     }
 
-    return entries;
+    for (const collection of collections) {
+      if (!shouldIndexCollection(collection).index) continue;
+      entries.push(
+        sitemapEntry(`/collections/${collection.slug}`, {
+          lastModified: collection.updatedAt,
+          changeFrequency: "weekly",
+          priority: 0.7,
+        }),
+      );
+    }
+  } catch {
+    // Keep static routes if catalog APIs are temporarily unavailable.
   }
 
-  const partitionIndex = id - 1;
-  const pageSize = Math.min(SEO_CONFIG.sitemapGamesPerPartition, 100);
-  const pagesPerPartition = Math.ceil(
-    SEO_CONFIG.sitemapGamesPerPartition / pageSize,
+  const pageSize = 100;
+  const maxPages = Math.min(
+    SEO_CONFIG.sitemapMaxPartitions *
+      Math.ceil(SEO_CONFIG.sitemapGamesPerPartition / pageSize),
+    500,
   );
-  const startPage = partitionIndex * pagesPerPartition + 1;
-  const entries: MetadataRoute.Sitemap = [];
 
-  for (let page = startPage; page < startPage + pagesPerPartition; page += 1) {
+  for (let page = 1; page <= maxPages; page += 1) {
     try {
       const result = await fetchGamesPage({
         page,

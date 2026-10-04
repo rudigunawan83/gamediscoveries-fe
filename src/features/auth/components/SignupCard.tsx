@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { SignupForm } from "@/features/auth/components/SignupForm";
-import { SocialAuthButtons } from "@/features/auth/components/SocialAuthButtons";
 
 export function SignupCard() {
   return (
@@ -18,7 +17,6 @@ export function SignupCard() {
 
       <div className="space-y-5 sm:space-y-6">
         <SignupForm />
-        <SocialAuthButtons mode="signup" />
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
