@@ -1,5 +1,5 @@
 import { GameSection } from "@/components/game/GameSection";
-import { mockNewGames } from "@/features/games/mock/games.mock";
+import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -7,12 +7,16 @@ export const metadata = createMetadata({
   path: "/new",
 });
 
-export default function NewGamesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewGamesPage() {
+  const home = await fetchHomeDiscoveries();
+
   return (
     <GameSection
       title="New Discoveries"
-      description="Recently added titles from the mock catalog."
-      games={mockNewGames}
+      description="Recently synced titles from GameMonetize."
+      games={home.latest}
     />
   );
 }

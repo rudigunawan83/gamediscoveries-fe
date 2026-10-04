@@ -1,4 +1,5 @@
 import { env } from "@/config/env";
+import { getAuthToken, notifyUnauthorized } from "@/lib/auth/token";
 import {
   ApiClientError,
   type ApiError,
@@ -19,7 +20,10 @@ export interface RequestOptions {
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 function buildUrl(path: string): string {
-  const base = env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+  // Prefer internal Docker DNS on the server to avoid shared public rate limits.
+  const serverBase =
+    typeof window === "undefined" ? process.env.INTERNAL_API_URL : undefined;
+  const base = (serverBase || env.NEXT_PUBLIC_API_URL).replace(/\/$/, "");
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${base}${normalizedPath}`;
 }
@@ -58,7 +62,11 @@ export function normalizeApiError(
   });
 }
 
-async function request<T>(
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestOnce<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<ApiResponse<T>> {
@@ -75,13 +83,20 @@ async function request<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  if (options.authToken) {
-    headers.set("Authorization", `Bearer ${options.authToken}`);
+  const token = options.authToken ?? getAuthToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
+
+  const method = options.method ?? "GET";
+  const skipUnauthorizedRedirect =
+    path.includes("/api/v1/auth/login") ||
+    path.includes("/api/v1/auth/register") ||
+    path.includes("/api/v1/auth/logout");
 
   try {
     const response = await fetch(buildUrl(path), {
-      method: options.method ?? "GET",
+      method,
       headers,
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: options.signal ?? controller.signal,
@@ -93,6 +108,9 @@ async function request<T>(
     const payload = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
+      if (response.status === 401 && !skipUnauthorizedRedirect) {
+        notifyUnauthorized();
+      }
       throw normalizeApiError(response.status, payload);
     }
 
@@ -127,6 +145,34 @@ async function request<T>(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiResponse<T>> {
+  const method = options.method ?? "GET";
+  const isMutation = method !== "GET";
+  const maxAttempts = isMutation ? 1 : 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await requestOnce<T>(path, options);
+    } catch (error) {
+      const retryable =
+        !isMutation &&
+        error instanceof ApiClientError &&
+        (error.status === 429 || error.status === 408 || error.status === 0);
+
+      if (!retryable || attempt === maxAttempts) {
+        throw error;
+      }
+
+      await sleep(400 * attempt);
+    }
+  }
+
+  throw new ApiClientError("Unexpected network error", 0);
 }
 
 export const apiClient = {

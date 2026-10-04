@@ -12,5 +12,5 @@ export const mobileBottomNavItems = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/discover", label: "Discover", icon: "compass" },
   { href: "/search", label: "Search", icon: "search" },
-  { href: "/games", label: "My Games", icon: "gamepad" },
+  { href: "/my-games", label: "My Games", icon: "gamepad" },
 ] as const;

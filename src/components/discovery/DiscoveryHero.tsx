@@ -1,54 +1,60 @@
-import Link from "next/link";
-import { Play, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SearchInput } from "@/components/search/SearchInput";
+import Image from "next/image";
+import { DiscoveryPills } from "@/components/discovery/DiscoveryPills";
+import { HeroSearchInput } from "@/components/search/HeroSearchInput";
 
 export function DiscoveryHero() {
   return (
     <section
       aria-labelledby="discovery-hero-heading"
-      className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/50 px-6 py-10 md:px-12 md:py-16"
+      className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 isolate min-h-[32rem] overflow-hidden md:min-h-[38rem] lg:min-h-[42rem]"
     >
+      <Image
+        src="/images/hero-background.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-[72%_center] sm:object-[68%_center] lg:object-right"
+      />
+
+      {/* Readability veil over the dark cavern side; keep character visible on the right. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/20 blur-3xl"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,8,18,0.92)_0%,rgba(4,8,18,0.78)_34%,rgba(4,8,18,0.35)_58%,rgba(4,8,18,0.12)_78%,transparent_100%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -left-16 size-72 rounded-full bg-secondary/25 blur-3xl"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_18%_40%,rgba(109,40,217,0.28),transparent_62%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#070b18] to-transparent"
       />
 
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          GameDiscoveries
-        </p>
-        <h1
-          id="discovery-hero-heading"
-          className="font-display text-balance text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
-        >
-          Discover Your Next Game
-        </h1>
-        <p className="max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
-          Thousands of games. One place to find your next favorite.
-        </p>
+      <div className="relative z-10 mx-auto flex min-h-[32rem] w-full max-w-7xl items-center px-4 py-10 md:min-h-[38rem] md:px-6 md:py-14 lg:min-h-[42rem]">
+        <div className="hero-enter flex w-full max-w-xl flex-col gap-7 lg:max-w-2xl">
+          <div className="space-y-4">
+            <p className="font-display text-sm font-semibold tracking-[0.22em] text-white/80 uppercase">
+              GameDiscoveries
+            </p>
+            <h1
+              id="discovery-hero-heading"
+              className="font-display text-[2.45rem] leading-[1.05] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-[4.1rem]"
+            >
+              Discover{" "}
+              <span className="text-[#c4a1ff]">Your</span>
+              <br className="hidden sm:block" />{" "}
+              Next Game
+            </h1>
+            <p className="max-w-md text-base leading-relaxed text-white/90 md:text-lg">
+              Play thousands of free games. New discoveries every day.
+            </p>
+          </div>
 
-        <div className="w-full max-w-2xl">
-          <SearchInput />
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="lg" className="gap-2">
-            <Link href="/games">
-              <Search className="size-4" aria-hidden="true" />
-              Explore Games
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary" className="gap-2">
-            <Link href="/discover">
-              <Play className="size-4" aria-hidden="true" />
-              Quick Play
-            </Link>
-          </Button>
+          <div className="hero-enter-delay space-y-5">
+            <HeroSearchInput />
+            <DiscoveryPills />
+          </div>
         </div>
       </div>
     </section>

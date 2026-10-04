@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Geist_Mono } from "next/font/google";
-import { PublicShell } from "@/components/layout/PublicShell";
+import { Montserrat, Geist_Mono } from "next/font/google";
 import { createMetadata } from "@/lib/seo/metadata";
+import { BRAND_THEME_COLOR } from "@/lib/seo/constants";
 import { AppProviders } from "@/providers/AppProviders";
 import "./globals.css";
 
-const display = Space_Grotesk({
+const display = Montserrat({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
-const sans = Space_Grotesk({
+const sans = Montserrat({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const mono = Geist_Mono({
@@ -25,7 +25,7 @@ const mono = Geist_Mono({
 export const metadata: Metadata = createMetadata();
 
 export const viewport: Viewport = {
-  themeColor: "#0b1220",
+  themeColor: BRAND_THEME_COLOR,
   width: "device-width",
   initialScale: 1,
   colorScheme: "dark",
@@ -42,9 +42,7 @@ export default function RootLayout({
       className={`dark ${display.variable} ${sans.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
-        <AppProviders>
-          <PublicShell>{children}</PublicShell>
-        </AppProviders>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { GameGrid } from "@/components/game/GameGrid";
 import type { Game } from "@/types/game";
 
@@ -8,14 +8,28 @@ interface GameSectionProps {
   description?: string;
   games: Game[];
   href?: string;
+  variant?: "default" | "discovery";
 }
 
-export function GameSection({ title, description, games, href }: GameSectionProps) {
+export function GameSection({
+  title,
+  description,
+  games,
+  href,
+  variant = "default",
+}: GameSectionProps) {
+  if (games.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="space-y-4" aria-labelledby={`${title}-heading`}>
+    <section className="space-y-5" aria-labelledby={`${title}-heading`}>
       <div className="flex items-end justify-between gap-4">
         <div className="space-y-1">
-          <h2 id={`${title}-heading`} className="font-display text-2xl font-semibold tracking-tight">
+          <h2
+            id={`${title}-heading`}
+            className="font-display text-2xl font-bold tracking-tight text-white md:text-[1.75rem]"
+          >
             {title}
           </h2>
           {description ? (
@@ -25,14 +39,14 @@ export function GameSection({ title, description, games, href }: GameSectionProp
         {href ? (
           <Link
             href={href}
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            className="inline-flex items-center gap-0.5 text-sm font-semibold text-primary hover:text-violet-300"
           >
-            View All
-            <ArrowRight className="size-4" aria-hidden="true" />
+            See All
+            <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         ) : null}
       </div>
-      <GameGrid games={games} />
+      <GameGrid games={games} variant={variant} />
     </section>
   );
 }

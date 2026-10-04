@@ -1,7 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GameDiscoveries">
-  <rect width="512" height="512" rx="96" fill="#0b1220"/>
-  <circle cx="256" cy="256" r="140" fill="#22d3ee"/>
-  <path d="M180 270c20-50 50-70 76-70s56 20 76 70c-28 34-52 50-76 50s-48-16-76-50z" fill="#0b1220"/>
-  <circle cx="220" cy="240" r="16" fill="#0b1220"/>
-  <circle cx="292" cy="240" r="16" fill="#0b1220"/>
+  <defs>
+    <linearGradient id="gold" x1="18%" y1="8%" x2="86%" y2="92%">
+      <stop offset="0%" stop-color="#FFE08A"/>
+      <stop offset="45%" stop-color="#F5B63B"/>
+      <stop offset="100%" stop-color="#E07A20"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="#0B1220"/>
+  <g transform="translate(56 48)">
+    <path fill="url(#gold)" d="M214 24c86 8 154 78 154 168 0 98-80 178-178 178S12 290 12 192C12 108 70 42 148 24l22 58C122 98 84 140 84 192c0 68 54 122 122 122s122-54 122-122c0-54-34-100-84-116l-16-4 10-70 76 22z"/>
+    <path fill="#0B1220" d="M148 176c0-20 16-36 36-36h32c20 0 36 16 36 36v10c12 6 20 16 20 30 0 18-14 32-32 32h-10c-4 12-16 20-30 20s-26-8-30-20h-10c-18 0-32-14-32-32 0-14 8-24 20-30v-10zm32 10h40v8h-40v-8zm-8 46c0 8 6 14 14 14h28c8 0 14-6 14-14s-6-14-14-14h-28c-8 0-14 6-14 14z"/>
+    <circle cx="174" cy="194" r="8" fill="#0B1220"/>
+    <circle cx="222" cy="194" r="8" fill="#0B1220"/>
+    <path fill="#FFE38F" d="M318 40l16 34 36 12-30 22 6 38-28-24-28 24 6-38-30-22 36-12z"/>
+  </g>
 </svg>

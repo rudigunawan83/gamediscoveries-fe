@@ -34,7 +34,13 @@ export interface Game {
   mobileReady?: boolean;
   multiplayer?: boolean;
   orientation?: GameOrientation;
+  platform?: string;
   provider?: string;
   status?: "draft" | "published" | "archived";
   publishedAt?: string;
+  gameUrl?: string;
+  instructions?: string;
+  developer?: string;
+  width?: number;
+  height?: number;
 }

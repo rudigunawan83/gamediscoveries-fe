@@ -4,7 +4,7 @@ test("homepage loads with hero and game cards", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: "Discover Your Next Game" }),
+    page.getByRole("heading", { name: /Discover Your Next Game/i }),
   ).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Trending Now" })).toBeVisible();

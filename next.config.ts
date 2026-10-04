@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.gamemonetize.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.gamemonetize.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.gamemonetize.co",
+      },
     ],
   },
 };

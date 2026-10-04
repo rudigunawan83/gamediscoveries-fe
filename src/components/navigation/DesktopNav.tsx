@@ -21,13 +21,19 @@ export function DesktopNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "rounded-full px-3 py-2 text-sm font-medium transition-colors",
+              "relative px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                ? "text-white"
+                : "text-muted-foreground hover:text-white",
             )}
           >
             {item.label}
+            {active ? (
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand-gradient"
+              />
+            ) : null}
           </Link>
         );
       })}

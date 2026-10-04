@@ -1,4 +1,5 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage";
+import { DiscoveryHero } from "@/components/discovery/DiscoveryHero";
+import { DiscoverFeed } from "@/features/games/components/DiscoverFeed";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -8,9 +9,9 @@ export const metadata = createMetadata({
 
 export default function DiscoverPage() {
   return (
-    <PlaceholderPage
-      title="Discover"
-      description="Personalized discovery feeds will live here in a later phase."
-    />
+    <div className="space-y-10 md:space-y-14">
+      <DiscoveryHero />
+      <DiscoverFeed />
+    </div>
   );
 }

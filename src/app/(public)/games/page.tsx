@@ -1,5 +1,4 @@
-import { GameSection } from "@/components/game/GameSection";
-import { mockGames } from "@/features/games/mock/games.mock";
+import { GamesCatalog } from "@/features/games/components/GamesCatalog";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -7,12 +6,14 @@ export const metadata = createMetadata({
   path: "/games",
 });
 
-export default function GamesPage() {
+export default async function GamesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; q?: string }>;
+}) {
+  const params = await searchParams;
+
   return (
-    <GameSection
-      title="All Games"
-      description="Browse the current mock catalog foundation."
-      games={mockGames}
-    />
+    <GamesCatalog category={params.category} search={params.q} />
   );
 }

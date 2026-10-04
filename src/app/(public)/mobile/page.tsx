@@ -1,5 +1,5 @@
 import { GameSection } from "@/components/game/GameSection";
-import { mockGames } from "@/features/games/mock/games.mock";
+import { fetchGames } from "@/features/games/api/games.api";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -7,8 +7,15 @@ export const metadata = createMetadata({
   path: "/mobile",
 });
 
-export default function MobileGamesPage() {
-  const mobileGames = mockGames.filter((game) => game.mobileReady);
+export const dynamic = "force-dynamic";
+
+export default async function MobileGamesPage() {
+  const mobileGames = await fetchGames({
+    page: 1,
+    pageSize: 48,
+    mobileReady: true,
+    sort: "newest",
+  });
 
   return (
     <GameSection
