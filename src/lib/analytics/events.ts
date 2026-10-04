@@ -25,4 +25,13 @@ export const ANALYTICS_EVENTS = {
   favoriteRemoved: "favorite_removed",
   historyGameClicked: "history_game_clicked",
   myGamesGameClicked: "my_games_game_clicked",
+  communityViewed: "community_viewed",
+  communityPostCreated: "community_post_created",
+  communityPostViewed: "community_post_viewed",
+  communityCommentCreated: "community_comment_created",
+  communityReactionAdded: "community_reaction_added",
+  communityReviewCreated: "community_review_created",
+  communityUserFollowed: "community_user_followed",
+  communityLeaderboardViewed: "community_leaderboard_viewed",
+  communityReportCreated: "community_report_created",
 } as const satisfies Record<string, AnalyticsEventName>;

@@ -71,6 +71,20 @@ export function UserMenu({ compact = false }: UserMenuProps) {
       <DropdownMenuContent align="end" className="min-w-52">
         <DropdownMenuItem
           onClick={() => {
+            router.push("/community");
+          }}
+        >
+          Community
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/community/notifications");
+          }}
+        >
+          Notifications
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
             router.push("/my-games");
           }}
         >

@@ -26,6 +26,9 @@ export function SiteFooter() {
           <Link href="/multiplayer" className="hover:text-primary">
             Multiplayer
           </Link>
+          <Link href="/community" className="hover:text-primary">
+            Community
+          </Link>
         </nav>
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} {SITE_NAME}. Find · Play · Explore More.

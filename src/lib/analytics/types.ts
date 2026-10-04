@@ -27,6 +27,22 @@ export type AnalyticsEventName =
   | "recommendation_clicked"
   | "recommendation_started"
   | "recommendation_completed"
-  | "recommendation_dismissed";
+  | "recommendation_dismissed"
+  | "community_viewed"
+  | "community_post_created"
+  | "community_post_viewed"
+  | "community_post_clicked"
+  | "community_comment_created"
+  | "community_reaction_added"
+  | "community_review_created"
+  | "community_review_updated"
+  | "community_game_shared"
+  | "community_user_followed"
+  | "community_user_unfollowed"
+  | "community_achievement_unlocked"
+  | "community_challenge_started"
+  | "community_challenge_completed"
+  | "community_leaderboard_viewed"
+  | "community_report_created";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>;

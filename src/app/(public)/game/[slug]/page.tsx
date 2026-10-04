@@ -1,9 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MonitorPlay, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { GameBreadcrumbs } from "@/components/game/GameBreadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { GameReviewsSection } from "@/features/community/components/GameReviewsSection";
 import { GameDetailFavoriteButton } from "@/features/my-games/components/GameDetailFavoriteButton";
 import { GameDetailPlayCta } from "@/features/games/components/GameDetailPlayCta";
 import {
@@ -190,9 +193,14 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               gameId={game.id}
               gameSlug={game.slug}
             />
+            <Button asChild variant="outline">
+              <Link href={`/game/${game.slug}/community`}>Community</Link>
+            </Button>
           </div>
         </div>
       </section>
+
+      <GameReviewsSection slug={game.slug} />
 
       <SimilarGamesSection gameId={game.id} fallbackGames={similarGames} />
     </div>
