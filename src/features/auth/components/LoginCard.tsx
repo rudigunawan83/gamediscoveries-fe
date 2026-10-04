@@ -6,9 +6,9 @@ import { SocialAuthButtons } from "@/features/auth/components/SocialAuthButtons"
 
 export function LoginCard() {
   return (
-    <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d1428]/78 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
-      <div className="mb-6 space-y-2">
-        <h2 className="font-display text-2xl font-bold tracking-tight text-white">
+    <div className="w-full max-w-md rounded-2xl border border-white/12 bg-[#0b1224]/82 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:rounded-3xl sm:p-7">
+      <div className="mb-5 space-y-1.5 sm:mb-6 sm:space-y-2">
+        <h2 className="font-display text-xl font-bold tracking-tight text-white sm:text-2xl">
           Sign In
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -16,7 +16,7 @@ export function LoginCard() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         <LoginForm />
         <SocialAuthButtons mode="continue" />
         <p className="text-center text-sm text-muted-foreground">

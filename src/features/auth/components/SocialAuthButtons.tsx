@@ -16,18 +16,20 @@ interface SocialAuthButtonsProps {
 export function SocialAuthButtons({ mode = "continue" }: SocialAuthButtonsProps) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground sm:gap-3 sm:text-xs sm:tracking-[0.18em]">
         <span className="h-px flex-1 bg-white/10" />
-        <span>{mode === "signup" ? "Or sign up with" : "Or continue with"}</span>
+        <span className="shrink-0">
+          {mode === "signup" ? "Or sign up with" : "Or continue with"}
+        </span>
         <span className="h-px flex-1 bg-white/10" />
       </div>
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
         {providers.map((provider) => (
           <Button
             key={provider.id}
             type="button"
             variant="outline"
-            className="h-11 rounded-xl border-white/10 bg-[#0b1224]/70 text-sm font-medium text-foreground hover:bg-white/5"
+            className="h-10 rounded-xl border-white/10 bg-[#0b1224]/70 px-1 text-xs font-medium text-foreground hover:bg-white/5 sm:h-11 sm:text-sm"
             onClick={() =>
               toast.message(`${provider.label} sign-in is coming soon.`)
             }

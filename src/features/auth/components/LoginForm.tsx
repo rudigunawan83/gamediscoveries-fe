@@ -87,7 +87,7 @@ export function LoginForm() {
   });
 
   return (
-    <form className="space-y-5" onSubmit={onSubmit} noValidate>
+    <form className="space-y-4 sm:space-y-5" onSubmit={onSubmit} noValidate>
       <AuthField
         id="login-email"
         label="Email"

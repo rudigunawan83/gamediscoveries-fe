@@ -18,19 +18,19 @@ export default function LoginPage() {
     >
       <LoginGate>
         <LoginViewTracker />
-        <div className="flex flex-1 flex-col gap-8 lg:gap-10">
-          <div className="grid flex-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] lg:gap-12 xl:gap-16">
-            <div className="max-w-xl space-y-4 hero-enter">
-              <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+        <div className="flex flex-1 flex-col">
+          <div className="grid flex-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] lg:items-center lg:gap-12 xl:gap-16">
+            <div className="max-w-xl space-y-2 hero-enter sm:space-y-4">
+              <h1 className="font-display text-[2rem] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Welcome{" "}
                 <span className="text-brand-gradient">Back</span>
               </h1>
-              <p className="max-w-md text-base text-muted-foreground sm:text-lg hero-enter-delay">
+              <p className="max-w-md text-sm leading-relaxed text-white/80 sm:text-base sm:text-muted-foreground lg:text-lg">
                 Continue your gaming journey. Discover new games, save your
                 favorites, and play anytime.
               </p>
             </div>
-            <div className="justify-self-stretch lg:justify-self-end hero-enter-delay">
+            <div className="w-full justify-self-stretch lg:justify-self-end hero-enter-delay">
               <LoginCard />
             </div>
           </div>

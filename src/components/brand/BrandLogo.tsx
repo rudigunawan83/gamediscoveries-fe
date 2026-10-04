@@ -55,7 +55,7 @@ export function BrandLogo({
         {showTagline ? (
           <span
             className={cn(
-              "mt-1 font-semibold uppercase tracking-[0.28em] text-muted-foreground",
+              "mt-1 hidden font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block sm:tracking-[0.28em]",
               s.tag,
             )}
           >

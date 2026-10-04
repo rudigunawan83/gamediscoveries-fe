@@ -13,13 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 function initials(name?: string | null, email?: string | null) {
   const source = (name || email || "U").trim();
   return source.slice(0, 2).toUpperCase();
 }
 
-export function UserMenu() {
+interface UserMenuProps {
+  compact?: boolean;
+}
+
+export function UserMenu({ compact = false }: UserMenuProps) {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
   const { user } = useCurrentUser();
@@ -28,7 +33,12 @@ export function UserMenu() {
     return (
       <Button
         asChild
-        className="h-10 rounded-full bg-brand-gradient px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgb(168_85_247_/_35%)] hover:opacity-95"
+        className={cn(
+          "rounded-full bg-brand-gradient font-semibold text-white shadow-[0_8px_24px_rgb(168_85_247_/_35%)] hover:opacity-95",
+          compact
+            ? "h-9 px-3.5 text-xs"
+            : "h-10 px-5 text-sm",
+        )}
       >
         <Link href="/login">Sign In</Link>
       </Button>
@@ -40,7 +50,10 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 p-1 pr-3 text-sm font-medium text-foreground outline-none transition hover:bg-card focus-visible:ring-2 focus-visible:ring-ring/60"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 text-sm font-medium text-foreground outline-none transition hover:bg-card focus-visible:ring-2 focus-visible:ring-ring/60",
+          compact ? "p-1" : "p-1 pr-3",
+        )}
         aria-label="Open user menu"
       >
         <Avatar size="sm">
@@ -51,7 +64,9 @@ export function UserMenu() {
             {initials(user?.displayName, user?.email)}
           </AvatarFallback>
         </Avatar>
-        <span className="max-w-[9rem] truncate">{label}</span>
+        {!compact ? (
+          <span className="max-w-[9rem] truncate">{label}</span>
+        ) : null}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-52">
         <DropdownMenuItem
