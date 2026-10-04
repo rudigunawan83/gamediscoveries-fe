@@ -43,4 +43,8 @@ export interface HomeDiscoveriesDto {
   popular: GameSummaryDto[];
   mobile: GameSummaryDto[];
   multiplayer: GameSummaryDto[];
+  hotGames: GameSummaryDto[];
+  bestGames: GameSummaryDto[];
+  mostPlayed: GameSummaryDto[];
+  exclusiveGames: GameSummaryDto[];
 }

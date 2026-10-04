@@ -32,7 +32,7 @@ export function PasswordInput({
         autoComplete={props.autoComplete ?? "current-password"}
         aria-invalid={invalid || undefined}
         className={cn(
-          "h-12 rounded-xl border-white/10 bg-[#0b1224]/85 pl-11 pr-11 text-sm placeholder:text-muted-foreground/80",
+          "h-12 rounded-xl border-primary/15 bg-[#12161f]/90 pl-11 pr-11 text-sm placeholder:text-muted-foreground/80",
           className,
         )}
         {...props}

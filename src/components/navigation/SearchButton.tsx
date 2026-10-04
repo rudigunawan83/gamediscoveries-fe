@@ -12,7 +12,7 @@ export function SearchButton() {
       href="/search"
       onClick={openSearch}
       aria-label="Search games"
-      className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-[#12192d]/90 px-4 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-white md:inline-flex"
+      className="hidden h-10 items-center gap-2 rounded-full border border-primary/20 bg-[#151820]/90 px-4 text-sm text-muted-foreground transition-colors hover:border-primary/45 hover:text-white md:inline-flex"
     >
       <Search className="size-4" aria-hidden="true" />
       <span>Search</span>

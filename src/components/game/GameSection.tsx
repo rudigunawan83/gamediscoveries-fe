@@ -39,7 +39,7 @@ export function GameSection({
         {href ? (
           <Link
             href={href}
-            className="inline-flex items-center gap-0.5 text-sm font-semibold text-primary hover:text-violet-300"
+            className="inline-flex items-center gap-0.5 text-sm font-semibold text-primary hover:text-[#ffe08a]"
           >
             See All
             <ChevronRight className="size-4" aria-hidden="true" />

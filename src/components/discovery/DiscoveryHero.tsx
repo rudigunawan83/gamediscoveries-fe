@@ -20,21 +20,21 @@ export function DiscoveryHero() {
       {/* Readability veil over the dark cavern side; keep character visible on the right. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,8,18,0.92)_0%,rgba(4,8,18,0.78)_34%,rgba(4,8,18,0.35)_58%,rgba(4,8,18,0.12)_78%,transparent_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(7,9,15,0.92)_0%,rgba(7,9,15,0.78)_34%,rgba(7,9,15,0.35)_58%,rgba(7,9,15,0.12)_78%,transparent_100%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_18%_40%,rgba(109,40,217,0.28),transparent_62%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_18%_40%,rgba(224,122,32,0.32),transparent_62%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#070b18] to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0a0c12] to-transparent"
       />
 
       <div className="relative z-10 mx-auto flex min-h-[32rem] w-full max-w-7xl items-center px-4 py-10 md:min-h-[38rem] md:px-6 md:py-14 lg:min-h-[42rem]">
         <div className="hero-enter flex w-full max-w-xl flex-col gap-7 lg:max-w-2xl">
           <div className="space-y-4">
-            <p className="font-display text-sm font-semibold tracking-[0.22em] text-white/80 uppercase">
+            <p className="font-display text-sm font-semibold tracking-[0.22em] text-primary uppercase">
               GameDiscoveries
             </p>
             <h1
@@ -42,12 +42,12 @@ export function DiscoveryHero() {
               className="font-display text-[2.45rem] leading-[1.05] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-[4.1rem]"
             >
               Discover{" "}
-              <span className="text-[#c4a1ff]">Your</span>
+              <span className="text-brand-gradient">Your</span>
               <br className="hidden sm:block" />{" "}
               Next Game
             </h1>
-            <p className="max-w-md text-base leading-relaxed text-white/90 md:text-lg">
-              Play thousands of free games. New discoveries every day.
+            <p className="max-w-md text-base leading-relaxed text-[#ffe8c2] md:text-lg">
+              Play thousands of free games. Hot picks, best titles, and exclusive classics every day.
             </p>
           </div>
 

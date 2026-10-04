@@ -3,6 +3,10 @@ export type AnalyticsEventName =
   | "game_impression"
   | "game_click"
   | "game_start"
+  | "game_viewed"
+  | "game_play_clicked"
+  | "game_started"
+  | "game_exit"
   | "search"
   | "auth_login_viewed"
   | "auth_login_submitted"
@@ -11,6 +15,13 @@ export type AnalyticsEventName =
   | "auth_register_submitted"
   | "auth_register_succeeded"
   | "auth_register_failed"
-  | "auth_logout";
+  | "auth_logout"
+  | "my_games_viewed"
+  | "favorites_viewed"
+  | "history_viewed"
+  | "favorite_added"
+  | "favorite_removed"
+  | "history_game_clicked"
+  | "my_games_game_clicked";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>;

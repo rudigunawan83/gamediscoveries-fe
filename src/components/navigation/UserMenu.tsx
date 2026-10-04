@@ -76,6 +76,20 @@ export function UserMenu({ compact = false }: UserMenuProps) {
         >
           My Games
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/my-games?tab=favorites");
+          }}
+        >
+          Favorites
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/my-games?tab=history");
+          }}
+        >
+          Recently Played
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"

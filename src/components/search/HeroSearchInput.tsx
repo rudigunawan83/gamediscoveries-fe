@@ -34,7 +34,7 @@ export function HeroSearchInput() {
       <button
         type="submit"
         aria-label="Search"
-        className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[#9b4dff] text-white shadow-[0_8px_22px_rgb(155_77_255_/_55%)] transition-transform hover:scale-105 active:scale-95"
+        className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-brand-gradient text-[#1a1205] shadow-[0_8px_22px_rgb(224_122_32_/_55%)] transition-transform hover:scale-105 active:scale-95"
       >
         <Search className="size-[1.05rem]" strokeWidth={2.4} aria-hidden="true" />
       </button>

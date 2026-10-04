@@ -41,7 +41,7 @@ export function AuthField({
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={errorId}
           className={cn(
-            "h-12 rounded-xl border-white/10 bg-[#0b1224]/85 pl-11 text-sm placeholder:text-muted-foreground/80",
+            "h-12 rounded-xl border-primary/15 bg-[#12161f]/90 pl-11 text-sm placeholder:text-muted-foreground/80",
             trailing ? "pr-11" : undefined,
             inputClassName,
           )}

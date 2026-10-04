@@ -2,30 +2,28 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Play, Star } from "lucide-react";
+import { Play, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { FavoriteButton } from "@/features/my-games/components/FavoriteButton";
 import { analytics } from "@/lib/analytics/client";
 import { displayRating } from "@/lib/utils/display-rating";
 import { formatPlayCount, formatRating } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
-import { usePreferencesStore } from "@/stores/preferences.store";
 import type { Game } from "@/types/game";
 
 interface GameCardProps {
   game: Game;
   className?: string;
   variant?: "default" | "discovery";
+  contextMeta?: string;
 }
 
 export function GameCard({
   game,
   className,
   variant = "default",
+  contextMeta,
 }: GameCardProps) {
-  const favoriteSlugs = usePreferencesStore((state) => state.favoriteSlugs);
-  const toggleFavorite = usePreferencesStore((state) => state.toggleFavorite);
-  const isFavorite = favoriteSlugs.includes(game.slug);
   const categoryLabel =
     game.categories
       .slice(0, 2)
@@ -92,6 +90,9 @@ export function GameCard({
             {game.title}
           </h3>
           <p className="line-clamp-1 text-xs text-muted-foreground">{categoryLabel}</p>
+          {contextMeta ? (
+            <p className="line-clamp-1 text-xs text-muted-foreground">{contextMeta}</p>
+          ) : null}
           <div
             className={cn(
               "flex items-center text-xs text-muted-foreground",
@@ -111,24 +112,13 @@ export function GameCard({
       </Link>
 
       {!isDiscovery ? (
-        <Button
-          type="button"
-          size="icon"
-          variant="secondary"
-          aria-label={isFavorite ? "Remove game from favorites" : "Add game to favorites"}
-          aria-pressed={isFavorite}
-          className="absolute right-2 top-2 size-8 rounded-full bg-background/70 backdrop-blur"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleFavorite(game.slug);
-          }}
-        >
-          <Heart
-            className={cn("size-4", isFavorite && "fill-destructive text-destructive")}
-            aria-hidden="true"
+        <div className="absolute right-2 top-2">
+          <FavoriteButton
+            gameId={game.id}
+            source="game_card"
+            callbackUrl={`/game/${game.slug}`}
           />
-        </Button>
+        </div>
       ) : null}
     </article>
   );

@@ -143,7 +143,7 @@ export function LoginForm() {
           type="checkbox"
           checked={rememberMe}
           onChange={(event) => setRememberMe(event.target.checked)}
-          className="size-4 rounded border-white/20 bg-[#0b1224] accent-primary"
+          className="size-4 rounded border-primary/30 bg-[#12161f] accent-primary"
         />
         Remember me
       </label>

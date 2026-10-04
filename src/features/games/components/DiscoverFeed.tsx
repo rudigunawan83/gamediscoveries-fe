@@ -9,7 +9,7 @@ import { ApiClientError } from "@/lib/api/types";
 
 export function DiscoverFeed() {
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ["discoveries", "home"],
+    queryKey: ["discoveries", "home", "v2"],
     queryFn: fetchHomeDiscoveries,
     staleTime: 60_000,
     retry: (failureCount, error) => {
@@ -53,6 +53,41 @@ export function DiscoverFeed() {
         description="Hand-picked picks from the live catalog."
         games={todaysDiscoveries.slice(0, 12)}
         href="/games"
+        variant="discovery"
+      />
+      <GameSection
+        title="Most Popular"
+        description="Top games players love right now."
+        games={data.popular.slice(0, 12)}
+        href="/most-popular"
+        variant="discovery"
+      />
+      <GameSection
+        title="Hot Games"
+        description="Fresh heat from the GameMonetize hot feed."
+        games={data.hotGames.slice(0, 12)}
+        href="/hot-games"
+        variant="discovery"
+      />
+      <GameSection
+        title="Best Games"
+        description="Editor-grade favorites and standout titles."
+        games={data.bestGames.slice(0, 12)}
+        href="/best-games"
+        variant="discovery"
+      />
+      <GameSection
+        title="Most Played"
+        description="High-engagement games with strong replay value."
+        games={data.mostPlayed.slice(0, 12)}
+        href="/most-played"
+        variant="discovery"
+      />
+      <GameSection
+        title="Exclusive Games"
+        description="Exclusive-style classics and match gems like Zuma vibes."
+        games={data.exclusiveGames.slice(0, 12)}
+        href="/exclusive-games"
         variant="discovery"
       />
       <GameSection

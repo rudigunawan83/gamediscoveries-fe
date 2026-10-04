@@ -102,7 +102,7 @@ export function useAuth() {
       queryClient.removeQueries({
         predicate: (query) =>
           typeof query.queryKey[0] === "string" &&
-          ["favorites", "history", "my-games", "recommendations"].includes(
+          ["favorites", "history", "my-games", "recommendations", "favorite-status"].includes(
             query.queryKey[0],
           ),
       });

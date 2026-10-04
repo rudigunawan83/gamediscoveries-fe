@@ -46,7 +46,13 @@ function toOrientation(value?: string | null): GameOrientation | undefined {
 const PLACEHOLDER =
   "https://placehold.co/640x360/0b1220/d4a017/png?text=Game&font=montserrat";
 
+function resolvePlayUrl(embedUrl?: string | null, gameUrl?: string | null): string | undefined {
+  const candidate = embedUrl || gameUrl || undefined;
+  return candidate?.trim() || undefined;
+}
+
 export function mapGameSummary(dto: GameSummaryDto): Game {
+  const playUrl = resolvePlayUrl(null, dto.gameUrl);
   return {
     id: dto.id,
     slug: dto.slug,
@@ -59,14 +65,15 @@ export function mapGameSummary(dto: GameSummaryDto): Game {
     rating: displayRating(dto.id),
     mobileReady: dto.mobileReady,
     multiplayer: dto.category?.toLowerCase().includes("multiplayer") ?? false,
-    provider: "GameMonetize",
     status: "published",
     publishedAt: dto.publishedAt ?? undefined,
-    gameUrl: dto.gameUrl ?? undefined,
+    gameUrl: playUrl,
+    playUrl,
   };
 }
 
 export function mapGameDetail(dto: GameDetailDto): Game {
+  const playUrl = resolvePlayUrl(dto.embedUrl, dto.gameUrl);
   return {
     id: dto.id,
     slug: dto.slug,
@@ -82,13 +89,13 @@ export function mapGameDetail(dto: GameDetailDto): Game {
     multiplayer: dto.category?.toLowerCase().includes("multiplayer") ?? false,
     orientation: toOrientation(dto.orientation),
     platform: dto.platform ?? undefined,
-    provider: "GameMonetize",
     status:
       dto.status === "draft" || dto.status === "archived"
         ? dto.status
         : "published",
     publishedAt: dto.publishedAt ?? undefined,
-    gameUrl: dto.embedUrl || dto.gameUrl || undefined,
+    gameUrl: playUrl,
+    playUrl,
     developer: dto.developer ?? undefined,
     width: dto.width ?? undefined,
     height: dto.height ?? undefined,

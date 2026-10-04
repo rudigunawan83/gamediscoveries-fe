@@ -29,7 +29,7 @@ export function SocialAuthButtons({ mode = "continue" }: SocialAuthButtonsProps)
             key={provider.id}
             type="button"
             variant="outline"
-            className="h-10 rounded-xl border-white/10 bg-[#0b1224]/70 px-1 text-xs font-medium text-foreground hover:bg-white/5 sm:h-11 sm:text-sm"
+            className="h-10 rounded-xl border-primary/15 bg-[#12161f]/80 px-1 text-xs font-medium text-foreground hover:bg-primary/10 sm:h-11 sm:text-sm"
             onClick={() =>
               toast.message(`${provider.label} sign-in is coming soon.`)
             }

@@ -53,71 +53,68 @@
 }
 
 :root {
-  /* Home mockup: deep navy + violet/magenta accents */
-  --background: #070b18;
-  --foreground: #f4f6ff;
-  --card: #10162b;
-  --card-foreground: #f4f6ff;
-  --popover: #10162b;
-  --popover-foreground: #f4f6ff;
-  --primary: #a855f7;
-  --primary-foreground: #ffffff;
-  --secondary: #151c33;
-  --secondary-foreground: #e8ecff;
-  --muted: #12192d;
-  --muted-foreground: #9aa3c7;
-  --accent: #1a2340;
-  --accent-foreground: #f4f6ff;
+  /* Warm amber / orange brand on deep navy */
+  --background: #0a0c12;
+  --foreground: #fff8ef;
+  --card: #151820;
+  --card-foreground: #fff8ef;
+  --popover: #151820;
+  --popover-foreground: #fff8ef;
+  --primary: #f5b63b;
+  --primary-foreground: #1a1205;
+  --secondary: #1b1f2a;
+  --secondary-foreground: #ffe8c2;
+  --muted: #141821;
+  --muted-foreground: #c4b39a;
+  --accent: #232836;
+  --accent-foreground: #fff8ef;
   --destructive: #ef4444;
-  --border: rgb(99 120 180 / 28%);
-  --input: #171f38;
-  --ring: #c084fc;
+  --border: rgb(245 182 59 / 22%);
+  --input: #1a1f2b;
+  --ring: #ffc857;
   --success: oklch(0.72 0.17 155);
   --warning: #fbbf24;
-  --chart-1: #a855f7;
-  --chart-2: #60a5fa;
-  --chart-3: #c084fc;
-  --chart-4: #38bdf8;
-  --chart-5: #f472b6;
+  --chart-1: #f5b63b;
+  --chart-2: #fb923c;
+  --chart-3: #ffe08a;
+  --chart-4: #e07a20;
+  --chart-5: #f59e0b;
   --radius: 0.95rem;
-  --sidebar: #0a1020;
-  --sidebar-foreground: #f4f6ff;
-  --sidebar-primary: #a855f7;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #151c33;
-  --sidebar-accent-foreground: #f4f6ff;
-  --sidebar-border: rgb(99 120 180 / 28%);
-  --sidebar-ring: #c084fc;
+  --sidebar: #0d1018;
+  --sidebar-foreground: #fff8ef;
+  --sidebar-primary: #f5b63b;
+  --sidebar-primary-foreground: #1a1205;
+  --sidebar-accent: #1b1f2a;
+  --sidebar-accent-foreground: #fff8ef;
+  --sidebar-border: rgb(245 182 59 / 22%);
+  --sidebar-ring: #ffc857;
   --shadow-game-card: 0 14px 36px rgb(0 0 0 / 45%);
-  --hero-glow: rgb(168 85 247 / 28%);
-  --surface-elevated: #12192d;
-  --brand-violet-from: #c084fc;
-  --brand-violet-via: #a855f7;
-  --brand-violet-to: #ec4899;
+  --hero-glow: rgb(245 182 59 / 28%);
+  --surface-elevated: #171b26;
   --brand-gold-from: #ffe08a;
   --brand-gold-via: #f5b63b;
   --brand-gold-to: #e07a20;
 }
 
 .dark {
-  --background: #070b18;
-  --foreground: #f4f6ff;
-  --card: #10162b;
-  --card-foreground: #f4f6ff;
-  --popover: #10162b;
-  --popover-foreground: #f4f6ff;
-  --primary: #a855f7;
-  --primary-foreground: #ffffff;
-  --secondary: #151c33;
-  --secondary-foreground: #e8ecff;
-  --muted: #12192d;
-  --muted-foreground: #9aa3c7;
-  --accent: #1a2340;
-  --accent-foreground: #f4f6ff;
+  --background: #0a0c12;
+  --foreground: #fff8ef;
+  --card: #151820;
+  --card-foreground: #fff8ef;
+  --popover: #151820;
+  --popover-foreground: #fff8ef;
+  --primary: #f5b63b;
+  --primary-foreground: #1a1205;
+  --secondary: #1b1f2a;
+  --secondary-foreground: #ffe8c2;
+  --muted: #141821;
+  --muted-foreground: #c4b39a;
+  --accent: #232836;
+  --accent-foreground: #fff8ef;
   --destructive: #ef4444;
-  --border: rgb(99 120 180 / 28%);
-  --input: #171f38;
-  --ring: #c084fc;
+  --border: rgb(245 182 59 / 22%);
+  --input: #1a1f2b;
+  --ring: #ffc857;
 }
 
 @layer base {
@@ -132,9 +129,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
-      radial-gradient(ellipse 70% 45% at 15% 0%, rgb(88 28 180 / 35%), transparent 55%),
-      radial-gradient(ellipse 55% 40% at 90% 10%, rgb(37 99 235 / 28%), transparent 50%),
-      linear-gradient(180deg, #070b18 0%, #05070f 100%);
+      radial-gradient(ellipse 70% 45% at 15% 0%, rgb(224 122 32 / 28%), transparent 55%),
+      radial-gradient(ellipse 55% 40% at 90% 10%, rgb(245 182 59 / 18%), transparent 50%),
+      linear-gradient(180deg, #0a0c12 0%, #07090f 100%);
     background-attachment: fixed;
   }
 
@@ -157,31 +154,62 @@
   }
 }
 
+/* Hide site chrome when game player is immersive / landscape */
+html[data-game-immersive] header,
+html[data-game-immersive] footer,
+html[data-game-immersive] [data-mobile-bottom-nav] {
+  display: none !important;
+}
+
+html[data-game-immersive] main {
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/*
+  Portrait-phone fallback: rotate the player so landscape RSS games
+  still fill the screen when orientation.lock / Fullscreen API fail.
+*/
+.game-css-landscape-rotate {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100dvh !important;
+  height: 100dvw !important;
+  max-width: none !important;
+  transform: rotate(90deg) translateY(-100%);
+  transform-origin: top left;
+  border-radius: 0 !important;
+  overflow: hidden;
+  background: #000;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 
   .game-card-surface {
-    background: linear-gradient(180deg, #141b31 0%, #0d1324 100%);
+    background: linear-gradient(180deg, #1a1f2b 0%, #10141d 100%);
     box-shadow: var(--shadow-game-card);
   }
 
   .bg-brand-gradient {
     background-image: linear-gradient(
       120deg,
-      var(--brand-violet-from) 0%,
-      var(--brand-violet-via) 48%,
-      var(--brand-violet-to) 100%
+      var(--brand-gold-from) 0%,
+      var(--brand-gold-via) 48%,
+      var(--brand-gold-to) 100%
     );
   }
 
   .text-brand-gradient {
     background-image: linear-gradient(
       120deg,
-      var(--brand-violet-from) 0%,
-      var(--brand-violet-via) 52%,
-      var(--brand-violet-to) 100%
+      var(--brand-gold-from) 0%,
+      var(--brand-gold-via) 52%,
+      var(--brand-gold-to) 100%
     );
     background-clip: text;
     color: transparent;

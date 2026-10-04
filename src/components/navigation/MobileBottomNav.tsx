@@ -19,7 +19,8 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 backdrop-blur-xl lg:hidden"
+      data-mobile-bottom-nav
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-primary/15 bg-[#0a0c12]/95 backdrop-blur-xl lg:hidden"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4 px-2 py-2">
         {mobileBottomNavItems.map((item) => {

@@ -1,14 +1,19 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Expand, Heart, MonitorPlay, Play, Star } from "lucide-react";
+import { MonitorPlay, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { GameBreadcrumbs } from "@/components/game/GameBreadcrumbs";
 import { GameSection } from "@/components/game/GameSection";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { GameDetailFavoriteButton } from "@/features/my-games/components/GameDetailFavoriteButton";
+import { GameDetailPlayCta } from "@/features/games/components/GameDetailPlayCta";
 import {
   fetchGameBySlug,
   fetchGames,
 } from "@/features/games/api/games.api";
+import { isPlayableGame } from "@/features/game-player/utils/playerUrl";
+import { env } from "@/config/env";
+import { SITE_NAME } from "@/lib/seo/constants";
 import { createMetadata } from "@/lib/seo/metadata";
 import { formatRating } from "@/lib/utils/format";
 
@@ -30,10 +35,15 @@ export async function generateMetadata({ params }: GameDetailPageProps) {
     });
   }
 
+  const description =
+    game.description?.trim() ||
+    `Play ${game.title} online for free on GameDiscoveries.`;
+
   return createMetadata({
     title: game.title,
-    description: game.description,
+    description,
     path: `/game/${slug}`,
+    image: game.coverUrl ?? game.thumbnailUrl,
   });
 }
 
@@ -45,53 +55,65 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     notFound();
   }
 
+  const playable = isPlayableGame(game.status, game.playUrl ?? game.gameUrl);
   const categorySlug = game.categories[0]?.slug;
+  const categoryName = game.categories[0]?.name;
+
   const similarGames = (
     await fetchGames({
       page: 1,
       pageSize: 12,
-      category: categorySlug,
+      category: categoryName ?? categorySlug,
       sort: "popular",
     })
   )
     .filter((item) => item.id !== game.id)
     .slice(0, 6);
 
-  const aspect =
-    game.width && game.height && game.height > 0
-      ? `${game.width} / ${game.height}`
-      : game.orientation === "portrait"
-        ? "9 / 16"
-        : "16 / 9";
-
   return (
     <div className="space-y-10">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "VideoGame",
+          name: game.title,
+          description: game.description,
+          image: game.coverUrl ?? game.thumbnailUrl,
+          url: `${env.NEXT_PUBLIC_APP_URL}/game/${game.slug}`,
+          genre: game.categories.map((c) => c.name),
+          gamePlatform: ["HTML5", "Web Browser"],
+          applicationCategory: "Game",
+          operatingSystem: "Any",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            availability: playable
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: SITE_NAME,
+            url: env.NEXT_PUBLIC_APP_URL,
+          },
+        }}
+      />
+
+      <GameBreadcrumbs gameTitle={game.title} categories={game.categories} />
+
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/50">
-        {game.gameUrl ? (
-          <div className="relative w-full bg-black" style={{ aspectRatio: aspect }}>
-            <iframe
-              src={game.gameUrl}
-              title={`Play ${game.title}`}
-              className="absolute inset-0 size-full border-0"
-              allow="fullscreen; autoplay; encrypted-media; gamepad"
-              allowFullScreen
-              loading="eager"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        ) : (
-          <div className="relative aspect-[21/9] min-h-56 bg-muted">
-            <Image
-              src={game.coverUrl ?? game.thumbnailUrl}
-              alt={`${game.title} cover`}
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-          </div>
-        )}
+        <div className="relative aspect-[21/9] min-h-56 bg-muted">
+          <Image
+            src={game.coverUrl ?? game.thumbnailUrl}
+            alt={`${game.title} cover`}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent" />
+        </div>
 
         <div className="space-y-5 px-5 py-6 md:px-8">
           <div className="flex flex-wrap gap-2">
@@ -100,7 +122,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                 {category.name}
               </Badge>
             ))}
-            {game.provider ? <Badge>{game.provider}</Badge> : null}
             {game.platform ? (
               <Badge variant="outline" className="capitalize">
                 {game.platform}
@@ -160,33 +181,23 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           ) : null}
 
           <div className="flex flex-wrap gap-3">
-            {game.gameUrl ? (
-              <Button asChild size="lg" className="gap-2">
-                <a href={game.gameUrl} target="_blank" rel="noopener noreferrer">
-                  <Expand className="size-4" aria-hidden="true" />
-                  Open Fullscreen
-                </a>
-              </Button>
-            ) : (
-              <Button size="lg" className="gap-2" disabled>
-                <Play className="size-4" aria-hidden="true" />
-                Play (unavailable)
-              </Button>
-            )}
-            <Button asChild size="lg" variant="outline" className="gap-2">
-              <Link href="/games">
-                <Heart className="size-4" aria-hidden="true" />
-                Browse more
-              </Link>
-            </Button>
+            <GameDetailPlayCta
+              gameId={game.id}
+              gameSlug={game.slug}
+              playable={playable}
+            />
+            <GameDetailFavoriteButton
+              gameId={game.id}
+              gameSlug={game.slug}
+            />
           </div>
         </div>
       </section>
 
       {similarGames.length > 0 ? (
         <GameSection
-          title="Similar Games"
-          description="More titles in related categories."
+          title="More Games You May Like"
+          description="Related titles from the same category."
           games={similarGames}
           href="/games"
           variant="discovery"

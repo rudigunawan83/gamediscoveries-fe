@@ -1,10 +1,11 @@
 export const desktopNavItems = [
   { href: "/", label: "Home" },
   { href: "/discover", label: "Discover" },
+  { href: "/hot-games", label: "Hot" },
+  { href: "/best-games", label: "Best" },
+  { href: "/most-played", label: "Most Played" },
+  { href: "/exclusive-games", label: "Exclusive" },
   { href: "/games", label: "Games" },
-  { href: "/trending", label: "Trending" },
-  { href: "/new", label: "New" },
-  { href: "/mobile", label: "Mobile" },
   { href: "/multiplayer", label: "Multiplayer" },
 ] as const;
 

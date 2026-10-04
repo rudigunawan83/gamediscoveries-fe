@@ -6,7 +6,7 @@ import { SocialAuthButtons } from "@/features/auth/components/SocialAuthButtons"
 
 export function SignupCard() {
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/12 bg-[#0b1224]/82 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:rounded-3xl sm:p-7">
+    <div className="w-full max-w-md rounded-2xl border border-primary/20 bg-[#151820]/88 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:rounded-3xl sm:p-7">
       <div className="mb-5 space-y-1.5 sm:mb-6 sm:space-y-2">
         <h2 className="font-display text-xl font-bold tracking-tight text-white sm:text-2xl">
           Create Account

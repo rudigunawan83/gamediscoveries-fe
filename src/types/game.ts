@@ -38,7 +38,13 @@ export interface Game {
   provider?: string;
   status?: "draft" | "published" | "archived";
   publishedAt?: string;
+  /** @deprecated Prefer playUrl — kept for transitional catalog mapping. */
   gameUrl?: string;
+  /**
+   * Validated play URL from the GameDiscoveries API.
+   * Never populated from user input or query strings.
+   */
+  playUrl?: string;
   instructions?: string;
   developer?: string;
   width?: number;

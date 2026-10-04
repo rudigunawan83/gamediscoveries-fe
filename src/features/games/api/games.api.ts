@@ -19,6 +19,19 @@ import type { HomeDiscoveriesDto } from "@/lib/api/types.games";
 // Opt-in only. Default is live API so production builds never bake mock catalogs.
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
+export type HomeDiscoveries = {
+  featured: Game[];
+  trending: Game[];
+  latest: Game[];
+  popular: Game[];
+  mobile: Game[];
+  multiplayer: Game[];
+  hotGames: Game[];
+  bestGames: Game[];
+  mostPlayed: Game[];
+  exclusiveGames: Game[];
+};
+
 export async function fetchGames(params: ListGamesParams = {}): Promise<Game[]> {
   if (USE_MOCK) {
     return mockGames;
@@ -41,14 +54,7 @@ export async function fetchGameBySlug(slug: string): Promise<Game | null> {
   }
 }
 
-export async function fetchHomeDiscoveries(): Promise<{
-  featured: Game[];
-  trending: Game[];
-  latest: Game[];
-  popular: Game[];
-  mobile: Game[];
-  multiplayer: Game[];
-}> {
+export async function fetchHomeDiscoveries(): Promise<HomeDiscoveries> {
   if (USE_MOCK) {
     return {
       featured: mockGames.slice(0, 8),
@@ -57,18 +63,26 @@ export async function fetchHomeDiscoveries(): Promise<{
       popular: mockGames.slice(0, 12),
       mobile: mockGames.filter((g) => g.mobileReady).slice(0, 12),
       multiplayer: mockGames.filter((g) => g.multiplayer).slice(0, 12),
+      hotGames: mockGames.slice(0, 12),
+      bestGames: mockGames.slice(0, 12),
+      mostPlayed: mockGames.slice(0, 12),
+      exclusiveGames: mockGames.slice(0, 12),
     };
   }
 
   const response = await getHomeDiscoveries();
   const data = response.data as HomeDiscoveriesDto;
   return {
-    featured: mapGameSummaries(data.featured),
-    trending: mapGameSummaries(data.trending),
-    latest: mapGameSummaries(data.latest),
-    popular: mapGameSummaries(data.popular),
-    mobile: mapGameSummaries(data.mobile),
-    multiplayer: mapGameSummaries(data.multiplayer),
+    featured: mapGameSummaries(data.featured ?? []),
+    trending: mapGameSummaries(data.trending ?? []),
+    latest: mapGameSummaries(data.latest ?? []),
+    popular: mapGameSummaries(data.popular ?? []),
+    mobile: mapGameSummaries(data.mobile ?? []),
+    multiplayer: mapGameSummaries(data.multiplayer ?? []),
+    hotGames: mapGameSummaries(data.hotGames ?? []),
+    bestGames: mapGameSummaries(data.bestGames ?? []),
+    mostPlayed: mapGameSummaries(data.mostPlayed ?? []),
+    exclusiveGames: mapGameSummaries(data.exclusiveGames ?? []),
   };
 }
 

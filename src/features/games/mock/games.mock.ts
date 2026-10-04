@@ -1,4 +1,4 @@
-import type { Category, Game } from "@/types/game";
+﻿import type { Category, Game } from "@/types/game";
 
 function thumb(seed: string, label: string): string {
   const text = encodeURIComponent(label);
@@ -33,7 +33,9 @@ export const mockGames: Game[] = [
     mobileReady: true,
     multiplayer: false,
     orientation: "landscape",
-    provider: "GameMonetize",
+    status: "published",
+    playUrl: "https://html5.gamemonetize.co/mock-neon-drift/",
+    gameUrl: "https://html5.gamemonetize.co/mock-neon-drift/",
   },
   {
     id: "g2",
@@ -48,7 +50,9 @@ export const mockGames: Game[] = [
     mobileReady: true,
     multiplayer: true,
     orientation: "both",
-    provider: "GameMonetize",
+    status: "published",
+    playUrl: "https://html5.gamemonetize.co/mock-skyward/",
+    gameUrl: "https://html5.gamemonetize.co/mock-skyward/",
   },
   {
     id: "g3",
@@ -91,7 +95,6 @@ export const mockGames: Game[] = [
     mobileReady: true,
     multiplayer: true,
     orientation: "landscape",
-    provider: "GameMonetize",
   },
   {
     id: "g6",
@@ -176,7 +179,6 @@ export const mockGames: Game[] = [
     mobileReady: true,
     multiplayer: true,
     orientation: "landscape",
-    provider: "GameMonetize",
   },
   {
     id: "g12",
