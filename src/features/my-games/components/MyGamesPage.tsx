@@ -9,6 +9,7 @@ import { HistorySection } from "@/features/my-games/components/HistorySection";
 import { MyGamesTabs } from "@/features/my-games/components/MyGamesTabs";
 import { useMyGamesOverview } from "@/features/my-games/hooks/useMyGames";
 import { parseMyGamesTab } from "@/features/my-games/utils/myGamesTabs";
+import { BecauseYouPlayedSection } from "@/features/recommendations/components/RecommendationSection";
 import { analytics } from "@/lib/analytics/client";
 
 export function MyGamesPage() {
@@ -49,6 +50,7 @@ export function MyGamesPage() {
         ) : (
           <div className="space-y-10">
             <ContinuePlaying items={overview.continuePlaying} />
+            <BecauseYouPlayedSection />
             <HistorySection preview />
             <FavoritesSection preview />
           </div>

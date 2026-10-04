@@ -22,6 +22,11 @@ export type AnalyticsEventName =
   | "favorite_added"
   | "favorite_removed"
   | "history_game_clicked"
-  | "my_games_game_clicked";
+  | "my_games_game_clicked"
+  | "recommendation_impression"
+  | "recommendation_clicked"
+  | "recommendation_started"
+  | "recommendation_completed"
+  | "recommendation_dismissed";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>;

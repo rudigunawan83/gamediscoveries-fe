@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { MonitorPlay, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { GameBreadcrumbs } from "@/components/game/GameBreadcrumbs";
-import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { GameDetailFavoriteButton } from "@/features/my-games/components/GameDetailFavoriteButton";
 import { GameDetailPlayCta } from "@/features/games/components/GameDetailPlayCta";
@@ -11,6 +10,7 @@ import {
   fetchGameBySlug,
   fetchGames,
 } from "@/features/games/api/games.api";
+import { SimilarGamesSection } from "@/features/recommendations/components/RecommendationSection";
 import { isPlayableGame } from "@/features/game-player/utils/playerUrl";
 import { env } from "@/config/env";
 import { SITE_NAME } from "@/lib/seo/constants";
@@ -194,15 +194,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
         </div>
       </section>
 
-      {similarGames.length > 0 ? (
-        <GameSection
-          title="More Games You May Like"
-          description="Related titles from the same category."
-          games={similarGames}
-          href="/games"
-          variant="discovery"
-        />
-      ) : null}
+      <SimilarGamesSection gameId={game.id} fallbackGames={similarGames} />
     </div>
   );
 }
