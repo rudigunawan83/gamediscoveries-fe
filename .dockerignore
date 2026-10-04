@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+README.source.md
+playwright-report
+test-results
+coverage
+.env*.local
+tests
+*.md
+.vscode
+.idea
