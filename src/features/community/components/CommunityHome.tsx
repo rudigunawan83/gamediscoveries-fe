@@ -135,11 +135,11 @@ function GameThumb({ game, tone = "from-sky-400 to-indigo-800", withPlay = false
 
 function HeroStat({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
   return (
-    <div className="flex items-center gap-3 border-white/10 pr-5 sm:border-r last:border-r-0">
-      <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/[0.08] text-sky-300">{icon}</span>
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10 text-sky-300 shadow-lg shadow-black/20">{icon}</span>
       <div>
-        <p className="font-display text-xl font-black text-white">{value}</p>
-        <p className="text-xs text-slate-400">{label}</p>
+        <p className="font-display text-sm font-black leading-none text-white sm:text-base">{value}</p>
+        <p className="mt-1 text-[10px] leading-none text-slate-300 sm:text-xs">{label}</p>
       </div>
     </div>
   );
@@ -275,45 +275,42 @@ export function CommunityHome() {
 
   return (
     <div className="relative mx-auto max-w-7xl space-y-6 text-white">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/75 p-6 shadow-2xl shadow-black/30 sm:p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_34%,rgba(245,158,11,0.24),transparent_26%),radial-gradient(circle_at_56%_20%,rgba(14,165,233,0.18),transparent_24%),linear-gradient(110deg,rgba(15,23,42,0.1),rgba(15,23,42,0.9))]" />
-        <div className="absolute right-8 top-8 hidden h-56 w-56 rounded-full bg-amber-300/20 blur-3xl lg:block" />
-        <div className="relative grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-center">
-          <div>
-            <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.35em] text-amber-200">
+      <section
+        className="relative min-h-[250px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/30 sm:min-h-[285px]"
+        style={{
+          backgroundImage: "url('/images/community-hero.jpg')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/78 to-slate-950/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
+        <div className="relative flex min-h-[250px] flex-col justify-end p-5 sm:min-h-[285px] sm:p-7">
+          <div className="max-w-xl">
+            <p className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.35em] text-amber-200">
               <Users className="h-4 w-4" /> Community
             </p>
-            <h1 className="font-display text-4xl font-black leading-tight text-white sm:text-6xl">
+            <h1 className="font-display text-3xl font-black leading-none text-white sm:text-5xl">
               Play. <span className="text-amber-300">Share.</span> Connect.
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-              Join a community of gamers, share your experiences, get tips, discover new games, and make new friends.
+            <p className="mt-4 max-w-md text-xs leading-5 text-slate-200 sm:text-sm sm:leading-6">
+              Join a community of gamers, share your experiences, get tips, discover new games, and make new friends!
             </p>
-            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <HeroStat icon={<Users className="h-5 w-5" />} value="12.4K" label="Members" />
-              <HeroStat icon={<MessageCircle className="h-5 w-5" />} value="3.2K" label="Discussions" />
-              <HeroStat icon={<Gamepad2 className="h-5 w-5" />} value="850" label="Game Reviews" />
-              <HeroStat icon={<Search className="h-5 w-5" />} value="320" label="Online Now" />
+            <div className="mt-6 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
+              <HeroStat icon={<Users className="h-5 w-5 text-fuchsia-300" />} value="12.4K" label="Members" />
+              <HeroStat icon={<MessageCircle className="h-5 w-5 text-sky-300" />} value="3.2K" label="Discussions" />
+              <HeroStat icon={<Gamepad2 className="h-5 w-5 text-emerald-300" />} value="850" label="Game Reviews" />
+              <HeroStat icon={<Search className="h-5 w-5 text-cyan-300" />} value="320" label="Online Now" />
             </div>
           </div>
-
-          <div className="relative min-h-[245px] overflow-hidden rounded-[2rem] border border-amber-200/20 bg-gradient-to-br from-sky-500/20 via-slate-950/60 to-amber-500/20 p-6">
-            <div className="absolute right-10 top-8 grid h-28 w-28 place-items-center rounded-full bg-amber-300/20 text-amber-200">
-              <Gamepad2 className="h-16 w-16" />
-            </div>
-            <div className="absolute bottom-8 left-8 flex -space-x-3">
-              {[0, 1, 2, 3].map((index) => (
-                <Avatar key={index} name={data.topPlayers[index]?.displayName ?? FALLBACK_POSTS[index % FALLBACK_POSTS.length].author} index={index} size="sm" />
-              ))}
-            </div>
-            <div className="relative z-10 max-w-xs">
-              <p className="text-sm font-bold text-amber-100">Create and connect</p>
-              <p className="mt-3 font-display text-5xl font-black text-white">+{postCount}</p>
-              <p className="text-sm text-slate-300">fresh community stories</p>
-            </div>
-          </div>
+          <button
+            className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-400 px-5 py-3 text-xs font-black text-slate-950 shadow-xl shadow-amber-950/30 transition hover:scale-[1.02] sm:absolute sm:bottom-7 sm:right-7 sm:mt-0"
+            type="button"
+          >
+            <Edit3 className="h-4 w-4" /> Create Post
+          </button>
         </div>
-        </section>
+      </section>
 
       <section className="grid gap-5 lg:grid-cols-[250px_1fr_340px]">
         <aside className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-4 shadow-2xl shadow-black/20">
