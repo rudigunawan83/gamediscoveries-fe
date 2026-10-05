@@ -1,6 +1,10 @@
 import { apiClient } from "@/lib/api/client";
 import type { ApiResponse } from "@/lib/api/types";
 import type { Game } from "@/types/game";
+import {
+  getDiscoveryTrending,
+  mapRankingItemToGame,
+} from "@/lib/api/discovery-rankings";
 
 export async function getForYou(): Promise<ApiResponse<Game[]>> {
   // Prefer Recommendation Engine (Phase 09); keep helper name for callers.
@@ -14,5 +18,9 @@ export async function getForYou(): Promise<ApiResponse<Game[]>> {
 }
 
 export async function getTrending(): Promise<ApiResponse<Game[]>> {
-  return apiClient.get<Game[]>("/api/v1/trending");
+  const response = await getDiscoveryTrending(20, "24h");
+  return {
+    ...response,
+    data: (response.data?.items ?? []).map(mapRankingItemToGame),
+  };
 }

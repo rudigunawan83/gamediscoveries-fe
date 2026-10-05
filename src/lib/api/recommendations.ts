@@ -19,11 +19,18 @@ export interface RecommendationGameDto {
   orientation?: string | null;
 }
 
+export interface RecommendationReasonDto {
+  type: string;
+  label: string;
+}
+
 export interface RecommendationItemDto {
   game: RecommendationGameDto;
   score: number;
   rank: number;
   reason: string;
+  reasonDetail?: RecommendationReasonDto | null;
+  position?: number;
 }
 
 export interface RecommendationResponse {
@@ -33,6 +40,30 @@ export interface RecommendationResponse {
   generatedAt: string;
   expiresAt: string;
   cacheHit: boolean;
+  strategy?: string;
+  profileLevel?: number;
+  recommendationRequestId?: string | null;
+}
+
+export interface RecommendationHomeResponse {
+  sections: Array<{
+    type: string;
+    title: string;
+    items: RecommendationItemDto[];
+  }>;
+  algorithmVersion: string;
+  profileLevel: number;
+  recommendationRequestId: string;
+}
+
+export interface AdminRecommendationOverview {
+  requests: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  feedbackCount: number;
+  personalizedShare: number;
+  lastRequestAt?: string | null;
 }
 
 export async function getRecommendations(
@@ -63,5 +94,40 @@ export async function getSimilarRecommendations(
 ): Promise<ApiResponse<RecommendationResponse>> {
   return apiClient.get<RecommendationResponse>(
     `/api/v1/recommendations/similar/${gameId}?limit=${limit}`,
+  );
+}
+
+export async function getRecommendationHome(limit = 12) {
+  return apiClient.get<RecommendationHomeResponse>(
+    `/api/v1/recommendations/home?limit=${limit}`,
+  );
+}
+
+export async function postRecommendationFeedback(
+  gameId: string,
+  feedbackType: string,
+  recommendationRequestId?: string | null,
+  section?: string,
+) {
+  return apiClient.post(`/api/v1/recommendations/${gameId}/feedback`, {
+    feedbackType,
+    recommendationRequestId,
+    section,
+  });
+}
+
+export async function postRecommendationImpression(payload: {
+  recommendationRequestId: string;
+  gameId: string;
+  position: number;
+  section: string;
+  eventType?: string;
+}) {
+  return apiClient.post("/api/v1/recommendations/impressions", payload);
+}
+
+export async function getAdminRecommendationOverview() {
+  return apiClient.get<AdminRecommendationOverview>(
+    "/api/v1/admin/recommendations/overview",
   );
 }

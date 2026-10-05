@@ -45,6 +45,7 @@ const navIcons: Record<string, typeof Home> = {
 
 const extraItems = [
   { href: "/search", label: "Search", icon: Search },
+  { href: "/progress", label: "Progress", icon: Sparkles },
   { href: "/my-games", label: "My Games", icon: Gamepad2 },
 ] as const;
 

@@ -1,5 +1,6 @@
 export const desktopNavItems = [
   { href: "/", label: "Home" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/community", label: "Community" },
   { href: "/hot-games", label: "Hot" },
   { href: "/best-games", label: "Best" },

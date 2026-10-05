@@ -9,6 +9,7 @@ import { recordHistory } from "@/features/my-games/api/historyApi";
 import { myGamesKeys } from "@/features/my-games/api/myGamesKeys";
 import { markPlayed } from "@/lib/pwa/install";
 import { useQueryClient } from "@tanstack/react-query";
+import { GameSessionTracker } from "@/features/game-player/session/GameSessionTracker";
 
 type UsePlaySessionArgs = {
   gameId: string;
@@ -44,6 +45,7 @@ export function usePlaySession({
   const startedAtRef = useRef<number | null>(null);
   const exitedRef = useRef(false);
   const recordedStartRef = useRef(false);
+  const trackerRef = useRef<GameSessionTracker | null>(null);
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = useAuthStore((state) => state.user?.id);
   const queryClient = useQueryClient();
@@ -65,25 +67,36 @@ export function usePlaySession({
     phaseRef.current = "game_started";
     startedAtRef.current = Date.now();
     markPlayed();
-    analytics.track("game_started", { gameId, gameSlug });
+    // Server emits GAME_START + GAME_SESSION_START via session API.
     phaseRef.current = "play_session_active";
+
+    if (!trackerRef.current) {
+      trackerRef.current = new GameSessionTracker({ gameId });
+    }
+    void trackerRef.current.start();
 
     if (accessToken && !recordedStartRef.current) {
       recordedStartRef.current = true;
       void persistHistory(gameId, 0, userId, queryClient);
     }
-  }, [accessToken, gameId, gameSlug, queryClient, userId]);
+  }, [accessToken, gameId, queryClient, userId]);
 
   const markExit = useCallback(() => {
     if (exitedRef.current) return;
     exitedRef.current = true;
     const durationSeconds = calculatePlayDurationSeconds(startedAtRef.current);
     phaseRef.current = "game_exit";
-    analytics.track("game_exit", { gameId, durationSeconds });
 
-    if (accessToken && startedAtRef.current) {
-      void persistHistory(gameId, durationSeconds, userId, queryClient);
-    }
+    const tracker = trackerRef.current;
+    void (async () => {
+      const ended = tracker ? await tracker.end("USER_EXIT") : null;
+      const serverActive = ended?.activeSeconds ?? durationSeconds;
+      if (accessToken && startedAtRef.current) {
+        void persistHistory(gameId, serverActive, userId, queryClient);
+      }
+      tracker?.destroy();
+      trackerRef.current = null;
+    })();
   }, [accessToken, gameId, queryClient, userId]);
 
   useEffect(() => {

@@ -5,10 +5,8 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { GameSection } from "@/components/game/GameSection";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
 import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
-import {
-  ForYouSection,
-  HiddenGemsSection,
-} from "@/features/recommendations/components/RecommendationSection";
+import { RecommendationHomeShelves } from "@/features/recommendations/components/RecommendationHomeShelves";
+import { HiddenGemsSection } from "@/features/recommendations/components/RecommendationSection";
 import { ApiClientError } from "@/lib/api/types";
 
 export function DiscoverFeed() {
@@ -52,7 +50,7 @@ export function DiscoverFeed() {
 
   return (
     <div className="space-y-10 md:space-y-14">
-      <ForYouSection />
+      <RecommendationHomeShelves />
       <GameSection
         title="Today's Discoveries"
         description="Hand-picked picks from the live catalog."

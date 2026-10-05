@@ -85,6 +85,20 @@ export function UserMenu({ compact = false }: UserMenuProps) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
+            router.push("/missions");
+          }}
+        >
+          Missions
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/progress");
+          }}
+        >
+          Progress
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
             router.push("/my-games");
           }}
         >
