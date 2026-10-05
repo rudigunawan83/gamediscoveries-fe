@@ -1,0 +1,106 @@
+name: Deploy FE to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-fe-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build production
+        run: pnpm run build:prod
+        env:
+          NEXT_PUBLIC_API_URL: https://api.gamediscoveries.com
+          NEXT_PUBLIC_APP_URL: https://www.gamediscoveries.com
+          NEXT_PUBLIC_USE_MOCK: "false"
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Pack standalone
+        run: |
+          set -euo pipefail
+          rm -rf fe-pack
+          mkdir -p fe-pack/fe-standalone
+
+          if [ -f .next/standalone/server.js ]; then
+            cp -a .next/standalone/. fe-pack/fe-standalone/
+          else
+            nested=$(find .next/standalone -maxdepth 3 -name server.js -print -quit)
+            test -n "$nested"
+            cp -a "$(dirname "$nested")/." fe-pack/fe-standalone/
+          fi
+
+          mkdir -p fe-pack/fe-standalone/.next/static fe-pack/fe-standalone/public
+          cp -a .next/static/. fe-pack/fe-standalone/.next/static/
+          cp -a public/. fe-pack/fe-standalone/public/
+          cp .env.production fe-pack/fe-standalone/.env.production
+
+          test -f fe-pack/fe-standalone/server.js
+          test -d fe-pack/fe-standalone/node_modules/next \
+            || test -d fe-pack/fe-standalone/node_modules/@next
+
+          if [ ! -d fe-pack/fe-standalone/node_modules/@swc/helpers ]; then
+            mkdir -p fe-pack/fe-standalone/node_modules/@swc
+            helper_src=$(find node_modules -type d -path '*/@swc/helpers' -print -quit || true)
+            if [ -n "$helper_src" ]; then
+              cp -a "$helper_src" fe-pack/fe-standalone/node_modules/@swc/helpers
+            fi
+          fi
+
+          tar -czf fe-standalone.tar.gz -C fe-pack fe-standalone
+          ls -lh fe-standalone.tar.gz
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add known hosts
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          PORT="${DEPLOY_PORT:-22}"
+          if [ -n "${DEPLOY_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$DEPLOY_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Upload and deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          PORT="${DEPLOY_PORT:-22}"
+          scp -P "$PORT" fe-standalone.tar.gz "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/fe-standalone.tar.gz"
+          ssh -p "$PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            'bash /opt/gamediscoveries/apps/ci-deploy-fe.sh /tmp/fe-standalone.tar.gz'
