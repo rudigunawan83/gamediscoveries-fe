@@ -10,15 +10,7 @@ export const metadata = createMetadata({
 
 export default function CommunityPage() {
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-          Community
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-          What&apos;s happening in GameDiscoveries?
-        </p>
-      </header>
+    <div>
       <CommunityHome />
     </div>
   );
