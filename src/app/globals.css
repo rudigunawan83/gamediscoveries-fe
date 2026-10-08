@@ -203,12 +203,15 @@ html[data-game-immersive] main {
   }
 
   [data-force-landscape="true"] .game-player-frame {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
     width: 100dvh !important;
     height: 100dvw !important;
     max-width: none !important;
     max-height: none !important;
     aspect-ratio: auto !important;
-    transform: rotate(90deg);
+    transform: translate(-50%, -50%) rotate(90deg);
     transform-origin: center;
   }
 }
