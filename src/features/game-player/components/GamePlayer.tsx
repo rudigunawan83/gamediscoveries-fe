@@ -74,10 +74,12 @@ export function GamePlayer({
       : orientation === "portrait"
         ? "9 / 16"
         : "16 / 9";
+  const shouldForceLandscape = orientation === "landscape" || orientation === "both";
 
   return (
     <div
       ref={shellRef}
+      data-force-landscape={shouldForceLandscape ? "true" : undefined}
       className={cn(
         "flex h-[100dvh] w-full flex-col overscroll-none bg-[#060914] text-white",
         isFullscreen && "fixed inset-0 z-[100]",
@@ -94,13 +96,13 @@ export function GamePlayer({
         }}
       />
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden overscroll-none bg-black pb-[env(safe-area-inset-bottom)]">
+      <div className="game-player-stage relative flex min-h-0 flex-1 items-center justify-center overflow-hidden overscroll-none bg-black pb-[env(safe-area-inset-bottom)]">
         {state === "error" && errorKind ? (
           <GamePlayerError kind={errorKind} backHref={backHref} onRetry={retry} />
         ) : (
           <div
             className={cn(
-              "relative w-full max-w-7xl bg-black",
+              "game-player-frame relative w-full max-w-7xl bg-black",
               isFullscreen ? "h-full max-w-none" : "max-h-full",
             )}
             style={isFullscreen ? { height: "100%" } : { aspectRatio: aspect, width: "100%" }}

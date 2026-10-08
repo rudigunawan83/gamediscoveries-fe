@@ -185,6 +185,34 @@ html[data-game-immersive] main {
   background: #000;
 }
 
+@media (orientation: portrait) and (max-width: 767px) {
+  [data-force-landscape="true"] {
+    height: 100dvh !important;
+    width: 100dvw !important;
+    overflow: hidden !important;
+  }
+
+  [data-force-landscape="true"] .game-player-toolbar {
+    display: none !important;
+  }
+
+  [data-force-landscape="true"] .game-player-stage {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: 0 !important;
+  }
+
+  [data-force-landscape="true"] .game-player-frame {
+    width: 100dvh !important;
+    height: 100dvw !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    transform: rotate(90deg);
+    transform-origin: center;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

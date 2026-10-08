@@ -21,7 +21,7 @@ export function GamePlayerToolbar({
 }: GamePlayerToolbarProps) {
   return (
     <header
-      className="flex h-14 shrink-0 items-center gap-3 border-b border-white/10 bg-[#060914]/95 px-3 backdrop-blur-md sm:px-4"
+      className="game-player-toolbar flex h-14 shrink-0 items-center gap-3 border-b border-white/10 bg-[#060914]/95 px-3 backdrop-blur-md sm:px-4"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <Link
