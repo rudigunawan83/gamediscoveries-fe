@@ -6,10 +6,16 @@ import type {
   GamePlayerState,
 } from "@/features/game-player/types/game-player.types";
 import { isPlayableGame, validatePlayUrl } from "@/features/game-player/utils/playerUrl";
+import type { GameOrientation } from "@/types/game";
 
 type UseGamePlayerArgs = {
   status?: string | null;
   playUrl?: string | null;
+  orientation?: GameOrientation;
+};
+
+type LockableScreenOrientation = ScreenOrientation & {
+  lock?: (orientation: "landscape") => Promise<void>;
 };
 
 function detectFullscreenSupport(): boolean {
@@ -17,7 +23,7 @@ function detectFullscreenSupport(): boolean {
   return typeof document.documentElement.requestFullscreen === "function";
 }
 
-export function useGamePlayer({ status, playUrl }: UseGamePlayerArgs) {
+export function useGamePlayer({ status, playUrl, orientation }: UseGamePlayerArgs) {
   const validation = useMemo(() => validatePlayUrl(playUrl), [playUrl]);
   const playable = isPlayableGame(status, playUrl);
 
@@ -40,6 +46,18 @@ export function useGamePlayer({ status, playUrl }: UseGamePlayerArgs) {
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
+
+  useEffect(() => {
+    if (!isLandscapeEligible(orientation) || !document.fullscreenElement) {
+      return;
+    }
+
+    void lockLandscape();
+
+    return () => {
+      unlockOrientation();
+    };
+  }, [orientation, isFullscreen]);
 
   const validatedUrl = validation.ok ? validation.url : null;
 
@@ -68,14 +86,18 @@ export function useGamePlayer({ status, playUrl }: UseGamePlayerArgs) {
     if (!target || !detectFullscreenSupport()) return;
     try {
       if (document.fullscreenElement) {
+        unlockOrientation();
         await document.exitFullscreen();
         return;
       }
       await target.requestFullscreen();
+      if (isLandscapeEligible(orientation)) {
+        await lockLandscape();
+      }
     } catch {
       // Keep playable when fullscreen is denied.
     }
-  }, []);
+  }, [orientation]);
 
   return {
     state,
@@ -89,4 +111,24 @@ export function useGamePlayer({ status, playUrl }: UseGamePlayerArgs) {
     retry,
     toggleFullscreen,
   };
+}
+
+function isLandscapeEligible(orientation?: GameOrientation) {
+  return orientation === "landscape" || orientation === "both";
+}
+
+async function lockLandscape() {
+  try {
+    await (screen.orientation as LockableScreenOrientation | undefined)?.lock?.("landscape");
+  } catch {
+    // Orientation lock is best-effort and browser/device dependent.
+  }
+}
+
+function unlockOrientation() {
+  try {
+    screen.orientation?.unlock?.();
+  } catch {
+    // Ignore unsupported unlock implementations.
+  }
 }

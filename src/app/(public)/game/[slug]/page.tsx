@@ -167,6 +167,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               gameId={game.id}
               gameSlug={game.slug}
               playable={playable}
+              orientation={game.orientation}
             />
             <GameDetailFavoriteButton
               gameId={game.id}

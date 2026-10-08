@@ -60,7 +60,7 @@ export function GamePlayer({
     onFrameError,
     retry,
     toggleFullscreen,
-  } = useGamePlayer({ status, playUrl });
+  } = useGamePlayer({ status, playUrl, orientation });
 
   useEffect(() => {
     if (state === "playing") {

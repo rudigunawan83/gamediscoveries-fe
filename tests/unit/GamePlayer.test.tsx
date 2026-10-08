@@ -12,6 +12,12 @@ vi.mock("@/lib/analytics/client", () => ({
   },
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 function renderWithQuery(ui: ReactNode) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
