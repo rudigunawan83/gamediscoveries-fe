@@ -59,10 +59,7 @@ export function LoginForm() {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(REMEMBER_EMAIL_KEY);
-      if (saved) {
-        setValue("email", saved);
-        setRememberMe(true);
-      }
+      if (saved) setValue("email", saved);
     } catch {
       // Ignore storage access errors.
     }

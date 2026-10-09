@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GameGridSkeleton } from "@/components/game/GameGridSkeleton";
 import { EmptyFavorites } from "@/features/my-games/components/EmptyFavorites";
@@ -27,12 +27,14 @@ export function FavoritesSection({
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreOverride, setHasMoreOverride] = useState<boolean | null>(null);
+  const [syncedAt, setSyncedAt] = useState(query.dataUpdatedAt);
 
-  useEffect(() => {
+  if (syncedAt !== query.dataUpdatedAt) {
+    setSyncedAt(query.dataUpdatedAt);
     setExtraItems([]);
     setPage(1);
     setHasMoreOverride(null);
-  }, [query.dataUpdatedAt]);
+  }
 
   const baseItems = query.data?.items ?? [];
   const items = [...baseItems, ...extraItems];

@@ -50,6 +50,20 @@ function subscribeOnline(onStoreChange: () => void) {
   };
 }
 
+function subscribeNever() {
+  return () => {};
+}
+
+/** Engagement flags live in web storage; re-read them every few seconds. */
+function subscribeEngagement(onStoreChange: () => void) {
+  const tick = window.setInterval(onStoreChange, 5_000);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.clearInterval(tick);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
 export function PwaContextProvider({ children }: { children: ReactNode }) {
   const online = useSyncExternalStore(
     subscribeOnline,
@@ -57,23 +71,29 @@ export function PwaContextProvider({ children }: { children: ReactNode }) {
     () => true,
   );
 
-  const [installed, setInstalled] = useState(false);
+  const standalone = useSyncExternalStore(subscribeNever, isStandalone, () => false);
+  const ios = useSyncExternalStore(subscribeNever, isIos, () => false);
+  const played = useSyncExternalStore(subscribeEngagement, hasPlayed, () => false);
+  const storedDismissed = useSyncExternalStore(
+    subscribeEngagement,
+    () => isDismissedRecently(),
+    () => false,
+  );
+  const pageViews = useSyncExternalStore(subscribeEngagement, getPageViews, () => 0);
+
+  const [installedEvent, setInstalledEvent] = useState(false);
+  const [dismissedNow, setDismissed] = useState(false);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEventLike | null>(null);
   const [updateWorker, setUpdateWorker] = useState<ServiceWorker | null>(null);
-  const [pageViews, setPageViews] = useState(0);
   const [sessionMs, setSessionMs] = useState(0);
-  const [played, setPlayed] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [ios, setIos] = useState(false);
   const [startedAt] = useState(() => Date.now());
 
+  const installed = standalone || installedEvent;
+  const dismissed = storedDismissed || dismissedNow;
+
   useEffect(() => {
-    setInstalled(isStandalone());
-    setIos(isIos());
-    setDismissed(isDismissedRecently());
-    setPlayed(hasPlayed());
-    setPageViews(incrementPageViews());
+    incrementPageViews();
 
     analytics.track("pwa_launch", {
       displayMode: getDisplayMode(),
@@ -87,7 +107,7 @@ export function PwaContextProvider({ children }: { children: ReactNode }) {
       setDeferredPrompt(event as BeforeInstallPromptEventLike);
     };
     const onInstalled = () => {
-      setInstalled(true);
+      setInstalledEvent(true);
       setDeferredPrompt(null);
       analytics.track("pwa_installed", {
         displayMode: getDisplayMode(),
@@ -110,8 +130,6 @@ export function PwaContextProvider({ children }: { children: ReactNode }) {
 
     const tick = window.setInterval(() => {
       setSessionMs(Date.now() - startedAt);
-      setPlayed(hasPlayed());
-      setDismissed(isDismissedRecently());
     }, 5_000);
 
     return () => {
@@ -134,7 +152,7 @@ export function PwaContextProvider({ children }: { children: ReactNode }) {
       shouldShowInstallUi({
         installed,
         dismissed,
-        pageViews: pageViews || getPageViews(),
+        pageViews,
         sessionMs,
         hasPlayed: played,
         canPrompt,
