@@ -10,7 +10,7 @@ import {
   useHistory,
   useHistoryPreview,
 } from "@/features/my-games/hooks/useHistory";
-import { formatPlayedAt } from "@/features/my-games/utils/formatPlayedAt";
+import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
 import { mapLibraryError } from "@/features/my-games/utils/libraryErrors";
 
 type HistorySectionProps = {
@@ -71,7 +71,7 @@ export function HistorySection({
   }
 
   const metaByGameId = Object.fromEntries(
-    items.map((item) => [item.gameId, formatPlayedAt(item.playedAt)]),
+    items.map((item) => [item.gameId, formatHistoryMeta(item)]),
   );
 
   return (

@@ -43,6 +43,36 @@ describe("historyApi", () => {
       "/api/v1/users/me/history?page=1&pageSize=24",
     );
     expect(result.items[0]?.durationSeconds).toBe(120);
+    expect(result.items[0]?.totalPlaySeconds).toBe(0);
+    expect(result.items[0]?.playCount).toBe(0);
+    expect(result.items[0]?.lastPlatform).toBeNull();
+  });
+
+  it("maps cross-platform totals", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      success: true,
+      data: [
+        {
+          id: "h1",
+          gameId: "g1",
+          playedAt: "2026-10-04T10:00:00Z",
+          durationSeconds: 120,
+          totalPlaySeconds: 3900,
+          playCount: 4,
+          lastPlatform: "ANDROID",
+          game: { id: "g1", slug: "puzzle-one", title: "Puzzle One" },
+        },
+      ],
+      error: null,
+      meta: { page: 1, pageSize: 24, total: 1, totalPages: 1 },
+    });
+
+    const [item] = (await fetchHistory({})).items;
+    expect(item).toMatchObject({
+      totalPlaySeconds: 3900,
+      playCount: 4,
+      lastPlatform: "ANDROID",
+    });
   });
 
   it("records history sessions", async () => {

@@ -13,6 +13,10 @@ export interface HistoryItem {
   gameId: string;
   playedAt: string;
   durationSeconds: number;
+  totalPlaySeconds: number;
+  playCount: number;
+  /** `WEB`, `ANDROID` or `IOS` of the last session that ended. */
+  lastPlatform: string | null;
   game: Game;
 }
 

@@ -11,6 +11,9 @@ interface HistoryItemDto {
   gameId: string;
   playedAt: string;
   durationSeconds: number;
+  totalPlaySeconds?: number;
+  playCount?: number;
+  lastPlatform?: string | null;
   game: GameSummaryDto;
 }
 
@@ -34,6 +37,9 @@ export async function fetchHistory(params: {
     gameId: item.gameId,
     playedAt: item.playedAt,
     durationSeconds: item.durationSeconds ?? 0,
+    totalPlaySeconds: item.totalPlaySeconds ?? 0,
+    playCount: item.playCount ?? 0,
+    lastPlatform: item.lastPlatform ?? null,
     game: mapGameSummary(item.game),
   }));
 

@@ -2,7 +2,7 @@
 
 import type { HistoryItem } from "@/features/my-games/types/my-games.types";
 import { LibraryGameGrid } from "@/features/my-games/components/LibraryGameGrid";
-import { formatPlayedAt } from "@/features/my-games/utils/formatPlayedAt";
+import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
 
 type ContinuePlayingProps = {
   items: HistoryItem[];
@@ -15,7 +15,7 @@ export function ContinuePlaying({ items }: ContinuePlayingProps) {
 
   const games = items.map((item) => item.game);
   const metaByGameId = Object.fromEntries(
-    items.map((item) => [item.gameId, formatPlayedAt(item.playedAt)]),
+    items.map((item) => [item.gameId, formatHistoryMeta(item)]),
   );
 
   return (
