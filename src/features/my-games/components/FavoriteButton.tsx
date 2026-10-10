@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFavoriteGame } from "@/features/my-games/hooks/useFavoriteGame";
@@ -24,12 +25,13 @@ export function FavoriteButton({
   variant = "icon",
   callbackUrl,
 }: FavoriteButtonProps) {
+  const t = useTranslations("Library");
   const { isAuthenticated } = useAuth();
   const statusQuery = useFavoriteStatus(gameId, isAuthenticated);
   const mutation = useFavoriteGame();
   const isFavorite = Boolean(statusQuery.data);
 
-  const label = isFavorite ? "Remove from favorites" : "Add to favorites";
+  const label = isFavorite ? t("removeFavorite") : t("addFavorite");
 
   return (
     <Button
@@ -66,10 +68,10 @@ export function FavoriteButton({
         aria-hidden="true"
       />
       {variant === "labeled" ? (
-        <span>{isFavorite ? "Favorite" : "Add to Favorites"}</span>
+        <span>{isFavorite ? t("favorite") : t("addToFavorites")}</span>
       ) : null}
       <span className="sr-only" aria-live="polite">
-        {isFavorite ? "In favorites" : "Not in favorites"}
+        {isFavorite ? t("inFavorites") : t("notInFavorites")}
       </span>
     </Button>
   );

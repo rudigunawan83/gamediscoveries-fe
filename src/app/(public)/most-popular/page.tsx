@@ -1,23 +1,30 @@
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Most Popular Games",
-  description:
-    "Play the most popular free online games on GameDiscoveries. Discover top-rated HTML5 titles players love.",
-  path: "/most-popular",
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Seo");
+  return createMetadata({
+    title: t("mostPopularTitle"),
+    description: t("mostPopularDescription"),
+    path: "/most-popular",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
 export default async function MostPopularPage() {
-  const home = await fetchHomeDiscoveries();
+  const [home, t, tNav] = await Promise.all([
+    fetchHomeDiscoveries(),
+    getTranslations("Seo"),
+    getTranslations("Nav"),
+  ]);
 
   return (
     <GameSection
-      title="Most Popular"
-      description="Top games from the live popular catalog."
+      title={tNav("mostPopular")}
+      description={t("mostPopularSectionDescription")}
       games={home.popular}
     />
   );

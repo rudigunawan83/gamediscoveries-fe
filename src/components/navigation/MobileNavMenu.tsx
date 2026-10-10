@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Gamepad2,
   Home,
@@ -15,7 +16,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { desktopNavItems } from "@/components/navigation/nav-config";
+import { desktopNavItems, type NavLabelKey } from "@/components/navigation/nav-config";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,16 +45,18 @@ const navIcons: Record<string, typeof Home> = {
 };
 
 const extraItems = [
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/progress", label: "Progress", icon: Sparkles },
-  { href: "/my-games", label: "My Games", icon: Gamepad2 },
-  { href: "/download", label: "Download App", icon: Smartphone },
-] as const;
+  { href: "/search", label: "search", icon: Search },
+  { href: "/progress", label: "progress", icon: Sparkles },
+  { href: "/my-games", label: "myGames", icon: Gamepad2 },
+  { href: "/download", label: "downloadApp", icon: Smartphone },
+] as const satisfies readonly { href: string; label: NavLabelKey; icon: typeof Home }[];
 
 export function MobileNavMenu() {
   const pathname = usePathname();
   const { isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Nav");
+  const tCommon = useTranslations("Common");
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -62,7 +65,7 @@ export function MobileNavMenu() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
             className="size-10 shrink-0 text-foreground"
           />
         }
@@ -81,11 +84,11 @@ export function MobileNavMenu() {
             <span className="text-brand-gradient">Discoveries</span>
           </SheetTitle>
           <SheetDescription className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Discover · Play · Explore
+            {t("menuTagline")}
           </SheetDescription>
         </SheetHeader>
 
-        <nav aria-label="Mobile menu" className="flex-1 overflow-y-auto px-3 py-4">
+        <nav aria-label={t("menuLabel")} className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1">
             {desktopNavItems.map((item) => {
               const Icon = navIcons[item.href] ?? Home;
@@ -110,7 +113,7 @@ export function MobileNavMenu() {
                     }
                   >
                     <Icon className="size-4 shrink-0" aria-hidden="true" />
-                    <span>{item.label}</span>
+                    <span>{t(item.label)}</span>
                     {active ? (
                       <span
                         aria-hidden="true"
@@ -146,7 +149,7 @@ export function MobileNavMenu() {
                     }
                   >
                     <Icon className="size-4 shrink-0" aria-hidden="true" />
-                    <span>{item.label}</span>
+                    <span>{t(item.label)}</span>
                   </SheetClose>
                 </li>
               );
@@ -166,7 +169,7 @@ export function MobileNavMenu() {
               }}
             >
               <LogOut className="size-4" aria-hidden="true" />
-              Sign Out
+              {tCommon("signOut")}
             </Button>
           ) : (
             <SheetClose
@@ -178,7 +181,7 @@ export function MobileNavMenu() {
               }
             >
               <LogIn className="size-4" aria-hidden="true" />
-              Sign In
+              {tCommon("signIn")}
             </SheetClose>
           )}
         </div>

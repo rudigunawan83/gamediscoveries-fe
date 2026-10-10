@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Compass,
@@ -17,15 +18,13 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useXpRuleLabel } from "@/features/progress/hooks/useXpRuleLabel";
 import { getMyAchievements, type AchievementItem } from "@/lib/api/achievements";
 import { getMyProgress, getMyXpTransactions } from "@/lib/api/progress";
+import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
-import { formatTimeAgo } from "./MobileGameDetail";
 import { MobileSubpageHeader } from "./MobileSubpageHeader";
 import { MobileMessage, MobilePillTabs } from "./MobileTabUi";
-
-const grouped = new Intl.NumberFormat("en-US");
-const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 
 const MUTED = "#6b6b7e";
 
@@ -154,11 +153,12 @@ function XpBar({ ratio, height = 8, label }: { ratio: number; height?: number; l
 }
 
 function LoadError({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations("Common");
   return (
     <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
-      <p className="text-sm text-[#9c9cb0]">Something went wrong. Please try again.</p>
+      <p className="text-sm text-[#9c9cb0]">{t("errorGeneric")}</p>
       <button type="button" onClick={onRetry} className="mt-2 text-sm font-bold text-[#ffc83d]">
-        Try again
+        {t("retry")}
       </button>
     </div>
   );
@@ -192,6 +192,10 @@ function StatTile({
 export function MobileProgress() {
   const { accessToken } = useAuth();
   const signedIn = Boolean(accessToken);
+  const { grouped, compact, timeAgo } = useFormats();
+  const t = useTranslations("Gamification");
+  const tProfile = useTranslations("Profile");
+  const ruleLabel = useXpRuleLabel();
 
   const progressQuery = useQuery({
     queryKey: ["me", "progress"],
@@ -214,12 +218,12 @@ export function MobileProgress() {
 
   return (
     <div>
-      <MobileSubpageHeader title="My Progress" />
+      <MobileSubpageHeader title={tProfile("myProgress")} />
       {!signedIn ? (
         <MobileMessage
           icon={TrendingUp}
-          title="Track your progress"
-          message="Sign in to earn XP, level up and build your streak."
+          title={t("progressSignInTitle")}
+          message={t("progressSignInMessage")}
           signIn
         />
       ) : progressQuery.isError ? (
@@ -235,7 +239,7 @@ export function MobileProgress() {
           <div className="flex justify-center">
             <HexBadge color="#ffc83d" size={120}>
               <span className="flex flex-col items-center leading-none text-[#1a1205]">
-                <span className="text-sm font-extrabold">Lv</span>
+                <span className="text-sm font-extrabold">{t("levelShort")}</span>
                 <span className="text-[38px] font-black">{level.level}</span>
               </span>
             </HexBadge>
@@ -245,29 +249,32 @@ export function MobileProgress() {
           ) : null}
 
           <div className="mt-4">
-            <XpBar ratio={level.progressPercentage / 100} height={10} label="Level progress" />
+            <XpBar ratio={level.progressPercentage / 100} height={10} label={t("levelProgress")} />
           </div>
           <div className="mt-2 flex items-center justify-between gap-3 text-xs text-[#9c9cb0]">
             <span>
               {level.isMaxLevel
-                ? "Max level reached"
-                : `${grouped.format(level.currentLevelXp)} / ${grouped.format(level.nextLevelXp)} XP`}
+                ? t("maxLevelReached")
+                : t("xpProgress", {
+                    current: grouped.format(level.currentLevelXp),
+                    next: grouped.format(level.nextLevelXp),
+                  })}
             </span>
-            <span>Total {grouped.format(level.totalXp)} XP</span>
+            <span>{t("totalXp", { xp: grouped.format(level.totalXp) })}</span>
           </div>
 
           <div className="mt-6 grid grid-cols-3 gap-2.5">
             <StatTile
               icon={Flame}
               color="#f97316"
-              value={`${progress.stats.currentStreak}d`}
-              label="Current Streak"
+              value={t("streakDaysShort", { days: progress.stats.currentStreak })}
+              label={t("currentStreak")}
             />
             <StatTile
               icon={Gamepad2}
               color="#3b82f6"
               value={compact.format(progress.stats.uniqueGamesPlayed)}
-              label="Games Played"
+              label={t("gamesPlayed")}
             />
             <Link href="/achievements" className="rounded-2xl">
               <StatTile
@@ -276,12 +283,12 @@ export function MobileProgress() {
                 value={
                   achievementsQuery.data ? String(achievementsQuery.data.overview.userUnlocked) : "—"
                 }
-                label="Achievements"
+                label={t("achievements")}
               />
             </Link>
           </div>
 
-          <h2 className="mt-7 text-lg font-extrabold text-white">Recent XP Activity</h2>
+          <h2 className="mt-7 text-lg font-extrabold text-white">{t("recentXp")}</h2>
           <div className="mt-3">
             {xpQuery.isError ? (
               <LoadError onRetry={() => void xpQuery.refetch()} />
@@ -292,7 +299,7 @@ export function MobileProgress() {
                 ))}
               </div>
             ) : xpQuery.data.length === 0 ? (
-              <p className="text-sm text-[#9c9cb0]">Play a game to start earning XP.</p>
+              <p className="text-sm text-[#9c9cb0]">{t("noXp")}</p>
             ) : (
               <ul className="space-y-2.5">
                 {xpQuery.data.map((item) => {
@@ -307,10 +314,10 @@ export function MobileProgress() {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-bold text-white">
-                          {item.description || humanizeCode(item.ruleCode)}
+                          {ruleLabel(item.ruleCode, item.description)}
                         </span>
                         <span className="block text-[11px] text-[#6b6b7e]">
-                          {formatTimeAgo(item.createdAt)}
+                          {timeAgo(item.createdAt)}
                         </span>
                       </span>
                       <span
@@ -319,8 +326,7 @@ export function MobileProgress() {
                           positive ? "text-[#ffc83d]" : "text-[#ff5d73]",
                         )}
                       >
-                        {positive ? "+" : ""}
-                        {grouped.format(item.xpAmount)} XP
+                        {t(positive ? "xpReward" : "xpAmount", { xp: grouped.format(item.xpAmount) })}
                       </span>
                     </li>
                   );
@@ -341,6 +347,7 @@ export function MobileAchievements() {
   const { accessToken } = useAuth();
   const [tab, setTab] = useState(0);
   const [selected, setSelected] = useState<AchievementItem | null>(null);
+  const t = useTranslations("Gamification");
 
   const query = useQuery({
     queryKey: ["me", "achievements"],
@@ -364,12 +371,12 @@ export function MobileAchievements() {
 
   return (
     <div>
-      <MobileSubpageHeader title="Achievements" />
+      <MobileSubpageHeader title={t("achievements")} />
       {!accessToken ? (
         <MobileMessage
           icon={Trophy}
-          title="Unlock achievements"
-          message="Sign in to collect badges as you play and explore."
+          title={t("achievementsSignInTitle")}
+          message={t("achievementsSignInMessage")}
           signIn
         />
       ) : query.isError ? (
@@ -383,23 +390,27 @@ export function MobileAchievements() {
       ) : (
         <>
           <MobilePillTabs
-            label="Achievement categories"
+            label={t("achievementCategories")}
             expanded={false}
-            labels={["All", ...categories.map(humanizeCode)]}
+            labels={[t("all"), ...categories.map(humanizeCode)]}
             selectedIndex={activeTab}
             onChange={setTab}
           />
           <div className="pb-5 pt-[18px]">
             <p className="text-base font-black text-white">
-              <span className="text-[#ffc83d]">{unlocked}</span> / {total} Unlocked
+              {t.rich("unlockedOf", {
+                unlocked,
+                total,
+                highlight: (chunks) => <span className="text-[#ffc83d]">{chunks}</span>,
+              })}
             </p>
             <div className="mt-2.5">
-              <XpBar ratio={total === 0 ? 0 : unlocked / total} label="Achievements unlocked" />
+              <XpBar ratio={total === 0 ? 0 : unlocked / total} label={t("achievementsUnlocked")} />
             </div>
           </div>
 
           {items.length === 0 ? (
-            <MobileMessage icon={Trophy} message="No achievements in this category yet." />
+            <MobileMessage icon={Trophy} message={t("emptyCategory")} />
           ) : (
             <ul className="grid grid-cols-3 gap-x-3 gap-y-4 pb-6">
               {items.map((item) => {
@@ -408,7 +419,7 @@ export function MobileAchievements() {
                   <li key={item.id}>
                     <button
                       type="button"
-                      aria-label={hidden ? "Secret achievement" : item.title}
+                      aria-label={hidden ? t("secretLabel") : item.title}
                       onClick={() => setSelected(item)}
                       className="flex w-full flex-col items-center rounded-2xl text-center"
                     >
@@ -455,6 +466,8 @@ export function MobileAchievements() {
 
 function AchievementDetails({ item }: { item: AchievementItem }) {
   const hidden = isHidden(item);
+  const { grouped, timeAgo } = useFormats();
+  const t = useTranslations("Gamification");
   return (
     <div className="flex flex-col items-center text-center">
       <span aria-hidden="true" className="mb-4 h-1 w-8 rounded-full bg-[#6b6b7e]" />
@@ -465,20 +478,24 @@ function AchievementDetails({ item }: { item: AchievementItem }) {
         locked={!item.isUnlocked}
       />
       <SheetTitle className="mt-3.5 text-xl font-black text-white">
-        {hidden ? "Secret Achievement" : item.title}
+        {hidden ? t("secretTitle") : item.title}
       </SheetTitle>
       <SheetDescription className="mt-1.5 text-sm text-[#9c9cb0]">
-        {hidden ? "Keep playing to discover this one." : item.description}
+        {hidden ? t("secretHint") : item.description}
       </SheetDescription>
       <p className="mt-3.5 text-sm font-bold text-white">
         {item.isUnlocked
-          ? `Unlocked ${item.unlockedAt ? formatTimeAgo(item.unlockedAt) : ""}`.trim()
+          ? item.unlockedAt
+            ? t("unlockedAt", { time: timeAgo(item.unlockedAt) })
+            : t("unlocked")
           : hidden
-            ? "Locked"
-            : `Progress ${item.progressValue}/${item.targetValue}`}
+            ? t("locked")
+            : t("progressOf", { current: item.progressValue, target: item.targetValue })}
       </p>
       {item.rewardXp > 0 ? (
-        <p className="mt-1 text-sm font-black text-[#ffc83d]">+{grouped.format(item.rewardXp)} XP</p>
+        <p className="mt-1 text-sm font-black text-[#ffc83d]">
+          {t("xpReward", { xp: grouped.format(item.rewardXp) })}
+        </p>
       ) : null}
     </div>
   );

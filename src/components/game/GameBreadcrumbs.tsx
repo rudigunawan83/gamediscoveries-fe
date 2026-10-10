@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { Category } from "@/types/game";
 
 type GameBreadcrumbsProps = {
@@ -7,20 +8,22 @@ type GameBreadcrumbsProps = {
 };
 
 export function GameBreadcrumbs({ gameTitle, categories }: GameBreadcrumbsProps) {
+  const t = useTranslations("Nav");
+  const tCommon = useTranslations("Common");
   const category = categories[0];
 
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+    <nav aria-label={tCommon("breadcrumb")} className="text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
           <Link href="/" className="hover:text-primary">
-            Home
+            {t("home")}
           </Link>
         </li>
         <li aria-hidden="true">/</li>
         <li>
           <Link href="/games" className="hover:text-primary">
-            Games
+            {t("games")}
           </Link>
         </li>
         {category ? (

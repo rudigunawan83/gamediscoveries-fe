@@ -1,23 +1,25 @@
+import type { Messages } from "next-intl";
 import { SITE_NAME } from "@/lib/seo/constants";
 
-export function gameTitle(gameName: string): string {
-  return `Play ${gameName} Online — Free Game`;
+export type SeoTranslator = (
+  key: keyof Messages["Seo"],
+  values?: Record<string, string | number>,
+) => string;
+
+export function gameTitle(t: SeoTranslator, gameName: string): string {
+  return t("gameTitle", { game: gameName });
 }
 
-export function categoryTitle(categoryName: string): string {
-  return `Best ${categoryName} Games — Play Free Online`;
+export function categoryTitle(t: SeoTranslator, categoryName: string): string {
+  return t("categoryTitle", { category: categoryName });
 }
 
 export function collectionTitle(name: string): string {
   return name;
 }
 
-export function gamesLikeTitle(gameName: string): string {
-  return `Games Like ${gameName} — Play Free Online`;
-}
-
-export function communityGameTitle(gameName: string): string {
-  return `${gameName} Community`;
+export function gamesLikeTitle(t: SeoTranslator, gameName: string): string {
+  return t("gamesLikeTitle", { game: gameName });
 }
 
 export function withSiteName(title: string): string {

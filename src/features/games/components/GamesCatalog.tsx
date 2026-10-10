@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/components/common/ErrorState";
 import { GameSection } from "@/components/game/GameSection";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
@@ -12,6 +13,7 @@ interface GamesCatalogProps {
 }
 
 export function GamesCatalog({ category, search }: GamesCatalogProps) {
+  const t = useTranslations("Discovery");
   const { data, isPending, isError, refetch, isFetching } = useQuery(
     gamesQueryOptions({
       page: 1,
@@ -29,8 +31,8 @@ export function GamesCatalog({ category, search }: GamesCatalogProps) {
   if (isError) {
     return (
       <ErrorState
-        title="Games failed to load."
-        description="The catalog is temporarily unavailable. Please try again."
+        title={t("loadErrorTitle")}
+        description={t("catalogErrorDescription")}
         onRetry={() => {
           void refetch();
         }}
@@ -43,11 +45,11 @@ export function GamesCatalog({ category, search }: GamesCatalogProps) {
   return (
     <div className="relative">
       {isFetching ? (
-        <p className="mb-3 text-xs text-muted-foreground">Refreshing catalog…</p>
+        <p className="mb-3 text-xs text-muted-foreground">{t("catalogRefreshing")}</p>
       ) : null}
       <GameSection
-        title="Newest Games"
-        description={`Showing ${games.length} latest games from the live catalog.`}
+        title={t("newestTitle")}
+        description={t("newestDescription", { count: games.length })}
         games={games}
         variant="discovery"
       />

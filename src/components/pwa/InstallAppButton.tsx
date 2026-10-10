@@ -1,6 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { usePwa } from "@/hooks/usePwa";
 
@@ -13,6 +14,7 @@ export function InstallAppButton({
 }) {
   const { showInstall, canPrompt, promptInstall, isIosDevice, installed } =
     usePwa();
+  const t = useTranslations("Pwa");
 
   if (installed || (!showInstall && !canPrompt)) return null;
   if (!canPrompt && !isIosDevice) return null;
@@ -30,10 +32,10 @@ export function InstallAppButton({
         }
         // iOS guidance is handled by the banner.
       }}
-      aria-label="Install GameDiscoveries"
+      aria-label={t("installTitle")}
     >
       <Download className="size-4" aria-hidden="true" />
-      {compact ? "Install" : "Install GameDiscoveries"}
+      {compact ? t("install") : t("installTitle")}
     </Button>
   );
 }

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export function EmptyMyGames() {
+  const t = useTranslations("Library");
   return (
     <section
       className="rounded-3xl border border-border/50 bg-card/40 px-6 py-14 text-center"
@@ -11,13 +13,13 @@ export function EmptyMyGames() {
         id="empty-my-games-title"
         className="font-display text-2xl font-semibold text-white"
       >
-        Your Game Library Is Empty
+        {t("emptyLibraryTitle")}
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        Discover a game and start building your personal library.
+        {t("emptyLibraryMessage")}
       </p>
       <Button asChild className="mt-6 bg-brand-gradient text-[#1a1205]">
-        <Link href="/">Discover Games</Link>
+        <Link href="/">{t("discoverGames")}</Link>
       </Button>
     </section>
   );

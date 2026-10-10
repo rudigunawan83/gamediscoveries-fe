@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { GameSection } from "@/components/game/GameSection";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
 import { mapRecommendationItems } from "@/features/recommendations/mappers";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/api/recommendations";
 
 export function RecommendationHomeShelves() {
+  const t = useTranslations("Discovery");
   const reported = useRef(new Set<string>());
   const { data, isPending } = useQuery({
     queryKey: ["recommendations", "home"],
@@ -68,9 +70,7 @@ export function RecommendationHomeShelves() {
           key={section.type}
           title={section.title}
           description={
-            section.type === "EXPLORATION"
-              ? "High-quality picks outside your usual genres."
-              : undefined
+            section.type === "EXPLORATION" ? t("explorationDescription") : undefined
           }
           games={mapRecommendationItems(section.items)}
           href="/"

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export function EmptyHistory() {
+  const t = useTranslations("Library");
   return (
     <section
       className="rounded-3xl border border-border/50 bg-card/40 px-6 py-14 text-center"
@@ -11,13 +13,13 @@ export function EmptyHistory() {
         id="empty-history-title"
         className="font-display text-2xl font-semibold text-white"
       >
-        Nothing Played Yet
+        {t("historyEmptyTitle")}
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        Start playing games and your recent activity will appear here.
+        {t("historyEmptyMessage")}
       </p>
       <Button asChild className="mt-6 bg-brand-gradient text-[#1a1205]">
-        <Link href="/">Discover Games</Link>
+        <Link href="/">{t("discoverGames")}</Link>
       </Button>
     </section>
   );

@@ -1,23 +1,26 @@
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Best Games",
-  description:
-    "Browse the best free online games curated for quality gameplay, fun, and replayability.",
-  path: "/best-games",
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Seo");
+  return createMetadata({
+    title: t("bestTitle"),
+    description: t("bestDescription"),
+    path: "/best-games",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
 export default async function BestGamesPage() {
-  const home = await fetchHomeDiscoveries();
+  const [home, t] = await Promise.all([fetchHomeDiscoveries(), getTranslations("Seo")]);
 
   return (
     <GameSection
-      title="Best Games"
-      description="Standout titles from the best-games feed."
+      title={t("bestTitle")}
+      description={t("bestSectionDescription")}
       games={home.bestGames}
     />
   );

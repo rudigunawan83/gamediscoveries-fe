@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Loader2, Mail, User, UserPlus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { type AuthMessageKey, useAuthMessage } from "@/features/auth/authMessages";
 import { AuthError } from "@/features/auth/components/AuthError";
 import { AuthField } from "@/features/auth/components/AuthField";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
@@ -18,31 +20,32 @@ import { Button } from "@/components/ui/button";
 import { ApiClientError } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
-export function signupErrorMessage(error: unknown): string {
+export function signupErrorMessage(error: unknown): AuthMessageKey {
   if (error instanceof ApiClientError) {
     if (error.status === 409) {
-      return "An account with this email already exists.";
+      return "errorEmailTaken";
     }
     if (error.status === 422) {
-      return "Please check your details and try again.";
+      return "errorCheckDetails";
     }
     if (error.status === 404) {
-      return "Sign-up is not available yet. The registration API is not configured.";
+      return "errorSignupUnavailable";
     }
     if (error.status === 0 || error.status === 408) {
-      return "Unable to reach the server. Please try again.";
+      return "errorNetwork";
     }
-    return "Unable to create your account right now. Please try again.";
   }
 
-  return "Unable to create your account right now. Please try again.";
+  return "errorSignupGeneric";
 }
 
 export function SignupForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const { register: registerAccount } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const t = useTranslations("Auth");
+  const message = useAuthMessage();
+  const [formError, setFormError] = useState<AuthMessageKey | null>(null);
 
   const {
     register,
@@ -75,25 +78,25 @@ export function SignupForm() {
     <form className="space-y-4 sm:space-y-5" onSubmit={onSubmit} noValidate>
       <AuthField
         id="signup-display-name"
-        label="Display Name"
+        label={t("displayName")}
         icon={User}
         type="text"
         autoComplete="nickname"
-        placeholder="Choose a display name"
-        error={errors.displayName?.message}
+        placeholder={t("displayNamePlaceholder")}
+        error={message(errors.displayName?.message)}
         disabled={isSubmitting}
         {...register("displayName")}
       />
 
       <AuthField
         id="signup-email"
-        label="Email"
+        label={t("email")}
         icon={Mail}
         type="email"
         autoComplete="email"
         inputMode="email"
-        placeholder="Enter your email"
-        error={errors.email?.message}
+        placeholder={t("emailPlaceholder")}
+        error={message(errors.email?.message)}
         disabled={isSubmitting}
         {...register("email")}
       />
@@ -103,12 +106,12 @@ export function SignupForm() {
           htmlFor="signup-password"
           className="text-sm font-medium text-foreground"
         >
-          Password
+          {t("password")}
         </label>
         <PasswordInput
           id="signup-password"
           autoComplete="new-password"
-          placeholder="Create a password"
+          placeholder={t("newPasswordPlaceholder")}
           invalid={Boolean(errors.password)}
           aria-describedby="signup-password-checks"
           disabled={isSubmitting}
@@ -124,19 +127,19 @@ export function SignupForm() {
               )}
             >
               <Check className="size-3.5" aria-hidden="true" />
-              {check.label}
+              {t(check.label)}
             </li>
           ))}
         </ul>
         {errors.password ? (
           <p role="alert" className="text-sm text-destructive">
-            {errors.password.message}
+            {message(errors.password.message)}
           </p>
         ) : null}
       </div>
 
       {formError ? (
-        <AuthError id="signup-form-error" message={formError} />
+        <AuthError id="signup-form-error" message={t(formError)} />
       ) : null}
 
       <Button
@@ -148,12 +151,12 @@ export function SignupForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            <span>Creating account...</span>
+            <span>{t("creatingAccount")}</span>
           </>
         ) : (
           <>
             <UserPlus className="size-4" aria-hidden="true" />
-            Create Account
+            {t("createAccount")}
           </>
         )}
       </Button>

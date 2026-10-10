@@ -1,13 +1,19 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { getMyXpTransactions, xpRuleLabel } from "@/lib/api/progress";
+import { useXpRuleLabel } from "@/features/progress/hooks/useXpRuleLabel";
+import { getMyXpTransactions } from "@/lib/api/progress";
 import { Button } from "@/components/ui/button";
 
 export default function ProgressXpPage() {
   const { accessToken } = useAuth();
+  const locale = useLocale();
+  const t = useTranslations("Gamification");
+  const tCommon = useTranslations("Common");
+  const ruleLabel = useXpRuleLabel();
   const query = useQuery({
     queryKey: ["me", "xp", "transactions", "all"],
     queryFn: async () =>
@@ -19,10 +25,13 @@ export default function ProgressXpPage() {
     return (
       <main className="container mx-auto px-4 py-8">
         <p className="text-sm text-muted-foreground">
-          <Link href="/login" className="text-primary">
-            Sign in
-          </Link>{" "}
-          to view XP history.
+          {t.rich("signInToViewXp", {
+            link: (chunks) => (
+              <Link href="/login" className="text-primary">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </main>
     );
@@ -31,9 +40,9 @@ export default function ProgressXpPage() {
   return (
     <main className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-white">XP History</h1>
+        <h1 className="font-display text-3xl font-bold text-white">{t("xpHistory")}</h1>
         <Button asChild variant="ghost" size="sm">
-          <Link href="/progress">Back</Link>
+          <Link href="/progress">{tCommon("back")}</Link>
         </Button>
       </div>
       <ul className="space-y-2">
@@ -44,17 +53,18 @@ export default function ProgressXpPage() {
           >
             <div>
               <p className="text-sm text-white">
-                {xpRuleLabel(tx.ruleCode, tx.description)}
+                {ruleLabel(tx.ruleCode, tx.description)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {new Date(tx.createdAt).toLocaleString()}
+                {new Date(tx.createdAt).toLocaleString(locale)}
               </p>
             </div>
             <p
               className={`font-semibold ${tx.xpAmount >= 0 ? "text-emerald-400" : "text-rose-400"}`}
             >
-              {tx.xpAmount >= 0 ? "+" : ""}
-              {tx.xpAmount} XP
+              {t(tx.xpAmount >= 0 ? "xpReward" : "xpAmount", {
+                xp: tx.xpAmount.toLocaleString(locale),
+              })}
             </p>
           </li>
         ))}

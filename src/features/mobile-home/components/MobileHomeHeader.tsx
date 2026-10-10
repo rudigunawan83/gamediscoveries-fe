@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getNotifications } from "@/lib/api/community";
 import { getMyProgress } from "@/lib/api/progress";
-
-const grouped = new Intl.NumberFormat("en-US");
+import { useFormats } from "@/lib/i18n/format";
 
 /** Greeting row from the app's Home tab: avatar, level progress and the notification bell. */
 export function MobileHomeHeader() {
+  const t = useTranslations("Discovery");
+  const tNav = useTranslations("Nav");
+  const tProfile = useTranslations("Profile");
   const { accessToken, user } = useAuth();
+  const { grouped } = useFormats();
   const signedIn = Boolean(accessToken);
 
   const progressQuery = useQuery({
@@ -22,7 +26,7 @@ export function MobileHomeHeader() {
   });
 
   const progress = signedIn ? progressQuery.data : undefined;
-  const name = progress?.user.name || user?.displayName || "Player";
+  const name = progress?.user.name || user?.displayName || tProfile("defaultName");
   const firstName = name.split(" ")[0];
   const avatarUrl = progress?.user.avatarUrl ?? user?.avatarUrl;
   const level = progress?.level;
@@ -31,7 +35,7 @@ export function MobileHomeHeader() {
     <div className="flex items-center gap-3 py-1">
       <Link
         href="/profile"
-        aria-label="Profile"
+        aria-label={tNav("profile")}
         className="shrink-0 rounded-full p-0.5 ring-2 ring-primary"
       >
         <Avatar className="size-11">
@@ -44,16 +48,16 @@ export function MobileHomeHeader() {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-base font-extrabold text-white">
-          Hi, {firstName} 👋
+          {t("greeting", { name: firstName })}
         </p>
         {level ? (
           <Link href="/progress" className="mt-1 flex items-center gap-2">
             <span className="text-xs font-extrabold text-primary">
-              Level {level.level}
+              {t("level", { level: level.level })}
             </span>
             <span
               role="progressbar"
-              aria-label="Level progress"
+              aria-label={t("levelProgress")}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(level.progressPercentage)}
@@ -66,13 +70,16 @@ export function MobileHomeHeader() {
             </span>
             <span className="shrink-0 text-[11px] text-muted-foreground">
               {level.isMaxLevel
-                ? "MAX"
-                : `${grouped.format(level.currentLevelXp)} / ${grouped.format(level.nextLevelXp)} XP`}
+                ? t("maxLevel")
+                : t("xpProgress", {
+                    current: grouped.format(level.currentLevelXp),
+                    next: grouped.format(level.nextLevelXp),
+                  })}
             </span>
           </Link>
         ) : signedIn ? null : (
           <Link href="/login" className="mt-1 block text-xs font-semibold text-primary">
-            Sign in to earn XP &amp; level up
+            {t("signInPrompt")}
           </Link>
         )}
       </div>
@@ -84,6 +91,8 @@ export function MobileHomeHeader() {
 
 /** Bell with the unread badge, as in the app's Home and Leaderboard app bars. */
 export function MobileNotificationBell() {
+  const t = useTranslations("Discovery");
+  const tNav = useTranslations("Nav");
   const { accessToken } = useAuth();
   const signedIn = Boolean(accessToken);
   const notificationsQuery = useQuery({
@@ -96,7 +105,7 @@ export function MobileNotificationBell() {
   return (
     <Link
       href="/community/notifications"
-      aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+      aria-label={unread > 0 ? t("notificationsUnread", { count: unread }) : tNav("notifications")}
       className="relative grid size-11 shrink-0 place-items-center rounded-full text-white hover:bg-white/5"
     >
       <Bell className="size-6" aria-hidden="true" />

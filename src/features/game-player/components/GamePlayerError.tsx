@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { GamePlayerErrorKind } from "@/features/game-player/types/game-player.types";
 
@@ -9,6 +10,9 @@ type GamePlayerErrorProps = {
 };
 
 export function GamePlayerError({ kind, backHref, onRetry }: GamePlayerErrorProps) {
+  const t = useTranslations("Player");
+  const tCommon = useTranslations("Common");
+
   if (kind === "unavailable" || kind === "invalid_url") {
     return (
       <div
@@ -16,13 +20,13 @@ export function GamePlayerError({ kind, backHref, onRetry }: GamePlayerErrorProp
         className="flex size-full min-h-[16rem] flex-col items-center justify-center gap-4 bg-[#060914] px-6 text-center"
       >
         <div className="space-y-2">
-          <h2 className="font-display text-2xl font-bold text-white">Game Unavailable</h2>
+          <h2 className="font-display text-2xl font-bold text-white">{t("unavailableTitle")}</h2>
           <p className="max-w-md text-sm text-muted-foreground">
-            This game cannot be played right now.
+            {t("unavailableMessage")}
           </p>
         </div>
         <Button asChild size="lg" className="bg-brand-gradient text-[#1a1205]">
-          <Link href={backHref}>Back to Game</Link>
+          <Link href={backHref}>{t("backToGame")}</Link>
         </Button>
       </div>
     );
@@ -34,9 +38,9 @@ export function GamePlayerError({ kind, backHref, onRetry }: GamePlayerErrorProp
       className="flex size-full min-h-[16rem] flex-col items-center justify-center gap-4 bg-[#060914] px-6 text-center"
     >
       <div className="space-y-2">
-        <h2 className="font-display text-2xl font-bold text-white">Unable to load this game.</h2>
+        <h2 className="font-display text-2xl font-bold text-white">{t("loadFailedTitle")}</h2>
         <p className="max-w-md text-sm text-muted-foreground">
-          Please try again or choose another game.
+          {t("loadFailedMessage")}
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-3">
@@ -47,11 +51,11 @@ export function GamePlayerError({ kind, backHref, onRetry }: GamePlayerErrorProp
             className="bg-brand-gradient text-[#1a1205]"
             onClick={onRetry}
           >
-            Retry
+            {tCommon("retry")}
           </Button>
         ) : null}
         <Button asChild size="lg" variant="outline">
-          <Link href="/games">More Games</Link>
+          <Link href="/games">{t("moreGames")}</Link>
         </Button>
       </div>
     </div>

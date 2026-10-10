@@ -1,18 +1,21 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
 import { SearchInput } from "@/components/search/SearchInput";
 import { MobileDiscover } from "@/features/mobile-tabs/components/MobileDiscover";
 import { SearchResults } from "@/features/search/components/SearchResults";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Search",
-  description:
-    "Search free online games on GameDiscoveries. Results pages are not indexed to prevent query-parameter URL explosion.",
-  path: "/search",
-  noIndex: true,
-  follow: true,
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Search");
+  return createMetadata({
+    title: t("title"),
+    description: t("metaDescription"),
+    path: "/search",
+    noIndex: true,
+    follow: true,
+  });
+}
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -20,6 +23,7 @@ interface SearchPageProps {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q = "" } = await searchParams;
+  const t = await getTranslations("Search");
 
   return (
     <>
@@ -28,10 +32,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     </div>
     <div className="hidden space-y-8 lg:block">
       <div className="space-y-3">
-        <h1 className="font-display text-3xl font-bold tracking-tight">Search</h1>
-        <p className="text-muted-foreground">
-          Find games by title, genre, or keyword across the live catalog.
-        </p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("intro")}</p>
         <SearchInput initialQuery={q} autoFocus />
       </div>
 

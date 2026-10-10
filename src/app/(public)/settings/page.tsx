@@ -1,12 +1,16 @@
+import { getTranslations } from "next-intl/server";
 import { MobileAccountSettings } from "@/features/mobile-tabs/components/MobileAccount";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Account Settings",
-  description: "Manage your GameDiscoveries account and privacy.",
-  path: "/settings",
-  noIndex: true,
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Settings");
+  return createMetadata({
+    title: t("title"),
+    description: t("metaDescription"),
+    path: "/settings",
+    noIndex: true,
+  });
+}
 
 export default function SettingsRoutePage() {
   return (

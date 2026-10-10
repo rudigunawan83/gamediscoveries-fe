@@ -1,38 +1,51 @@
 import Link from "next/link";
+import type { Messages } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SeoRelatedLinks } from "@/features/seo/components/SeoRelatedLinks";
 import {
   getDiscoveryTrending,
   mapRankingItemToGame,
-  trendBadge,
 } from "@/lib/api/discovery-rankings";
 import { createMetadata } from "@/lib/seo/metadata";
-import { discoveryPageDescription } from "@/lib/seo/descriptions";
 import { itemListJsonLd } from "@/lib/seo/structured-data";
 
-export const metadata = createMetadata({
-  title: "Trending Games — Play Free Online",
-  description: discoveryPageDescription("trending"),
-  path: "/trending",
-});
+const TREND_LABELS: Record<string, keyof Messages["Seo"]> = {
+  RISING: "trendRising",
+  HOT: "trendHot",
+  NEW: "trendNew",
+  DECLINING: "trendDeclining",
+};
+
+export async function generateMetadata() {
+  const t = await getTranslations("Seo");
+  return createMetadata({
+    title: t("trendingTitle"),
+    description: t("trendingDescription"),
+    path: "/trending",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
 export default async function TrendingPage() {
-  const ranking = (await getDiscoveryTrending(24, "24h")).data;
+  const [ranking, t, tDiscovery] = await Promise.all([
+    getDiscoveryTrending(24, "24h").then((response) => response.data),
+    getTranslations("Seo"),
+    getTranslations("Discovery"),
+  ]);
   const games = (ranking?.items ?? []).map(mapRankingItemToGame);
 
   return (
     <div className="space-y-10">
-      <JsonLd data={itemListJsonLd("Trending Games", "/trending", games)} />
+      <JsonLd data={itemListJsonLd(t("trendingHeading"), "/trending", games)} />
       <header className="space-y-3">
         <h1 className="font-display text-3xl font-bold tracking-tight">
-          Trending Games
+          {t("trendingHeading")}
         </h1>
         <p className="max-w-3xl text-muted-foreground">
-          {discoveryPageDescription("trending")} Rankings use GameDiscoveries
-          Discovery Score — recent engagement, momentum, and quality.
+          {t("trendingDescription")} {t("trendingIntro")}
         </p>
       </header>
 
@@ -55,7 +68,7 @@ export default async function TrendingPage() {
                 </Link>
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>{trendBadge(item.trend)}</span>
+                <span>{t(TREND_LABELS[item.trend] ?? "trendPopular")}</span>
                 <span>
                   {item.rankChange > 0
                     ? `↑ ${item.rankChange}`
@@ -71,17 +84,17 @@ export default async function TrendingPage() {
       ) : null}
 
       <GameSection
-        title="Trending now"
-        description="Games gaining attention across GameDiscoveries right now."
+        title={t("trendingSectionTitle")}
+        description={t("trendingSectionDescription")}
         games={games}
         variant="discovery"
       />
       <SeoRelatedLinks
         links={[
-          { href: "/rising", label: "Rising games" },
-          { href: "/most-popular", label: "Popular games" },
-          { href: "/new", label: "New discoveries" },
-          { href: "/games", label: "All games" },
+          { href: "/rising", label: t("linkRising") },
+          { href: "/most-popular", label: t("linkPopularGames") },
+          { href: "/new", label: tDiscovery("linkNewDiscoveries") },
+          { href: "/games", label: t("linkAllGames") },
         ]}
       />
     </div>

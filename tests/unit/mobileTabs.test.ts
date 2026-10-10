@@ -3,7 +3,6 @@ import { Car, Clock, Compass, Flame, Gamepad2, Heart, Puzzle, Trophy } from "luc
 import { isGameDetailPath, isMobileFullScreenPath } from "@/components/navigation/nav-config";
 import type { HistoryItem } from "@/features/my-games/types/my-games.types";
 import { categoryIcon } from "@/features/mobile-tabs/components/MobileDiscover";
-import { formatTimeAgo } from "@/features/mobile-tabs/components/MobileGameDetail";
 import {
   achievementColor,
   achievementIcon,
@@ -12,7 +11,14 @@ import {
 import { leaderboardName, leaderboardSubtitle } from "@/features/mobile-tabs/components/MobileLeaderboard";
 import { historySubtitle } from "@/features/mobile-tabs/components/MobileLibrary";
 import { HELP_FAQS, PRIVACY_LABELS } from "@/features/mobile-tabs/components/MobileAccount";
-import { communityName, sectionLabel, withReaction } from "@/features/mobile-tabs/components/MobileCommunityUi";
+import {
+  communityName,
+  errorMessage,
+  sectionLabel,
+  withReaction,
+} from "@/features/mobile-tabs/components/MobileCommunityUi";
+import { REQUEST_FAILED_MESSAGE } from "@/lib/api/client";
+import { ApiClientError } from "@/lib/api/types";
 import {
   notificationCategory,
   notificationRoute,
@@ -20,25 +26,15 @@ import {
 } from "@/features/mobile-tabs/components/MobileNotifications";
 import { toggleInSavedList } from "@/features/mobile-tabs/lib/savedCommunityPosts";
 import type { CommunityPost } from "@/lib/api/community";
-import { formatRemaining, missionVisual } from "@/features/mobile-tabs/components/MobileMissions";
+import { missionVisual } from "@/features/mobile-tabs/components/MobileMissions";
 import type { LeaderboardItemDto } from "@/lib/api/leaderboards";
 import type { Game } from "@/types/game";
-
-describe("formatRemaining", () => {
-  const now = Date.parse("2026-10-10T00:00:00Z");
-
-  it("formats days, hours and minutes like the app", () => {
-    expect(formatRemaining("2026-10-11T03:00:00Z", now)).toBe("1d 3h left");
-    expect(formatRemaining("2026-10-10T02:15:00Z", now)).toBe("2h 15m left");
-    expect(formatRemaining("2026-10-10T00:09:30Z", now)).toBe("9m left");
-  });
-
-  it("handles expired and missing dates", () => {
-    expect(formatRemaining("2026-10-09T23:59:00Z", now)).toBe("Expired");
-    expect(formatRemaining(null, now)).toBe("");
-    expect(formatRemaining("not-a-date", now)).toBe("");
-  });
-});
+import {
+  communityTranslator,
+  gamificationTranslator,
+  historyFormatter,
+  notificationsTranslator,
+} from "./helpers/intl";
 
 describe("missionVisual", () => {
   it("maps requirement types to icons", () => {
@@ -55,18 +51,6 @@ describe("isGameDetailPath", () => {
     expect(isGameDetailPath("/game/2244-number-match/play")).toBe(false);
     expect(isGameDetailPath("/game/2244-number-match/community")).toBe(false);
     expect(isGameDetailPath("/games/puzzle")).toBe(false);
-  });
-});
-
-describe("formatTimeAgo", () => {
-  const now = Date.parse("2026-10-10T12:00:00Z");
-
-  it("formats recent times like the app", () => {
-    expect(formatTimeAgo("2026-10-10T11:59:40Z", now)).toBe("just now");
-    expect(formatTimeAgo("2026-10-10T11:15:00Z", now)).toBe("45m ago");
-    expect(formatTimeAgo("2026-10-10T07:00:00Z", now)).toBe("5h ago");
-    expect(formatTimeAgo("2026-10-07T12:00:00Z", now)).toBe("3d ago");
-    expect(formatTimeAgo("2026-06-01T12:00:00Z", now)).toBe("1 Jun 2026");
   });
 });
 
@@ -108,14 +92,19 @@ describe("leaderboard rows", () => {
     ({ rank: 4, score: 1200, gamesPlayed, validSessions: 0, xpEarned: 0, user: { id: "u1", ...user } }) as LeaderboardItemDto;
 
   it("prefers display name, then username", () => {
-    expect(leaderboardName(entry({ displayName: "Ana", username: "ana" }))).toBe("Ana");
-    expect(leaderboardName(entry({ username: "ana" }))).toBe("ana");
-    expect(leaderboardName(entry({}))).toBe("Player");
+    expect(leaderboardName(entry({ displayName: "Ana", username: "ana" }), "Player")).toBe("Ana");
+    expect(leaderboardName(entry({ username: "ana" }), "Player")).toBe("ana");
+    expect(leaderboardName(entry({}), "Pemain")).toBe("Pemain");
   });
 
   it("shows level when known, else games played", () => {
-    expect(leaderboardSubtitle(entry({ level: 7 }))).toBe("Lv 7");
-    expect(leaderboardSubtitle(entry({ level: null }, 12))).toBe("12 games played");
+    const t = gamificationTranslator();
+    expect(leaderboardSubtitle(t, entry({ level: 7 }))).toBe("Lv 7");
+    expect(leaderboardSubtitle(t, entry({ level: null }, 12))).toBe("12 games played");
+    expect(leaderboardSubtitle(t, entry({ level: null }, 1))).toBe("1 game played");
+    expect(leaderboardSubtitle(gamificationTranslator("id"), entry({ level: null }, 12))).toBe(
+      "12 game dimainkan",
+    );
   });
 });
 
@@ -133,8 +122,19 @@ describe("historySubtitle", () => {
     }) satisfies HistoryItem;
 
   it("adds the play count only for repeat plays", () => {
-    expect(historySubtitle(item(3))).toMatch(/ · 3 plays$/);
-    expect(historySubtitle(item(1))).not.toMatch(/plays$/);
+    expect(historySubtitle(historyFormatter(), item(3))).toMatch(/ · 3 plays$/);
+    expect(historySubtitle(historyFormatter(), item(1))).not.toMatch(/play$/);
+    expect(historySubtitle(historyFormatter("id"), item(3))).toMatch(/ · 3 kali main$/);
+  });
+});
+
+describe("errorMessage", () => {
+  it("keeps server messages but hides client-generated English errors", () => {
+    expect(errorMessage(new ApiClientError("Post not found", 404), "Gagal")).toBe("Post not found");
+    expect(errorMessage(new ApiClientError("Request timed out", 408), "Gagal")).toBe("Gagal");
+    expect(errorMessage(new ApiClientError("Failed to fetch", 0), "Gagal")).toBe("Gagal");
+    expect(errorMessage(new ApiClientError(REQUEST_FAILED_MESSAGE, 502), "Gagal")).toBe("Gagal");
+    expect(errorMessage("oops", "Gagal")).toBe("Gagal");
   });
 });
 
@@ -156,10 +156,17 @@ describe("community helpers", () => {
     }) satisfies CommunityPost;
 
   it("labels sections like the app", () => {
-    expect(sectionLabel("discussion")).toBe("Discussions");
-    expect(sectionLabel("game_share")).toBe("Game Shares");
-    expect(sectionLabel("weekly_poll")).toBe("Weekly poll");
-    expect(sectionLabel(null)).toBe("");
+    const t = communityTranslator();
+    expect(sectionLabel(t, "discussion")).toBe("Discussions");
+    expect(sectionLabel(t, "game_share")).toBe("Game Shares");
+    expect(sectionLabel(t, "weekly_poll")).toBe("Weekly poll");
+    expect(sectionLabel(t, null)).toBe("");
+  });
+
+  it("labels known sections in Indonesian", () => {
+    const t = communityTranslator("id");
+    expect(sectionLabel(t, "discussion")).toBe("Diskusi");
+    expect(sectionLabel(t, "game_share")).toBe("Berbagi Game");
   });
 
   it("prefers display name over username", () => {
@@ -191,8 +198,13 @@ describe("notifications", () => {
   });
 
   it("builds titles and routes", () => {
-    expect(notificationTitle("comment_reply")).toBe("Comment Reply");
-    expect(notificationTitle("")).toBe("Notification");
+    const t = notificationsTranslator();
+    expect(notificationTitle(t, "comment_reply")).toBe("Comment Reply");
+    expect(notificationTitle(t, "")).toBe("Notification");
+    expect(notificationTitle(t, "reply_to_comment")).toBe("New Reply");
+    const tId = notificationsTranslator("id");
+    expect(notificationTitle(tId, "reply_to_comment")).toBe("Balasan Baru");
+    expect(notificationTitle(tId, "")).toBe("Notifikasi");
     expect(notificationRoute({ type: "comment", entityType: "post", entityId: "p1" })).toBe("/community/post/p1");
     expect(notificationRoute({ type: "x", entityType: "achievement" })).toBe("/achievements");
     expect(notificationRoute({ type: "mission_done", entityType: "user" })).toBe("/missions");

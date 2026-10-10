@@ -1,9 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { getAchievements } from "@/lib/api/community";
 
 export default function AchievementsPage() {
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
   const { data, isPending } = useQuery({
     queryKey: ["community", "achievements"],
     queryFn: async () => (await getAchievements()).data ?? [],
@@ -13,14 +16,12 @@ export default function AchievementsPage() {
     <div className="space-y-6">
       <header className="space-y-2">
         <h1 className="font-display text-3xl font-bold text-white">
-          Achievements
+          {t("achievementsTitle")}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Platform badges unlocked through play, discovery, and community.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("achievementsIntro")}</p>
       </header>
       {isPending ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(data as Array<{
@@ -42,8 +43,7 @@ export default function AchievementsPage() {
                 {item.description}
               </p>
               <p className="mt-2 text-xs text-primary">
-                {item.rarity}
-                {item.unlockedAt ? " · unlocked" : ""}
+                {item.unlockedAt ? t("rarityUnlocked", { rarity: item.rarity }) : item.rarity}
               </p>
             </article>
           ))}

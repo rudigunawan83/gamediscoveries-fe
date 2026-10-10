@@ -1,12 +1,14 @@
-import type { SeoCollection } from "@/features/seo/types";
+import type { CollectionMessageKey, SeoCollection } from "@/features/seo/types";
 
 /**
  * Curated collections only — no mass thin-page generation.
  * gameSlugs are filled at runtime from live catalog filters when empty.
+ * English copy is canonical (indexability, admin); keep it in sync with `Collections` in messages/en.json.
  */
 export const CURATED_COLLECTIONS: SeoCollection[] = [
   {
     slug: "best-browser-games",
+    messageKey: "bestBrowserGames",
     title: "Best Browser Games",
     description:
       "A curated set of free HTML5 browser games you can play instantly — no download required. Great starting points for discovering your next favorite title.",
@@ -18,6 +20,7 @@ export const CURATED_COLLECTIONS: SeoCollection[] = [
   },
   {
     slug: "best-mobile-games",
+    messageKey: "bestMobileGames",
     title: "Best Mobile Games",
     description:
       "Mobile-ready free online games optimized for touch controls and smaller screens. Play on the go without installing an app store title.",
@@ -28,6 +31,7 @@ export const CURATED_COLLECTIONS: SeoCollection[] = [
   },
   {
     slug: "best-2-player-games",
+    messageKey: "best2PlayerGames",
     title: "Best 2 Player Games",
     description:
       "Games to play with a friend — local or online multiplayer picks from the GameDiscoveries catalog.",
@@ -38,6 +42,7 @@ export const CURATED_COLLECTIONS: SeoCollection[] = [
   },
   {
     slug: "hidden-gems",
+    messageKey: "hiddenGems",
     title: "Hidden Gems",
     description:
       "Lesser-known free online games worth trying. Fresh discoveries beyond the usual top charts.",
@@ -48,6 +53,7 @@ export const CURATED_COLLECTIONS: SeoCollection[] = [
   },
   {
     slug: "games-to-play-with-friends",
+    messageKey: "gamesToPlayWithFriends",
     title: "Games to Play with Friends",
     description:
       "Shareable multiplayer and party-friendly browser games for hanging out with friends online.",
@@ -60,4 +66,23 @@ export const CURATED_COLLECTIONS: SeoCollection[] = [
 
 export function getCollectionBySlug(slug: string): SeoCollection | undefined {
   return CURATED_COLLECTIONS.find((c) => c.slug === slug);
+}
+
+export type CollectionsTranslator = (
+  key: `${CollectionMessageKey}.${"title" | "description" | "rationale"}`,
+) => string;
+
+/** Swaps the canonical English copy for the active locale; call after indexability checks. */
+export function localizeCollection(
+  collection: SeoCollection,
+  t: CollectionsTranslator,
+): SeoCollection {
+  const key = collection.messageKey;
+  if (!key) return collection;
+  return {
+    ...collection,
+    title: t(`${key}.title`),
+    description: t(`${key}.description`),
+    rationale: collection.rationale ? t(`${key}.rationale`) : undefined,
+  };
 }

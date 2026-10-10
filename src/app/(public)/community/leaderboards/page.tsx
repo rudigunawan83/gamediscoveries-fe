@@ -3,20 +3,33 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useLocale, useTranslations, type Messages } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { getLeaderboards } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
 
+type CommunityKey = keyof Messages["Community"];
+
 const TYPES = [
-  ["players", "Weekly Players"],
-  ["explorers", "Top Explorers"],
-  ["reviewers", "Top Reviewers"],
-  ["contributors", "Top Contributors"],
-] as const;
+  ["players", "typePlayers"],
+  ["explorers", "typeExplorers"],
+  ["reviewers", "typeReviewers"],
+  ["contributors", "typeContributors"],
+] as const satisfies readonly (readonly [string, CommunityKey])[];
+
+const PERIODS = [
+  ["daily", "periodDaily"],
+  ["weekly", "periodWeekly"],
+  ["monthly", "periodMonthly"],
+  ["all", "periodAll"],
+] as const satisfies readonly (readonly [string, CommunityKey])[];
 
 export default function LeaderboardsPage() {
-  const [type, setType] = useState("players");
-  const [period, setPeriod] = useState("weekly");
+  const [type, setType] = useState<string>("players");
+  const [period, setPeriod] = useState<string>("weekly");
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
 
   const { data, isPending } = useQuery({
     queryKey: ["community", "leaderboards", type, period],
@@ -31,11 +44,9 @@ export default function LeaderboardsPage() {
     <div className="space-y-6">
       <header className="space-y-2">
         <h1 className="font-display text-3xl font-bold text-white">
-          Leaderboards
+          {t("leaderboardsTitle")}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Periodic rankings so new players can compete.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("leaderboardsIntro")}</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
@@ -46,25 +57,25 @@ export default function LeaderboardsPage() {
             variant={type === value ? "default" : "outline"}
             onClick={() => setType(value)}
           >
-            {label}
+            {t(label)}
           </Button>
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        {["daily", "weekly", "monthly", "all"].map((value) => (
+        {PERIODS.map(([value, label]) => (
           <Button
             key={value}
             size="sm"
             variant={period === value ? "default" : "outline"}
             onClick={() => setPeriod(value)}
           >
-            {value}
+            {t(label)}
           </Button>
         ))}
       </div>
 
       {isPending ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
       ) : (
         <ol className="space-y-2">
           {(data as Array<{
@@ -84,7 +95,7 @@ export default function LeaderboardsPage() {
               >
                 {entry.rank}. {entry.displayName || entry.username}
               </Link>
-              <span className="text-muted-foreground">{entry.score}</span>
+              <span className="text-muted-foreground">{entry.score.toLocaleString(locale)}</span>
             </li>
           ))}
         </ol>

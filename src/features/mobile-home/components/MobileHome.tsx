@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Download, Search } from "lucide-react";
 import { ErrorState } from "@/components/common/ErrorState";
 import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
@@ -18,6 +19,8 @@ import { MobileHomeHeader } from "./MobileHomeHeader";
  * Shares query keys with the desktop feed so both render from one fetch.
  */
 export function MobileHome() {
+  const t = useTranslations("Discovery");
+  const tSearch = useTranslations("Search");
   const home = useQuery({
     queryKey: ["discoveries", "home", "v2"],
     queryFn: fetchHomeDiscoveries,
@@ -42,12 +45,12 @@ export function MobileHome() {
         className="flex h-12 items-center gap-3 rounded-2xl border border-white/10 bg-[#15151d] px-4 text-sm text-muted-foreground"
       >
         <Search className="size-5" aria-hidden="true" />
-        Search games…
+        {tSearch("mobilePlaceholder")}
       </Link>
 
       <Link
         href="/search"
-        aria-label="New Adventures Every Day. Explore the latest and trending games!"
+        aria-label={t("bannerLabel")}
         className="relative block aspect-[950/330] overflow-hidden rounded-[20px] bg-[#15151d]"
       >
         <Image
@@ -75,10 +78,10 @@ export function MobileHome() {
         />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-extrabold text-white">
-            Get the Android app
+            {t("appBannerTitle")}
           </span>
           <span className="block truncate text-xs text-muted-foreground">
-            Faster play, notifications and Watch &amp; Earn XP
+            {t("appBannerSubtitle")}
           </span>
         </span>
         <Download className="size-5 shrink-0 text-primary" aria-hidden="true" />
@@ -92,25 +95,25 @@ export function MobileHome() {
         </div>
       ) : home.isError || !data ? (
         <ErrorState
-          title="Games failed to load."
-          description="We couldn't load the home feed. Please try again."
+          title={t("loadErrorTitle")}
+          description={t("homeLoadError")}
           onRetry={() => {
             void home.refetch();
           }}
         />
       ) : (
         <>
-          <MobileGameShelf title="Recommended For You" games={recommended} href="/search" />
+          <MobileGameShelf title={t("shelfRecommended")} games={recommended} href="/search" />
           <MobileFeaturedCarousel games={data.featured} />
-          <MobileGameShelf title="Trending Now" games={data.trending} href="/trending" />
-          <MobileGameShelf title="Made for Mobile" games={data.mobile} href="/mobile" />
-          <MobileGameShelf title="Popular" games={data.popular} href="/most-popular" />
-          <MobileGameShelf title="New Releases" games={data.latest} href="/new" />
-          <MobileGameShelf title="Hot Games" games={data.hotGames} />
-          <MobileGameShelf title="Most Played" games={data.mostPlayed} />
-          <MobileGameShelf title="Best Games" games={data.bestGames} />
-          <MobileGameShelf title="Multiplayer" games={data.multiplayer} />
-          <MobileGameShelf title="Exclusive" games={data.exclusiveGames} />
+          <MobileGameShelf title={t("shelfTrending")} games={data.trending} href="/trending" />
+          <MobileGameShelf title={t("shelfMobile")} games={data.mobile} href="/mobile" />
+          <MobileGameShelf title={t("shelfPopular")} games={data.popular} href="/most-popular" />
+          <MobileGameShelf title={t("shelfNewReleases")} games={data.latest} href="/new" />
+          <MobileGameShelf title={t("shelfHot")} games={data.hotGames} />
+          <MobileGameShelf title={t("shelfMostPlayed")} games={data.mostPlayed} />
+          <MobileGameShelf title={t("shelfBest")} games={data.bestGames} />
+          <MobileGameShelf title={t("shelfMultiplayer")} games={data.multiplayer} />
+          <MobileGameShelf title={t("shelfExclusive")} games={data.exclusiveGames} />
         </>
       )}
     </div>

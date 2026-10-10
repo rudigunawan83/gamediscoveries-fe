@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
 
@@ -159,6 +160,7 @@ export function MobileMessage({
   signIn?: boolean;
   action?: { href: string; label: string };
 }) {
+  const t = useTranslations("Common");
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
       <span className="grid size-16 place-items-center rounded-full bg-[#ffc83d]/10">
@@ -174,13 +176,13 @@ export function MobileMessage({
             href="/login"
             className="grid h-12 place-items-center rounded-2xl bg-[#ffc83d] text-sm font-extrabold text-[#1a1205]"
           >
-            Sign In
+            {t("signIn")}
           </Link>
           <Link
             href="/signup"
             className="grid h-12 place-items-center rounded-2xl border border-[#2a2a37] text-sm font-bold text-white"
           >
-            Create an account
+            {t("createAnAccount")}
           </Link>
         </div>
       ) : null}

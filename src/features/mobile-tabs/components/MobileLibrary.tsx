@@ -1,22 +1,28 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Heart, History } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { FavoriteButton } from "@/features/my-games/components/FavoriteButton";
 import { useFavorites } from "@/features/my-games/hooks/useFavorites";
 import { useHistory } from "@/features/my-games/hooks/useHistory";
 import type { HistoryItem } from "@/features/my-games/types/my-games.types";
-import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
+import type { HistoryFormatter } from "@/features/my-games/utils/formatPlayedAt";
+import {
+  formatHistoryMeta,
+  useHistoryFormatter,
+} from "@/features/my-games/utils/formatPlayTime";
 import { MobileSubpageHeader } from "./MobileSubpageHeader";
 import { MobileGameListSkeleton, MobileGameListTile, MobileMessage } from "./MobileTabUi";
 
 function LoadError({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations("Common");
   return (
     <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
-      <p className="text-sm text-[#9c9cb0]">Something went wrong. Please try again.</p>
+      <p className="text-sm text-[#9c9cb0]">{t("errorGeneric")}</p>
       <button type="button" onClick={onRetry} className="mt-2 text-sm font-bold text-[#ffc83d]">
-        Try again
+        {t("retry")}
       </button>
     </div>
   );
@@ -24,18 +30,19 @@ function LoadError({ onRetry }: { onRetry: () => void }) {
 
 /** Mirrors the app's My Favorites screen. */
 export function MobileFavorites() {
+  const t = useTranslations("Library");
   const { accessToken } = useAuth();
   const query = useFavorites({ pageSize: 50 });
   const items = query.data?.items ?? [];
 
   return (
     <div>
-      <MobileSubpageHeader title="My Favorites" />
+      <MobileSubpageHeader title={t("favoritesTitle")} />
       {!accessToken ? (
         <MobileMessage
           icon={Heart}
-          title="Save your favorites"
-          message="Sign in to keep a list of games you love."
+          title={t("favoritesSignInTitle")}
+          message={t("favoritesSignInMessage")}
           signIn
         />
       ) : query.isPending ? (
@@ -45,9 +52,9 @@ export function MobileFavorites() {
       ) : items.length === 0 ? (
         <MobileMessage
           icon={Heart}
-          title="No favorites yet"
-          message="Tap the heart on any game to save it here."
-          action={{ href: "/search", label: "Discover Games" }}
+          title={t("favoritesEmptyTitle")}
+          message={t("favoritesEmptyMessage")}
+          action={{ href: "/search", label: t("discoverGames") }}
         />
       ) : (
         <ul className="space-y-2.5">
@@ -71,13 +78,17 @@ export function MobileFavorites() {
   );
 }
 
-export function historySubtitle(item: HistoryItem) {
-  const meta = formatHistoryMeta(item);
-  return item.playCount > 1 ? `${meta} · ${item.playCount} plays` : meta;
+export function historySubtitle(fmt: HistoryFormatter, item: HistoryItem) {
+  const meta = formatHistoryMeta(fmt, item);
+  return item.playCount > 1
+    ? `${meta} · ${fmt.t("playCount", { count: item.playCount })}`
+    : meta;
 }
 
 /** Mirrors the app's Play History screen. */
 export function MobileHistory() {
+  const t = useTranslations("Library");
+  const fmt = useHistoryFormatter();
   const { accessToken } = useAuth();
   const query = useHistory(24);
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
@@ -99,12 +110,12 @@ export function MobileHistory() {
 
   return (
     <div>
-      <MobileSubpageHeader title="Play History" />
+      <MobileSubpageHeader title={t("historyTitle")} />
       {!accessToken ? (
         <MobileMessage
           icon={History}
-          title="Your play history"
-          message="Sign in to pick up right where you left off."
+          title={t("historySignInTitle")}
+          message={t("historySignInMessage")}
           signIn
         />
       ) : query.isPending ? (
@@ -114,16 +125,16 @@ export function MobileHistory() {
       ) : items.length === 0 ? (
         <MobileMessage
           icon={History}
-          title="Nothing played yet"
-          message="Games you play will show up here."
-          action={{ href: "/search", label: "Find a Game" }}
+          title={t("historyEmptyTitle")}
+          message={t("historyEmptyMessage")}
+          action={{ href: "/search", label: t("findGame") }}
         />
       ) : (
         <>
           <ul className="space-y-2.5">
             {items.map((item) => (
               <li key={item.id}>
-                <MobileGameListTile game={item.game} subtitle={historySubtitle(item)} />
+                <MobileGameListTile game={item.game} subtitle={historySubtitle(fmt, item)} />
               </li>
             ))}
           </ul>

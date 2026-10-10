@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations, type Messages } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { errorMessage } from "@/features/mobile-tabs/components/MobileCommunityUi";
 import {
   createCommunityPost,
   getGameDiscussions,
 } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
+
+const SORTS = [
+  ["latest", "sortLatest"],
+  ["popular", "sortPopular"],
+  ["most_commented", "sortMostCommented"],
+] as const satisfies readonly (readonly [string, keyof Messages["Community"]])[];
 
 export function GameCommunitySection({
   slug,
@@ -26,6 +34,7 @@ export function GameCommunitySection({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("Community");
 
   const discussionsQuery = useQuery({
     queryKey: ["community", "game", slug, sort],
@@ -52,33 +61,27 @@ export function GameCommunitySection({
         queryKey: ["community", "game", slug],
       });
     },
-    onError: (err: Error) => setError(err.message || "Failed to create discussion"),
+    onError: (err: Error) => setError(errorMessage(err, t("createDiscussionFailed"))),
   });
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
         <h1 className="font-display text-3xl font-bold text-white">
-          {gameTitle} Community
+          {t("gameCommunityTitle", { game: gameTitle })}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Game-centric discussions, tips, and player recommendations.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("gameCommunityIntro")}</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
-        {[
-          ["latest", "Latest"],
-          ["popular", "Popular"],
-          ["most_commented", "Most commented"],
-        ].map(([value, label]) => (
+        {SORTS.map(([value, label]) => (
           <Button
             key={value}
             size="sm"
             variant={sort === value ? "default" : "outline"}
             onClick={() => setSort(value)}
           >
-            {label}
+            {t(label)}
           </Button>
         ))}
       </div>
@@ -92,14 +95,14 @@ export function GameCommunitySection({
           }}
         >
           <h2 className="font-display text-lg font-semibold text-white">
-            Start a discussion
+            {t("startDiscussion")}
           </h2>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
             maxLength={160}
-            placeholder="Is this game worth playing?"
+            placeholder={t("discussionTitleHint")}
             className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white"
           />
           <textarea
@@ -108,17 +111,17 @@ export function GameCommunitySection({
             required
             maxLength={4000}
             rows={4}
-            placeholder="Share your thoughts about this game..."
+            placeholder={t("discussionContentHint")}
             className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white"
           />
           {error ? <p className="text-xs text-red-400">{error}</p> : null}
           <Button type="submit" disabled={createMutation.isPending}>
-            Post discussion
+            {t("postDiscussion")}
           </Button>
         </form>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Sign in to start a discussion about {gameTitle}.
+          {t("signInToDiscuss", { game: gameTitle })}
         </p>
       )}
 
@@ -137,15 +140,15 @@ export function GameCommunitySection({
               {post.content}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              @{post.author.username} · {post.commentCount} comments ·{" "}
-              {post.reactionCount} reactions
+              @{post.author.username} ·{" "}
+              {t("postMeta", { comments: post.commentCount, reactions: post.reactionCount })}
             </p>
           </Link>
         ))}
         {!discussionsQuery.isPending &&
         (discussionsQuery.data?.length ?? 0) === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No discussions yet for this game.
+            {t("noDiscussions")}
           </p>
         ) : null}
       </section>

@@ -1,13 +1,17 @@
+import { getTranslations } from "next-intl/server";
 import { MobileProgress } from "@/features/mobile-tabs/components/MobileGamification";
 import { ProgressPageView } from "@/features/progress/components/ProgressPageView";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Progress",
-  description: "Your GameDiscoveries level, XP, and play progress.",
-  path: "/progress",
-  noIndex: true,
-});
+export async function generateMetadata() {
+  const [tNav, t] = await Promise.all([getTranslations("Nav"), getTranslations("Gamification")]);
+  return createMetadata({
+    title: tNav("progress"),
+    description: t("progressMetaDescription"),
+    path: "/progress",
+    noIndex: true,
+  });
+}
 
 export default function ProgressRoutePage() {
   return (

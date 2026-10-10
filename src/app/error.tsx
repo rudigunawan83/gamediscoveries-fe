@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/components/common/ErrorState";
 
 export default function GlobalError({
@@ -8,11 +9,6 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return (
-    <ErrorState
-      title="Something went wrong."
-      description="We hit an unexpected issue while loading this page."
-      onRetry={reset}
-    />
-  );
+  const t = useTranslations("Errors");
+  return <ErrorState description={t("pageDescription")} onRetry={reset} />;
 }

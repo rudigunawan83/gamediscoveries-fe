@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations, type Messages } from "next-intl";
 import { ArrowLeft, Play, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePlayGameClick } from "@/features/games/components/GameDetailPlayCta";
@@ -13,25 +14,17 @@ import { FavoriteButton } from "@/features/my-games/components/FavoriteButton";
 import { useSimilarGames } from "@/features/recommendations/hooks/useRecommendations";
 import { ShareButton } from "@/features/seo/components/ShareButton";
 import { getGameReviews } from "@/lib/api/community";
+import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
 import { MobileGameListSkeleton, MobilePillTabs } from "./MobileTabUi";
 
-const TABS = ["About", "How to Play", "Reviews", "Similar"] as const;
-const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-
-export function formatTimeAgo(iso: string, now = Date.now()) {
-  const time = new Date(iso).getTime();
-  if (Number.isNaN(time)) return "";
-  const minutes = Math.floor((now - time) / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(time).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
+const TABS = [
+  "tabAbout",
+  "tabHowToPlay",
+  "tabReviews",
+  "tabSimilar",
+] as const satisfies readonly (keyof Messages["Game"])[];
 
 /** Mirrors the app's game detail screen. */
 export function MobileGameDetail({
@@ -45,6 +38,8 @@ export function MobileGameDetail({
   shareUrl: string;
   fallbackSimilar: Game[];
 }) {
+  const t = useTranslations("Game");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [tab, setTab] = useState(0);
   const onPlayClick = usePlayGameClick({
@@ -58,11 +53,18 @@ export function MobileGameDetail({
     queryFn: async () => (await getGameReviews(game.slug)).data,
   });
   const similarQuery = useSimilarGames(game.id, 12);
+  const { compact } = useFormats();
   const similar = similarQuery.data?.games.length ? similarQuery.data.games : fallbackSimilar;
 
   const category = game.categories[0]?.name;
   const orientation =
-    game.orientation === "portrait" ? "Portrait" : game.orientation ? "Landscape" : null;
+    game.orientation === "portrait"
+      ? t("portrait")
+      : game.orientation
+        ? t("landscape")
+        : null;
+  const shareTitle = t("shareTitle", { title: game.title });
+  const shareText = t("shareText", { title: game.title });
   const summary = reviews.data?.summary;
   const playHref = `/game/${game.slug}/play`;
 
@@ -83,7 +85,7 @@ export function MobileGameDetail({
         <div className="absolute inset-x-0 top-0 flex items-center justify-between px-2 pt-2">
           <button
             type="button"
-            aria-label="Back"
+            aria-label={tCommon("back")}
             onClick={() => {
               if (window.history.length > 1) router.back();
               else router.push("/");
@@ -94,8 +96,8 @@ export function MobileGameDetail({
           </button>
           <ShareButton
             iconOnly
-            title={`Play ${game.title} online`}
-            text={`Play ${game.title} on GameDiscoveries`}
+            title={shareTitle}
+            text={shareText}
             url={shareUrl}
             entityType="game"
             entityId={game.id}
@@ -106,7 +108,7 @@ export function MobileGameDetail({
           <Link
             href={playHref}
             onClick={onPlayClick}
-            aria-label={`Play ${game.title}`}
+            aria-label={t("playLabel", { title: game.title })}
             className="absolute left-1/2 top-1/2 grid size-[72px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[2.5px] border-[#ffc83d] bg-black/45"
           >
             <Play className="ml-1 size-9 fill-[#ffc83d] text-[#ffc83d]" aria-hidden="true" />
@@ -118,7 +120,7 @@ export function MobileGameDetail({
         <h1 className="text-2xl font-black text-white">{game.title}</h1>
         <div className="flex flex-wrap gap-2">
           {category ? <Chip label={category} color="#ffc83d" /> : null}
-          {game.mobileReady ? <Chip label="Mobile" color="#2bd576" /> : null}
+          {game.mobileReady ? <Chip label={t("mobile")} color="#2bd576" /> : null}
           {orientation ? <Chip label={orientation} color="#3b82f6" /> : null}
           {game.tags.slice(0, 3).map((tag) => (
             <Chip key={tag} label={tag} color="#8b5cf6" />
@@ -129,15 +131,20 @@ export function MobileGameDetail({
           <span className="font-extrabold text-white">
             {summary && summary.reviewCount > 0
               ? summary.averageRating.toFixed(1)
-              : "No ratings yet"}
+              : t("noRatings")}
           </span>
           {summary && summary.reviewCount > 0 ? (
             <span className="text-xs text-[#9c9cb0]">
-              ({compact.format(summary.reviewCount)} reviews)
+              {t("reviewCount", {
+                count: summary.reviewCount,
+                formatted: compact.format(summary.reviewCount),
+              })}
             </span>
           ) : null}
           {game.developer ? (
-            <span className="ml-2 truncate text-xs text-[#9c9cb0]">by {game.developer}</span>
+            <span className="ml-2 truncate text-xs text-[#9c9cb0]">
+              {t("byDeveloper", { developer: game.developer })}
+            </span>
           ) : null}
         </div>
 
@@ -149,11 +156,11 @@ export function MobileGameDetail({
               className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl bg-[#ffc83d] text-base font-extrabold text-[#1a1205]"
             >
               <Play className="size-6 fill-current" aria-hidden="true" />
-              Play Now
+              {t("playNow")}
             </Link>
           ) : (
             <span className="flex h-[52px] flex-1 items-center justify-center rounded-2xl bg-[#1e1e29] text-base font-bold text-[#6b6b7e]">
-              Not available
+              {t("notAvailable")}
             </span>
           )}
           <span className="grid size-[52px] shrink-0 place-items-center rounded-2xl border border-[#2a2a37] bg-[#1e1e29]">
@@ -165,8 +172,8 @@ export function MobileGameDetail({
           </span>
           <ShareButton
             iconOnly
-            title={`Play ${game.title} online`}
-            text={`Play ${game.title} on GameDiscoveries`}
+            title={shareTitle}
+            text={shareText}
             url={shareUrl}
             entityType="game"
             entityId={game.id}
@@ -177,9 +184,9 @@ export function MobileGameDetail({
 
       <div className="mt-6 px-4">
         <MobilePillTabs
-          label="Game details"
+          label={t("detailsLabel")}
           expanded={false}
-          labels={TABS}
+          labels={TABS.map((key) => t(key))}
           selectedIndex={tab}
           onChange={setTab}
         />
@@ -187,19 +194,16 @@ export function MobileGameDetail({
 
       <div className="px-5 pt-[18px]">
         {tab === 0 ? (
-          <TextSection text={game.description} empty="No description yet." />
+          <TextSection text={game.description} empty={t("noDescription")} />
         ) : tab === 1 ? (
-          <TextSection
-            text={game.instructions}
-            empty="Just tap Play Now and follow the in-game tutorial."
-          />
+          <TextSection text={game.instructions} empty={t("defaultInstructions")} />
         ) : tab === 2 ? (
           reviews.isPending ? (
             <MobileGameListSkeleton count={3} />
           ) : reviews.isError ? (
-            <TextSection text={null} empty="Reviews failed to load. Please try again later." />
+            <TextSection text={null} empty={t("reviewsError")} />
           ) : !reviews.data?.items.length ? (
-            <TextSection text={null} empty="No reviews yet. Be the first after you play!" />
+            <TextSection text={null} empty={t("noReviews")} />
           ) : (
             <ul className="space-y-3.5">
               {reviews.data.items.slice(0, 10).map((review) => (
@@ -212,7 +216,7 @@ export function MobileGameDetail({
         ) : similar.length === 0 ? (
           <TextSection
             text={null}
-            empty={similarQuery.isPending ? "Loading similar games…" : "No similar games found."}
+            empty={similarQuery.isPending ? t("loadingSimilar") : t("noSimilar")}
           />
         ) : (
           <SimilarGrid games={similar} />
@@ -221,7 +225,7 @@ export function MobileGameDetail({
 
       {tab !== 3 && similar.length > 0 ? (
         <div className="mt-7 px-4">
-          <MobileGameShelf title="Similar Games" games={similar} />
+          <MobileGameShelf title={t("similarGames")} games={similar} />
         </div>
       ) : null}
     </div>
@@ -258,6 +262,8 @@ type Review = {
 
 function ReviewTile({ review }: { review: Review }) {
   const name = review.author.displayName || review.author.username;
+  const t = useTranslations("Game");
+  const { timeAgo } = useFormats();
   return (
     <div className="rounded-2xl bg-[#17171f] p-3.5">
       <div className="flex items-center gap-2.5">
@@ -268,7 +274,7 @@ function ReviewTile({ review }: { review: Review }) {
           </AvatarFallback>
         </Avatar>
         <span className="min-w-0 flex-1 truncate text-sm font-bold text-white">{name}</span>
-        <span className="flex" aria-label={`${review.rating} out of 5 stars`}>
+        <span className="flex" aria-label={t("starsLabel", { rating: review.rating })}>
           {Array.from({ length: 5 }, (_, i) => (
             <Star
               key={i}
@@ -281,7 +287,7 @@ function ReviewTile({ review }: { review: Review }) {
       {review.content ? (
         <p className="mt-2 text-sm text-[#9c9cb0]">{review.content}</p>
       ) : null}
-      <p className="mt-1.5 text-[11px] text-[#6b6b7e]">{formatTimeAgo(review.createdAt)}</p>
+      <p className="mt-1.5 text-[11px] text-[#6b6b7e]">{timeAgo(review.createdAt)}</p>
     </div>
   );
 }

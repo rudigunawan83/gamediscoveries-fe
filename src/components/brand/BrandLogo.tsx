@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { SITE_NAME } from "@/lib/seo/constants";
 
@@ -22,10 +23,11 @@ export function BrandLogo({
   className,
   showMark = true,
   showTagline = false,
-  tagline = "Find Play Explore More",
+  tagline,
   size = "md",
   href = "/",
 }: BrandLogoProps) {
+  const t = useTranslations("Seo");
   const s = sizeMap[size];
 
   const content = (
@@ -59,7 +61,7 @@ export function BrandLogo({
               s.tag,
             )}
           >
-            {tagline}
+            {tagline ?? t("tagline")}
           </span>
         ) : null}
       </span>

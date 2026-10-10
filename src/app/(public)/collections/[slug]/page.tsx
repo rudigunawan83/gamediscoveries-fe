@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ShareButton } from "@/features/seo/components/ShareButton";
 import { fetchResolvedCollection } from "@/features/seo/api/collections.api";
+import { localizeCollection } from "@/features/seo/data/collections";
 import { env } from "@/config/env";
 import { generateCollectionMetadata } from "@/lib/seo/metadata";
 import {
@@ -22,10 +24,11 @@ export async function generateMetadata({ params }: CollectionPageProps) {
   const { slug } = await params;
   const collection = await fetchResolvedCollection(slug);
   if (!collection) {
+    const t = await getTranslations("Seo");
     return generateCollectionMetadata({
       slug,
-      title: "Collection",
-      description: "Game collection on GameDiscoveries.",
+      title: t("collectionFallbackTitle"),
+      description: t("collectionFallbackDescription"),
       updatedAt: new Date().toISOString(),
       gameSlugs: [],
     });
@@ -35,12 +38,19 @@ export async function generateMetadata({ params }: CollectionPageProps) {
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { slug } = await params;
-  const collection = await fetchResolvedCollection(slug);
-  if (!collection) notFound();
+  const resolved = await fetchResolvedCollection(slug);
+  if (!resolved) notFound();
 
-  const decision = shouldIndexCollection(collection);
+  const decision = shouldIndexCollection(resolved);
   if (!decision.index) notFound();
 
+  const [t, tNav, tCommon, tCollections] = await Promise.all([
+    getTranslations("Seo"),
+    getTranslations("Nav"),
+    getTranslations("Common"),
+    getTranslations("Collections"),
+  ]);
+  const collection = localizeCollection(resolved, tCollections);
   const games = collection.games ?? [];
 
   return (
@@ -48,8 +58,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Collections", path: "/collections" },
+            { name: tNav("home"), path: "/" },
+            { name: tNav("collections"), path: "/collections" },
             { name: collection.title, path: `/collections/${collection.slug}` },
           ]),
           itemListJsonLd(collection.title, `/collections/${collection.slug}`, games),
@@ -57,17 +67,17 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       />
 
       <header className="space-y-4">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+        <nav aria-label={tCommon("breadcrumb")} className="text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
               <Link href="/" className="hover:text-primary">
-                Home
+                {tNav("home")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
             <li>
               <Link href="/collections" className="hover:text-primary">
-                Collections
+                {tNav("collections")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
@@ -86,7 +96,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             </p>
             {collection.rationale ? (
               <p className="max-w-3xl text-sm text-muted-foreground">
-                Why this list: {collection.rationale}
+                {t("collectionWhy", { rationale: collection.rationale })}
               </p>
             ) : null}
           </div>
@@ -101,8 +111,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       </header>
 
       <GameSection
-        title="Games in this collection"
-        description={`${games.length} curated free online games.`}
+        title={t("collectionGamesTitle")}
+        description={t("collectionGamesDescription", { count: games.length })}
         games={games}
         variant="discovery"
       />

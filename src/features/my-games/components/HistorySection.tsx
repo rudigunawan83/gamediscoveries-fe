@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { GameGridSkeleton } from "@/components/game/GameGridSkeleton";
 import { EmptyHistory } from "@/features/my-games/components/EmptyHistory";
@@ -10,7 +11,10 @@ import {
   useHistory,
   useHistoryPreview,
 } from "@/features/my-games/hooks/useHistory";
-import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
+import {
+  formatHistoryMeta,
+  useHistoryFormatter,
+} from "@/features/my-games/utils/formatPlayTime";
 import { mapLibraryError } from "@/features/my-games/utils/libraryErrors";
 
 type HistorySectionProps = {
@@ -22,20 +26,24 @@ export function HistorySection({
   preview = false,
   showHeader = true,
 }: HistorySectionProps) {
+  const t = useTranslations("Library");
+  const tNav = useTranslations("Nav");
+  const tCommon = useTranslations("Common");
+  const fmt = useHistoryFormatter();
   const previewQuery = useHistoryPreview(6);
   const fullQuery = useHistory(24);
   const query = preview ? previewQuery : fullQuery;
 
   if (query.isPending) {
     return (
-      <section className="space-y-4" aria-busy="true" aria-label="Loading history">
+      <section className="space-y-4" aria-busy="true" aria-label={t("historyLoading")}>
         {showHeader ? (
           <div>
             <h2 className="font-display text-xl font-semibold text-white">
-              Recently Played
+              {tNav("recentlyPlayed")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Jump back into games you&apos;ve played recently.
+              {t("historyDescription")}
             </p>
           </div>
         ) : null}
@@ -49,13 +57,15 @@ export function HistorySection({
       <section className="space-y-4">
         {showHeader ? (
           <h2 className="font-display text-xl font-semibold text-white">
-            Recently Played
+            {tNav("recentlyPlayed")}
           </h2>
         ) : null}
         <LibraryErrorState
           message={mapLibraryError(
             query.error,
-            "Unable to load your recent games.",
+            t,
+            t("historyLoadError"),
+            tCommon("errorGeneric"),
           )}
           onRetry={() => {
             void query.refetch();
@@ -71,7 +81,7 @@ export function HistorySection({
   }
 
   const metaByGameId = Object.fromEntries(
-    items.map((item) => [item.gameId, formatHistoryMeta(item)]),
+    items.map((item) => [item.gameId, formatHistoryMeta(fmt, item)]),
   );
 
   return (
@@ -83,10 +93,10 @@ export function HistorySection({
               id="history-section-title"
               className="font-display text-xl font-semibold text-white"
             >
-              Recently Played
+              {tNav("recentlyPlayed")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Jump back into games you&apos;ve played recently.
+              {t("historyDescription")}
             </p>
           </div>
           {preview ? (
@@ -94,7 +104,7 @@ export function HistorySection({
               href="/my-games?tab=history"
               className="text-sm font-medium text-primary hover:underline"
             >
-              View All History
+              {t("viewAllHistory")}
             </Link>
           ) : null}
         </div>
@@ -116,7 +126,7 @@ export function HistorySection({
               void fullQuery.fetchNextPage();
             }}
           >
-            {fullQuery.isFetchingNextPage ? "Loading…" : "Load More"}
+            {fullQuery.isFetchingNextPage ? tCommon("loading") : tCommon("loadMore")}
           </Button>
         </div>
       ) : null}

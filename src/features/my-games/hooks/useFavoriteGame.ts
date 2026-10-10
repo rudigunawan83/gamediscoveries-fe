@@ -9,8 +9,6 @@ import {
 import { myGamesKeys } from "@/features/my-games/api/myGamesKeys";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import { analytics } from "@/lib/analytics/client";
-import { mapLibraryError } from "@/features/my-games/utils/libraryErrors";
-
 type ToggleFavoriteInput = {
   gameId: string;
   isFavorite: boolean;
@@ -72,10 +70,7 @@ export function useFavoriteGame() {
             ? `${window.location.pathname}${window.location.search}`
             : "/my-games");
         router.push(`/login?callbackUrl=${encodeURIComponent(callback)}`);
-        return;
       }
-      // Surface via callers that read mutation.error
-      void mapLibraryError(error, "Unable to update favorites.");
     },
   });
 }

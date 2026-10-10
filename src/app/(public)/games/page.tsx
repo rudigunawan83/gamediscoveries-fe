@@ -1,12 +1,15 @@
 import { GamesCatalog } from "@/features/games/components/GamesCatalog";
+import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Games — Play Free Online",
-  description:
-    "Browse free HTML5 browser games on GameDiscoveries. Filter by category via SEO-friendly /games/[category] URLs.",
-  path: "/games",
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Seo");
+  return createMetadata({
+    title: t("gamesTitle"),
+    description: t("gamesDescription"),
+    path: "/games",
+  });
+}
 
 export default async function GamesPage({
   searchParams,

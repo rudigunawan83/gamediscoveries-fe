@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
 import { GameGrid } from "@/components/game/GameGrid";
 import type { Game } from "@/types/game";
@@ -18,6 +19,7 @@ export function GameSection({
   href,
   variant = "default",
 }: GameSectionProps) {
+  const t = useTranslations("Common");
   if (games.length === 0) {
     return null;
   }
@@ -41,7 +43,7 @@ export function GameSection({
             href={href}
             className="inline-flex items-center gap-0.5 text-sm font-semibold text-primary hover:text-[#ffe08a]"
           >
-            See All
+            {t("seeAll")}
             <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         ) : null}

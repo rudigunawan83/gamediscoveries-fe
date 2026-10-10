@@ -13,14 +13,16 @@ export function parseMyGamesTab(value: string | null | undefined): MyGamesTab {
   return "all";
 }
 
-export function myGamesTabLabel(tab: MyGamesTab): string {
+export function myGamesTabLabel(
+  tab: MyGamesTab,
+): "Nav.favorites" | "Nav.recentlyPlayed" | "Library.tabAll" {
   switch (tab) {
     case "favorites":
-      return "Favorites";
+      return "Nav.favorites";
     case "history":
-      return "Recently Played";
+      return "Nav.recentlyPlayed";
     default:
-      return "All";
+      return "Library.tabAll";
   }
 }
 

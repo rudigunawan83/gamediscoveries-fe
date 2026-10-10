@@ -6,15 +6,18 @@ import type { Game } from "@/types/game";
 
 export type JsonLdObject = Record<string, unknown>;
 
-export function websiteJsonLd(): JsonLdObject {
+export function websiteJsonLd({
+  description = SITE_DESCRIPTION,
+  inLanguage = SEO_CONFIG.defaultLocale,
+}: { description?: string; inLanguage?: string } = {}): JsonLdObject {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
     alternateName: ["Game Discoveries", SITE_TAGLINE],
     url: env.NEXT_PUBLIC_APP_URL,
-    description: SITE_DESCRIPTION,
-    inLanguage: SEO_CONFIG.defaultLocale,
+    description,
+    inLanguage,
     potentialAction: {
       "@type": "SearchAction",
       target: `${env.NEXT_PUBLIC_APP_URL}/search?q={search_term_string}`,
@@ -23,13 +26,15 @@ export function websiteJsonLd(): JsonLdObject {
   };
 }
 
-export function organizationJsonLd(): JsonLdObject {
+export function organizationJsonLd({
+  description = SITE_TAGLINE,
+}: { description?: string } = {}): JsonLdObject {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     url: env.NEXT_PUBLIC_APP_URL,
-    description: SITE_TAGLINE,
+    description,
     logo: `${env.NEXT_PUBLIC_APP_URL}/favicon.png`,
   };
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations, type Messages } from "next-intl";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Bookmark, Gamepad2, MessagesSquare, Plus, Search, SearchX, X } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -19,10 +20,10 @@ import {
 import { MobileSubpageHeader } from "./MobileSubpageHeader";
 import { MobileGameListSkeleton, MobileMessage } from "./MobileTabUi";
 
-const SORTS: { value: CommunityPostSort; label: string; emoji?: string }[] = [
-  { value: "latest", label: "Latest" },
-  { value: "trending", label: "Trending", emoji: "🔥" },
-  { value: "most_liked", label: "Most Liked", emoji: "👑" },
+const SORTS: { value: CommunityPostSort; label: keyof Messages["Community"]; emoji?: string }[] = [
+  { value: "latest", label: "sortLatest" },
+  { value: "trending", label: "sortTrending", emoji: "🔥" },
+  { value: "most_liked", label: "sortMostLiked", emoji: "👑" },
 ];
 
 const GOLD_ICON = (
@@ -33,6 +34,8 @@ const GOLD_ICON = (
 export function MobileCommunity() {
   const { accessToken } = useAuth();
   const promptSignIn = useSignInPrompt();
+  const t = useTranslations("Community");
+  const tNav = useTranslations("Nav");
   const [sort, setSort] = useState<CommunityPostSort>("latest");
   const [searching, setSearching] = useState(false);
   const [input, setInput] = useState("");
@@ -61,8 +64,8 @@ export function MobileCommunity() {
               <input
                 autoFocus
                 type="search"
-                aria-label="Search posts"
-                placeholder="Search posts"
+                aria-label={t("searchPosts")}
+                placeholder={t("searchPosts")}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={(event) => {
@@ -72,14 +75,14 @@ export function MobileCommunity() {
               />
             </label>
           ) : (
-            <h1 className="truncate text-2xl font-black text-white">Community</h1>
+            <h1 className="truncate text-2xl font-black text-white">{tNav("community")}</h1>
           )
         }
         action={
           searching ? (
             <button
               type="button"
-              aria-label="Close search"
+              aria-label={t("closeSearch")}
               onClick={closeSearch}
               className="grid size-11 shrink-0 place-items-center text-white"
             >
@@ -89,14 +92,14 @@ export function MobileCommunity() {
             <span className="mr-1 flex shrink-0 items-center gap-1">
               <Link
                 href="/community/saved"
-                aria-label="Saved posts"
+                aria-label={t("savedPosts")}
                 className="grid size-11 place-items-center text-white"
               >
                 <Bookmark className="size-6" aria-hidden="true" />
               </Link>
               <button
                 type="button"
-                aria-label="Search posts"
+                aria-label={t("searchPosts")}
                 onClick={() => setSearching(true)}
                 className="grid size-11 place-items-center rounded-full border border-[#2a2a37] bg-[#15151d] text-white"
               >
@@ -107,7 +110,7 @@ export function MobileCommunity() {
         }
       />
 
-      <div role="tablist" aria-label="Sort posts" className="flex gap-2 pb-2.5 pt-1">
+      <div role="tablist" aria-label={t("sortLabel")} className="flex gap-2 pb-2.5 pt-1">
         {SORTS.map((item) => {
           const selected = item.value === sort;
           return (
@@ -129,19 +132,19 @@ export function MobileCommunity() {
                   {item.emoji}
                 </span>
               ) : null}
-              <span className="truncate">{item.label}</span>
+              <span className="truncate">{t(item.label)}</span>
             </button>
           );
         })}
       </div>
 
-      <PostFeed key={`${sort}:${search}`} sort={sort} search={search} />
+      <CommunityPostFeed key={`${sort}:${search}`} sort={sort} search={search} />
 
       <button
         type="button"
-        aria-label="New post"
+        aria-label={t("newPost")}
         onClick={() => {
-          if (!accessToken) promptSignIn("Sign in to post in the community.");
+          if (!accessToken) promptSignIn(t("signInToPost"));
           else setComposerOpen(true);
         }}
         className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-5 z-40 grid size-14 place-items-center rounded-2xl bg-[#ffc83d] text-[#1a1205] shadow-[0_6px_20px_rgba(255,200,61,0.35)]"
@@ -153,10 +156,12 @@ export function MobileCommunity() {
   );
 }
 
-function PostFeed({ sort, search }: { sort: CommunityPostSort; search: string }) {
+export function CommunityPostFeed({ sort, search = "" }: { sort: CommunityPostSort; search?: string }) {
   const { accessToken } = useAuth();
   const like = useLikePost();
   const saved = useSavedPosts();
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
   const [menuPost, setMenuPost] = useState<CommunityPost | null>(null);
   const sentinel = useRef<HTMLDivElement>(null);
 
@@ -194,9 +199,9 @@ function PostFeed({ sort, search }: { sort: CommunityPostSort; search: string })
   if (query.isError) {
     return (
       <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
-        <p className="text-sm text-[#9c9cb0]">Something went wrong. Please try again.</p>
+        <p className="text-sm text-[#9c9cb0]">{tCommon("errorGeneric")}</p>
         <button type="button" onClick={() => void query.refetch()} className="mt-2 text-sm font-bold text-[#ffc83d]">
-          Try again
+          {tCommon("retry")}
         </button>
       </div>
     );
@@ -205,11 +210,11 @@ function PostFeed({ sort, search }: { sort: CommunityPostSort; search: string })
     return search ? (
       <MobileMessage
         icon={SearchX}
-        title="No posts found"
-        message={`Nothing matches "${search}". Try another word.`}
+        title={t("noResultsTitle")}
+        message={t("noResultsMessage", { query: search })}
       />
     ) : (
-      <MobileMessage icon={MessagesSquare} title="Nothing here yet" message="Start the conversation with the + button." />
+      <MobileMessage icon={MessagesSquare} title={t("emptyTitle")} message={t("emptyMessage")} />
     );
   }
 
@@ -242,12 +247,13 @@ function PostFeed({ sort, search }: { sort: CommunityPostSort; search: string })
 export function MobileCommunitySaved() {
   const saved = useSavedPosts();
   const [menuPost, setMenuPost] = useState<CommunityPost | null>(null);
+  const t = useTranslations("Community");
 
   return (
     <div>
-      <MobileSubpageHeader title="Saved Posts" fallbackHref="/community" />
+      <MobileSubpageHeader title={t("savedPostsTitle")} fallbackHref="/community" />
       {saved.length === 0 ? (
-        <MobileMessage icon={Bookmark} title="No saved posts" message="Tap the bookmark on a post to keep it here." />
+        <MobileMessage icon={Bookmark} title={t("noSavedTitle")} message={t("noSavedMessage")} />
       ) : (
         <ul className="space-y-3.5 pb-8">
           {saved.map((post) => (

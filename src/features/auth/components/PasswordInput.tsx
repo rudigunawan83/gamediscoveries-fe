@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff, Lock, type LucideIcon } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export function PasswordInput({
   ...props
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations("Auth");
 
   return (
     <div className="relative">
@@ -41,7 +43,7 @@ export function PasswordInput({
         type="button"
         className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
         onClick={() => setVisible((value) => !value)}
-        aria-label={visible ? "Hide password" : "Show password"}
+        aria-label={visible ? t("hidePassword") : t("showPassword")}
       >
         {visible ? (
           <EyeOff className="size-4" aria-hidden="true" />

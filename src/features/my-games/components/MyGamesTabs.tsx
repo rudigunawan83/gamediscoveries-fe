@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { MyGamesTab } from "@/features/my-games/types/my-games.types";
 import {
   MY_GAMES_TABS,
@@ -14,10 +15,11 @@ type MyGamesTabsProps = {
 };
 
 export function MyGamesTabs({ activeTab }: MyGamesTabsProps) {
+  const t = useTranslations();
   return (
     <div
       role="tablist"
-      aria-label="My Games sections"
+      aria-label={t("Library.tabsLabel")}
       className="flex flex-wrap gap-2 border-b border-border/40 pb-1"
     >
       {MY_GAMES_TABS.map((tab) => {
@@ -36,7 +38,7 @@ export function MyGamesTabs({ activeTab }: MyGamesTabsProps) {
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {myGamesTabLabel(tab)}
+            {t(myGamesTabLabel(tab))}
             {selected ? (
               <span
                 aria-hidden="true"

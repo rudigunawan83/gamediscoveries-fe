@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { env } from "@/config/env";
-import {
-  SITE_DESCRIPTION,
-  SITE_NAME,
-  SITE_TAGLINE,
-} from "@/lib/seo/constants";
+import { SITE_NAME } from "@/lib/seo/constants";
 import { buildCanonicalUrl, normalizePath } from "@/lib/seo/canonical";
 import { buildHreflangAlternates } from "@/lib/seo/hreflang";
 import {
@@ -21,6 +18,7 @@ import {
   withSiteName,
 } from "@/lib/seo/titles";
 import type { Game } from "@/types/game";
+import { localizeCollection } from "@/features/seo/data/collections";
 import type { SeoCategory, SeoCollection } from "@/features/seo/types";
 import {
   shouldIndexCategory,
@@ -29,9 +27,12 @@ import {
   shouldIndexGamesLike,
 } from "@/lib/seo/indexability";
 
-export function createMetadata({
+const OG_LOCALES: Record<string, string> = { en: "en_US", id: "id_ID" };
+
+/** Titles and descriptions follow the request locale; the canonical URL is shared by all locales. */
+export async function createMetadata({
   title,
-  description = SITE_DESCRIPTION,
+  description,
   path = "/",
   noIndex = false,
   follow,
@@ -48,10 +49,13 @@ export function createMetadata({
   image?: string;
   type?: "website" | "article";
   availableLocales?: string[];
-} = {}): Metadata {
+} = {}): Promise<Metadata> {
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("Seo")]);
   const pageTitle = title
     ? withSiteName(title)
-    : `${SITE_NAME} — ${SITE_TAGLINE}`;
+    : `${SITE_NAME} — ${t("tagline")}`;
+  description ??= t("siteDescription");
+  const ogLocale = OG_LOCALES[locale] ?? OG_LOCALES.en!;
   const url = buildCanonicalUrl(path);
   const ogImage = image ?? "/favicon.png";
   const shouldFollow = follow ?? !noIndex;
@@ -101,8 +105,8 @@ export function createMetadata({
     },
     openGraph: {
       type,
-      locale: "en_US",
-      alternateLocale: ["id_ID"],
+      locale: ogLocale,
+      alternateLocale: Object.values(OG_LOCALES).filter((item) => item !== ogLocale),
       siteName: SITE_NAME,
       title: pageTitle,
       description,
@@ -141,11 +145,12 @@ export function createMetadata({
   };
 }
 
-export function generateGameMetadata(game: Game): Metadata {
+export async function generateGameMetadata(game: Game): Promise<Metadata> {
   const decision = shouldIndexGame(game);
+  const t = await getTranslations("Seo");
   return createMetadata({
-    title: gameTitle(game.title),
-    description: gameDescription(game),
+    title: gameTitle(t, game.title),
+    description: gameDescription(t, game),
     path: `/game/${game.slug}`,
     image: game.coverUrl ?? game.thumbnailUrl,
     noIndex: !decision.index,
@@ -153,11 +158,13 @@ export function generateGameMetadata(game: Game): Metadata {
   });
 }
 
-export function generateCategoryMetadata(category: SeoCategory): Metadata {
+export async function generateCategoryMetadata(category: SeoCategory): Promise<Metadata> {
   const decision = shouldIndexCategory(category);
+  const t = await getTranslations("Seo");
   return createMetadata({
-    title: categoryTitle(category.name),
+    title: categoryTitle(t, category.name),
     description: categoryDescription(
+      t,
       category.name,
       category.gameCount ?? 0,
     ),
@@ -167,15 +174,21 @@ export function generateCategoryMetadata(category: SeoCategory): Metadata {
   });
 }
 
-export function generateCollectionMetadata(
+export async function generateCollectionMetadata(
   collection: SeoCollection,
-): Metadata {
+): Promise<Metadata> {
   const decision = shouldIndexCollection(collection);
+  const [t, tCollections] = await Promise.all([
+    getTranslations("Seo"),
+    getTranslations("Collections"),
+  ]);
+  const localized = localizeCollection(collection, tCollections);
   return createMetadata({
-    title: collectionTitle(collection.title),
+    title: collectionTitle(localized.title),
     description: collectionDescription(
-      collection.title,
-      collection.description,
+      t,
+      localized.title,
+      localized.description,
     ),
     path: `/collections/${collection.slug}`,
     image: collection.image,
@@ -184,14 +197,15 @@ export function generateCollectionMetadata(
   });
 }
 
-export function generateGamesLikeMetadata(
+export async function generateGamesLikeMetadata(
   game: Game,
   similarCount: number,
-): Metadata {
+): Promise<Metadata> {
   const decision = shouldIndexGamesLike(similarCount);
+  const t = await getTranslations("Seo");
   return createMetadata({
-    title: gamesLikeTitle(game.title),
-    description: gamesLikeDescription(game.title, similarCount),
+    title: gamesLikeTitle(t, game.title),
+    description: gamesLikeDescription(t, game.title, similarCount),
     path: `/games-like/${game.slug}`,
     image: game.thumbnailUrl ?? game.coverUrl,
     noIndex: !decision.index,
@@ -205,7 +219,7 @@ export function generateCommunityMetadata(input: {
   path: string;
   image?: string;
   indexable: boolean;
-}): Metadata {
+}): Promise<Metadata> {
   return createMetadata({
     title: input.title,
     description: input.description,

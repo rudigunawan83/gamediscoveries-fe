@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Gamepad2, Play } from "lucide-react";
 import { ErrorState } from "@/components/common/ErrorState";
 import { MobileGameShelf } from "@/features/mobile-home/components/MobileGameShelf";
@@ -18,6 +19,9 @@ import {
 
 /** Mirrors the app's Play tab: continue playing, recently played, quick play. */
 export function MobilePlay() {
+  const t = useTranslations("Discovery");
+  const tNav = useTranslations("Nav");
+  const tGame = useTranslations("Game");
   const history = useHistoryPreview(6);
   const recent = (history.data?.pages[0]?.items ?? []).slice(1).map((item) => item.game);
 
@@ -29,27 +33,27 @@ export function MobilePlay() {
 
   return (
     <div className="space-y-6">
-      <MobileTabTitle title="Play" />
+      <MobileTabTitle title={tNav("play")} />
 
       <HomeContinuePlaying />
-      <MobileGameShelf title="Recently Played" games={recent} href="/history" />
+      <MobileGameShelf title={tNav("recentlyPlayed")} games={recent} href="/history" />
 
       <section aria-labelledby="quick-play-title" className="space-y-3">
         <h2 id="quick-play-title" className="text-base font-extrabold text-white">
-          Quick Play
+          {t("quickPlay")}
         </h2>
         {quickPlay.isPending ? (
           <MobileGameListSkeleton count={5} />
         ) : quickPlay.isError ? (
           <ErrorState
-            title="Quick play failed to load."
-            description="Please check your connection and try again."
+            title={t("quickPlayError")}
+            description={t("connectionError")}
             onRetry={() => {
               void quickPlay.refetch();
             }}
           />
         ) : quickPlay.data.length === 0 ? (
-          <MobileMessage icon={Gamepad2} message="No quick play picks right now." />
+          <MobileMessage icon={Gamepad2} message={t("quickPlayEmpty")} />
         ) : (
           <ul className="space-y-2.5">
             {quickPlay.data.map((game) => (
@@ -59,7 +63,7 @@ export function MobilePlay() {
                   trailing={
                     <Link
                       href={`/game/${game.slug}/play`}
-                      aria-label={`Play ${game.title} now`}
+                      aria-label={tGame("playNowLabel", { title: game.title })}
                       className="grid size-11 shrink-0 place-items-center rounded-full bg-[#ffc83d] text-[#1a1205]"
                     >
                       <Play className="size-5 fill-current" aria-hidden="true" />

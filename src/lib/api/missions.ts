@@ -95,15 +95,3 @@ export async function getMissionAnalytics() {
     "/api/v1/admin/gamification/missions/analytics",
   );
 }
-
-export function formatCountdown(expiresAt: string) {
-  const ms = new Date(expiresAt).getTime() - Date.now();
-  if (ms <= 0) return "Resetting…";
-  const totalSec = Math.floor(ms / 1000);
-  const days = Math.floor(totalSec / 86400);
-  const hours = Math.floor((totalSec % 86400) / 3600);
-  const mins = Math.floor((totalSec % 3600) / 60);
-  const secs = totalSec % 60;
-  if (days > 0) return `${days}d ${hours}h`;
-  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-}

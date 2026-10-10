@@ -1,17 +1,26 @@
 import type { MetadataRoute } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   BRAND_BACKGROUND_COLOR,
   BRAND_THEME_COLOR,
-  SITE_DESCRIPTION,
   SITE_NAME,
-  SITE_TAGLINE,
 } from "@/lib/seo/constants";
 
-export default function manifest(): MetadataRoute.Manifest {
+/** Browsers fetch the manifest without cookies, so the locale usually comes from Accept-Language. */
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const [locale, t, tSeo] = await Promise.all([
+    getLocale(),
+    getTranslations("Manifest"),
+    getTranslations("Seo"),
+  ]);
+
   return {
     name: SITE_NAME,
     short_name: SITE_NAME,
-    description: `${SITE_TAGLINE}. ${SITE_DESCRIPTION}`,
+    description: t("description", {
+      tagline: tSeo("tagline"),
+      siteDescription: tSeo("siteDescription"),
+    }),
     start_url: "/",
     scope: "/",
     id: "/",
@@ -19,7 +28,7 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait-primary",
     background_color: BRAND_BACKGROUND_COLOR,
     theme_color: BRAND_THEME_COLOR,
-    lang: "en",
+    lang: locale,
     categories: ["games", "entertainment"],
     icons: [
       {
@@ -43,37 +52,37 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: "Discover",
-        short_name: "Discover",
-        description: "Discover your next game",
+        name: t("discover"),
+        short_name: t("discover"),
+        description: t("discoverDescription"),
         url: "/",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "Trending",
-        short_name: "Trending",
-        description: "See trending games",
+        name: t("trending"),
+        short_name: t("trending"),
+        description: t("trendingDescription"),
         url: "/trending",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "Quick Play",
-        short_name: "Quick Play",
-        description: "Jump into hot games",
+        name: t("quickPlay"),
+        short_name: t("quickPlay"),
+        description: t("quickPlayDescription"),
         url: "/hot-games",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "My Games",
-        short_name: "My Games",
-        description: "Favorites and recently played",
+        name: t("myGames"),
+        short_name: t("myGames"),
+        description: t("myGamesDescription"),
         url: "/my-games",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "Search",
-        short_name: "Search",
-        description: "Search games",
+        name: t("search"),
+        short_name: t("search"),
+        description: t("searchDescription"),
         url: "/search",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },

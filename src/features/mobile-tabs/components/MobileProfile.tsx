@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations, type Messages } from "next-intl";
 import {
   Bell,
   ChevronRight,
@@ -27,38 +28,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getMyAchievements } from "@/lib/api/achievements";
 import { getMyProgress, type LevelInfo } from "@/lib/api/progress";
+import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
-const grouped = new Intl.NumberFormat("en-US");
-const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-
-type MenuEntry = { icon: LucideIcon; label: string; accent: string; href?: string };
+type ProfileKey = keyof Messages["Profile"];
+type MenuEntry = { icon: LucideIcon; label: ProfileKey; accent: string; href?: string };
 
 /** App menu rows; entries without `href` have no web page yet and show "Soon". */
 const MAIN_MENU: MenuEntry[] = [
-  { icon: Heart, label: "My Favorites", accent: "#ffc83d", href: "/favorites" },
-  { icon: History, label: "Play History", accent: "#8b5cf6", href: "/history" },
-  { icon: MessageCircle, label: "My Reviews", accent: "#3b82f6", href: "/my-reviews" },
-  { icon: Settings, label: "Account Settings", accent: "#2bd576", href: "/settings" },
-  { icon: HelpCircle, label: "Help & Support", accent: "#ff5d73", href: "/help" },
+  { icon: Heart, label: "myFavorites", accent: "#ffc83d", href: "/favorites" },
+  { icon: History, label: "playHistory", accent: "#8b5cf6", href: "/history" },
+  { icon: MessageCircle, label: "myReviews", accent: "#3b82f6", href: "/my-reviews" },
+  { icon: Settings, label: "accountSettings", accent: "#2bd576", href: "/settings" },
+  { icon: HelpCircle, label: "helpSupport", accent: "#ff5d73", href: "/help" },
 ];
 
 const COMMUNITY_MENU: MenuEntry[] = [
-  { icon: BarChart3, label: "Leaderboard", accent: "#8b5cf6", href: "/leaderboard" },
-  { icon: MessagesSquare, label: "Community", accent: "#14b8a6", href: "/community" },
-  { icon: Bell, label: "Notifications", accent: "#f97316", href: "/community/notifications" },
-  { icon: Smartphone, label: "Download App", accent: "#ffc83d", href: "/download" },
+  { icon: BarChart3, label: "leaderboard", accent: "#8b5cf6", href: "/leaderboard" },
+  { icon: MessagesSquare, label: "community", accent: "#14b8a6", href: "/community" },
+  { icon: Bell, label: "notifications", accent: "#f97316", href: "/community/notifications" },
+  { icon: Smartphone, label: "downloadApp", accent: "#ffc83d", href: "/download" },
 ];
 
 const SIGNED_IN_MORE: MenuEntry[] = [
-  { icon: TrendingUp, label: "My Progress", accent: "#14b8a6", href: "/progress" },
-  { icon: Trophy, label: "Achievements", accent: "#ffc83d", href: "/achievements" },
+  { icon: TrendingUp, label: "myProgress", accent: "#14b8a6", href: "/progress" },
+  { icon: Trophy, label: "achievements", accent: "#ffc83d", href: "/achievements" },
   ...COMMUNITY_MENU,
 ];
 
 /** Mirrors the app's Profile tab. */
 export function MobileProfile() {
   const { accessToken, user, logout } = useAuth();
+  const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
+  const tAuth = useTranslations("Auth");
   const signedIn = Boolean(accessToken);
 
   const progressQuery = useQuery({
@@ -75,22 +78,20 @@ export function MobileProfile() {
   if (!signedIn) {
     return (
       <div className="space-y-6">
-        <ProfileHero name="Guest Player" highlighted={false} />
-        <p className="text-center text-sm text-[#9c9cb0]">
-          Create an account to save XP, streaks, favorites and achievements.
-        </p>
+        <ProfileHero name={t("guestName")} highlighted={false} />
+        <p className="text-center text-sm text-[#9c9cb0]">{t("guestPrompt")}</p>
         <div className="flex flex-col gap-2.5">
           <Link
             href="/signup"
             className="grid h-12 place-items-center rounded-2xl bg-[#ffc83d] text-sm font-extrabold text-[#1a1205]"
           >
-            Create Account
+            {tAuth("createAccount")}
           </Link>
           <Link
             href="/login"
             className="grid h-12 place-items-center rounded-2xl border border-[#2a2a37] text-sm font-bold text-white"
           >
-            Sign In
+            {tCommon("signIn")}
           </Link>
         </div>
         <Menu items={MAIN_MENU} prominent />
@@ -101,7 +102,7 @@ export function MobileProfile() {
 
   const progress = progressQuery.data;
   const stats = progress?.stats;
-  const name = progress?.user.name || user?.displayName || "Player";
+  const name = progress?.user.name || user?.displayName || t("defaultName");
   const avatarUrl = user?.avatarUrl ?? progress?.user.avatarUrl;
 
   return (
@@ -110,7 +111,7 @@ export function MobileProfile() {
 
       {progressQuery.isError ? (
         <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
-          <p className="text-sm text-[#9c9cb0]">We couldn&apos;t load your progress.</p>
+          <p className="text-sm text-[#9c9cb0]">{t("loadError")}</p>
           <button
             type="button"
             onClick={() => {
@@ -119,7 +120,7 @@ export function MobileProfile() {
             }}
             className="mt-2 text-sm font-bold text-[#ffc83d]"
           >
-            Try again
+            {tCommon("retry")}
           </button>
         </div>
       ) : (
@@ -127,10 +128,10 @@ export function MobileProfile() {
           <XpProgress level={progress?.level} />
           <StatisticsCard
             stats={[
-              { icon: Flame, colors: ["#ff4d2e", "#ffc928"], label: "Games", srLabel: "Game sessions played", value: stats?.totalGameSessions },
-              { icon: Gamepad2, colors: ["#ffe27a", "#f5a524"], label: "Games", srLabel: "Different games played", value: stats?.uniqueGamesPlayed },
-              { icon: Trophy, colors: ["#ffe27a", "#f5a524"], label: "Achievements", srLabel: "Achievements unlocked", value: achievementsQuery.data?.overview.userUnlocked, highlight: true },
-              { icon: Hexagon, colors: ["#c084fc", "#6d28d9"], label: "Points", srLabel: "Total XP points", value: progress?.level.totalXp },
+              { icon: Flame, colors: ["#ff4d2e", "#ffc928"], label: t("statGames"), srLabel: t("statSessionsSr"), value: stats?.totalGameSessions },
+              { icon: Gamepad2, colors: ["#ffe27a", "#f5a524"], label: t("statGames"), srLabel: t("statUniqueGamesSr"), value: stats?.uniqueGamesPlayed },
+              { icon: Trophy, colors: ["#ffe27a", "#f5a524"], label: t("statAchievements"), srLabel: t("statAchievementsSr"), value: achievementsQuery.data?.overview.userUnlocked, highlight: true },
+              { icon: Hexagon, colors: ["#c084fc", "#6d28d9"], label: t("statPoints"), srLabel: t("statPointsSr"), value: progress?.level.totalXp },
             ]}
           />
         </>
@@ -147,7 +148,7 @@ export function MobileProfile() {
         className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#2a2a37] text-sm font-bold text-[#ff5d73]"
       >
         <LogOut className="size-5" aria-hidden="true" />
-        Sign Out
+        {tCommon("signOut")}
       </button>
     </div>
   );
@@ -170,6 +171,7 @@ function ProfileHero({
     .slice(0, 2)
     .map((part) => part[0]!.toUpperCase())
     .join("");
+  const t = useTranslations("Profile");
 
   return (
     <div className="relative -mx-4 -mt-6 overflow-hidden px-4 pb-2 pt-4">
@@ -199,10 +201,10 @@ function ProfileHero({
 
       <div className="relative">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="min-h-11 text-[22px] font-extrabold leading-[44px] text-white">Profile</h1>
+          <h1 className="min-h-11 text-[22px] font-extrabold leading-[44px] text-white">{t("title")}</h1>
           <Link
             href="/settings"
-            aria-label="Account Settings"
+            aria-label={t("accountSettings")}
             className="grid size-12 place-items-center rounded-[14px] border border-[#ffc83d]/60 bg-black/45 text-white"
           >
             <Settings className="size-[26px]" aria-hidden="true" />
@@ -244,18 +246,24 @@ function ProfileHero({
 }
 
 function XpProgress({ level }: { level?: LevelInfo }) {
+  const { grouped } = useFormats();
+  const t = useTranslations("Profile");
   const ratio = level ? Math.min(1, Math.max(0, level.progressPercentage / 100)) : 0;
   const label = !level
-    ? "Level progress loading"
+    ? t("levelLoading")
     : level.isMaxLevel
-      ? `Level ${level.level}, maximum level reached`
-      : `Level ${level.level}, ${grouped.format(level.currentLevelXp)} of ${grouped.format(level.nextLevelXp)} XP`;
+      ? t("levelMaxSr", { level: level.level })
+      : t("levelProgressSr", {
+          level: level.level,
+          current: grouped.format(level.currentLevelXp),
+          next: grouped.format(level.nextLevelXp),
+        });
 
   return (
     <div role="group" aria-label={label}>
       <div
         role="progressbar"
-        aria-label="Level progress"
+        aria-label={t("levelProgress")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(ratio * 100)}
@@ -267,12 +275,12 @@ function XpProgress({ level }: { level?: LevelInfo }) {
         />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 text-base font-extrabold text-white">
-        <span>{level ? `Level ${level.level}` : "Level —"}</span>
+        <span>{level ? t("level", { level: level.level }) : t("levelUnknown")}</span>
         <span className="truncate">
           {!level ? (
             <span className="font-semibold text-[#9c9cb0]">— XP</span>
           ) : level.isMaxLevel ? (
-            <span className="text-[#ffc83d]">MAX LEVEL</span>
+            <span className="text-[#ffc83d]">{t("maxLevel")}</span>
           ) : (
             <>
               {grouped.format(level.currentLevelXp)}
@@ -297,6 +305,8 @@ type Stat = {
 };
 
 function StatisticsCard({ stats }: { stats: Stat[] }) {
+  const { compact } = useFormats();
+  const t = useTranslations("Profile");
   return (
     <ul className="flex divide-x divide-white/10 rounded-[22px] border-[1.4px] border-[#ffc83d]/65 bg-gradient-to-b from-[#1b1a14] to-[#101318] px-1.5 py-[18px] shadow-[0_0_26px_rgba(255,200,61,0.18)]">
       {stats.map((stat) => {
@@ -305,7 +315,11 @@ function StatisticsCard({ stats }: { stats: Stat[] }) {
         return (
           <li
             key={stat.srLabel}
-            aria-label={`${stat.srLabel}: ${stat.value === undefined ? "not available" : display}`}
+            aria-label={
+              stat.value === undefined
+                ? t("statUnavailable", { label: stat.srLabel })
+                : t("statValue", { label: stat.srLabel, value: display })
+            }
             className="flex min-w-0 flex-1 flex-col items-center px-1"
           >
             <Icon
@@ -345,10 +359,11 @@ function Menu({ items, prominent }: { items: MenuEntry[]; prominent: boolean }) 
 }
 
 function MoreSection({ items }: { items: MenuEntry[] }) {
+  const t = useTranslations("Profile");
   return (
     <section aria-labelledby="profile-more" className="space-y-2.5">
       <h2 id="profile-more" className="pl-1 text-sm font-bold text-[#9c9cb0]">
-        More
+        {t("more")}
       </h2>
       <Menu items={items} prominent={false} />
     </section>
@@ -356,7 +371,9 @@ function MoreSection({ items }: { items: MenuEntry[] }) {
 }
 
 function MenuItem({ item, prominent }: { item: MenuEntry; prominent: boolean }) {
-  const { icon: Icon, label, accent, href } = item;
+  const t = useTranslations("Profile");
+  const { icon: Icon, accent, href } = item;
+  const label = t(item.label);
   const content = (
     <>
       {prominent ? (
@@ -382,7 +399,7 @@ function MenuItem({ item, prominent }: { item: MenuEntry; prominent: boolean }) 
         </span>
       ) : (
         <span className="shrink-0 rounded-full border border-[#ffc83d]/50 px-2.5 py-1 text-xs font-bold text-[#ffc83d]">
-          Soon
+          {t("soon")}
         </span>
       )}
     </>
@@ -406,7 +423,7 @@ function MenuItem({ item, prominent }: { item: MenuEntry; prominent: boolean }) 
       {content}
     </Link>
   ) : (
-    <div aria-label={`${label}, coming soon`} className={className} style={style}>
+    <div aria-label={t("comingSoon", { label })} className={className} style={style}>
       {content}
     </div>
   );

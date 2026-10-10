@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   CheckCircle2,
@@ -20,9 +21,8 @@ import {
 import { ErrorState } from "@/components/common/ErrorState";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getMyMissions, type MissionDto } from "@/lib/api/missions";
+import { useFormats } from "@/lib/i18n/format";
 import { MobileGameListSkeleton, MobileMessage, MobilePillTabs, MobileTabTitle } from "./MobileTabUi";
-
-const grouped = new Intl.NumberFormat("en-US");
 
 export function missionVisual(requirementType: string): [LucideIcon, string] {
   const t = requirementType.toUpperCase();
@@ -42,25 +42,15 @@ export function missionVisual(requirementType: string): [LucideIcon, string] {
   return [Gamepad2, "#3b82f6"];
 }
 
-export function formatRemaining(until: string | null | undefined, now = Date.now()) {
-  if (!until) return "";
-  const ms = new Date(until).getTime() - now;
-  if (Number.isNaN(ms)) return "";
-  if (ms < 0) return "Expired";
-  const minutes = Math.floor(ms / 60_000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days >= 1) return `${days}d ${hours % 24}h left`;
-  if (hours >= 1) return `${hours}h ${minutes % 60}m left`;
-  return `${minutes}m left`;
-}
-
 const isCompleted = (mission: MissionDto) => mission.status === "COMPLETED";
 
 /** Mirrors the app's Missions tab: Daily/Weekly pills, reward banner, mission cards. */
 export function MobileMissions() {
   const { accessToken } = useAuth();
   const [tab, setTab] = useState(0);
+  const t = useTranslations("Gamification");
+  const tDiscovery = useTranslations("Discovery");
+  const tNav = useTranslations("Nav");
 
   const query = useQuery({
     queryKey: ["me", "missions"],
@@ -74,8 +64,8 @@ export function MobileMissions() {
     body = (
       <MobileMessage
         icon={Flag}
-        title="Daily & weekly missions"
-        message="Sign in to get missions, earn bonus XP and keep your streak alive."
+        title={t("missionsSignInTitle")}
+        message={t("missionsSignInMessage")}
         signIn
       />
     );
@@ -84,8 +74,8 @@ export function MobileMissions() {
   } else if (query.isError || !query.data) {
     body = (
       <ErrorState
-        title="Missions failed to load."
-        description="Please check your connection and try again."
+        title={t("missionsError")}
+        description={tDiscovery("connectionError")}
         onRetry={() => {
           void query.refetch();
         }}
@@ -98,14 +88,14 @@ export function MobileMissions() {
     body = (
       <div className="space-y-4">
         <MobilePillTabs
-          label="Mission period"
-          labels={["Daily", "Weekly"]}
+          label={t("missionPeriod")}
+          labels={[t("daily"), t("weekly")]}
           selectedIndex={tab}
           onChange={setTab}
         />
         <MissionsBanner daily={daily} missions={items} expiresAt={expiresAt} />
         {items.length === 0 ? (
-          <MobileMessage icon={Hourglass} message="No missions right now. New ones arrive soon." />
+          <MobileMessage icon={Hourglass} message={t("missionsEmpty")} />
         ) : (
           <ul className="space-y-3">
             {items.map((mission) => (
@@ -121,7 +111,7 @@ export function MobileMissions() {
 
   return (
     <div className="space-y-4">
-      <MobileTabTitle title="Missions" />
+      <MobileTabTitle title={tNav("missions")} />
       {body}
     </div>
   );
@@ -168,22 +158,25 @@ function MissionsBanner({
 }) {
   const done = missions.filter(isCompleted).length;
   const bonus = missions.reduce((sum, m) => sum + m.rewardXp, 0);
-  const remaining = formatRemaining(expiresAt);
+  const { grouped, timeLeft } = useFormats();
+  const remaining = timeLeft(expiresAt);
+  const t = useTranslations("Gamification");
 
   return (
     <div className="flex items-center gap-3.5 rounded-[22px] border border-[#ffc83d]/35 bg-gradient-to-br from-[#3a2a0a] to-[#1c1626] p-[18px]">
       <div className="min-w-0 flex-1">
         <p className="text-base font-black text-white">
-          {daily ? "Complete Daily Missions" : "Complete Weekly Missions"}
+          {daily ? t("completeDaily") : t("completeWeekly")}
         </p>
         <p className="mt-1 text-xs text-[#9c9cb0]">
-          Earn up to {grouped.format(bonus)} XP{remaining ? ` · ${remaining}` : ""}
+          {t("earnUpTo", { xp: grouped.format(bonus) })}
+          {remaining ? ` · ${remaining}` : ""}
         </p>
         <div className="mt-3 flex items-center gap-2.5">
           <ProgressBar
             value={missions.length === 0 ? 0 : done / missions.length}
             height={8}
-            label="Missions completed"
+            label={t("missionsCompleted")}
           />
           <span className="text-sm font-extrabold text-[#ffc83d]">
             {done}/{missions.length}
@@ -197,6 +190,8 @@ function MissionsBanner({
 
 function MissionCard({ mission }: { mission: MissionDto }) {
   const [Icon, color] = missionVisual(mission.requirementType);
+  const { grouped } = useFormats();
+  const t = useTranslations("Gamification");
   const completed = isCompleted(mission);
   const ratio = mission.target > 0 ? mission.progress / mission.target : 0;
 
@@ -224,10 +219,10 @@ function MissionCard({ mission }: { mission: MissionDto }) {
         </div>
       </div>
       {completed ? (
-        <CheckCircle2 className="size-7 shrink-0 text-[#2bd576]" aria-label="Completed" />
+        <CheckCircle2 className="size-7 shrink-0 text-[#2bd576]" aria-label={t("completed")} />
       ) : (
         <span className="shrink-0 text-[13px] font-black text-[#ffc83d]">
-          +{grouped.format(mission.rewardXp)} XP
+          {t("xpReward", { xp: grouped.format(mission.rewardXp) })}
         </span>
       )}
     </div>

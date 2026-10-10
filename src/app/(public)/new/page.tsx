@@ -1,45 +1,51 @@
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SeoRelatedLinks } from "@/features/seo/components/SeoRelatedLinks";
 import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
 import { createMetadata } from "@/lib/seo/metadata";
-import { discoveryPageDescription } from "@/lib/seo/descriptions";
 import { itemListJsonLd } from "@/lib/seo/structured-data";
 
-export const metadata = createMetadata({
-  title: "New Games — Fresh Discoveries",
-  description: discoveryPageDescription("new"),
-  path: "/new",
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Seo");
+  return createMetadata({
+    title: t("newTitle"),
+    description: t("newDescription"),
+    path: "/new",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
 export default async function NewGamesPage() {
-  const home = await fetchHomeDiscoveries();
+  const [home, t, tDiscovery] = await Promise.all([
+    fetchHomeDiscoveries(),
+    getTranslations("Seo"),
+    getTranslations("Discovery"),
+  ]);
 
   return (
     <div className="space-y-10">
-      <JsonLd data={itemListJsonLd("New Games", "/new", home.latest)} />
+      <JsonLd data={itemListJsonLd(t("newListName"), "/new", home.latest)} />
       <header className="space-y-3">
         <h1 className="font-display text-3xl font-bold tracking-tight">
-          New Discoveries
+          {t("newHeading")}
         </h1>
         <p className="max-w-3xl text-muted-foreground">
-          {discoveryPageDescription("new")} Timestamps come from provider/catalog
-          publish dates — we do not fake freshness.
+          {t("newDescription")} {t("newIntro")}
         </p>
       </header>
       <GameSection
-        title="Recently added"
-        description="Newest titles from the live catalog."
+        title={t("newSectionTitle")}
+        description={t("newSectionDescription")}
         games={home.latest}
         variant="discovery"
       />
       <SeoRelatedLinks
         links={[
-          { href: "/trending", label: "Trending" },
-          { href: "/collections/hidden-gems", label: "Hidden gems" },
-          { href: "/games", label: "All games" },
+          { href: "/trending", label: tDiscovery("linkTrending") },
+          { href: "/collections/hidden-gems", label: t("linkHiddenGems") },
+          { href: "/games", label: t("linkAllGames") },
         ]}
       />
     </div>

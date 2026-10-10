@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { UserProfileView } from "@/features/community/components/UserProfileView";
 import { createMetadata } from "@/lib/seo/metadata";
 
@@ -7,9 +8,10 @@ interface ProfilePageProps {
 
 export async function generateMetadata({ params }: ProfilePageProps) {
   const { username } = await params;
+  const t = await getTranslations("Profile");
   return createMetadata({
     title: `@${username}`,
-    description: `Player profile for ${username} on GameDiscoveries.`,
+    description: t("publicMetaDescription", { username }),
     path: `/profile/${username}`,
   });
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +29,8 @@ export function UserMenu({ compact = false }: UserMenuProps) {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
   const { user } = useCurrentUser();
+  const t = useTranslations("Nav");
+  const tCommon = useTranslations("Common");
 
   if (!isAuthenticated) {
     return (
@@ -40,12 +43,12 @@ export function UserMenu({ compact = false }: UserMenuProps) {
             : "h-10 px-5 text-sm",
         )}
       >
-        <Link href="/login">Sign In</Link>
+        <Link href="/login">{tCommon("signIn")}</Link>
       </Button>
     );
   }
 
-  const label = user?.displayName || user?.email || "Account";
+  const label = user?.displayName || user?.email || t("account");
 
   return (
     <DropdownMenu>
@@ -54,7 +57,7 @@ export function UserMenu({ compact = false }: UserMenuProps) {
           "inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 text-sm font-medium text-foreground outline-none transition hover:bg-card focus-visible:ring-2 focus-visible:ring-ring/60",
           compact ? "p-1" : "p-1 pr-3",
         )}
-        aria-label="Open user menu"
+        aria-label={t("openUserMenu")}
       >
         <Avatar size="sm">
           {user?.avatarUrl ? (
@@ -74,49 +77,49 @@ export function UserMenu({ compact = false }: UserMenuProps) {
             router.push("/community");
           }}
         >
-          Community
+          {t("community")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/community/notifications");
           }}
         >
-          Notifications
+          {t("notifications")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/missions");
           }}
         >
-          Missions
+          {t("missions")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/progress");
           }}
         >
-          Progress
+          {t("progress")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/my-games");
           }}
         >
-          My Games
+          {t("myGames")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/my-games?tab=favorites");
           }}
         >
-          Favorites
+          {t("favorites")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             router.push("/my-games?tab=history");
           }}
         >
-          Recently Played
+          {t("recentlyPlayed")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -125,7 +128,7 @@ export function UserMenu({ compact = false }: UserMenuProps) {
             void logout();
           }}
         >
-          Sign Out
+          {tCommon("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

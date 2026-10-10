@@ -1,13 +1,16 @@
 import { CommunityHome } from "@/features/community/components/CommunityHome";
 import { MobileCommunity } from "@/features/mobile-tabs/components/MobileCommunity";
+import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Community",
-  description:
-    "Discuss games, share discoveries, join challenges, and follow player activity on GameDiscoveries.",
-  path: "/community",
-});
+export async function generateMetadata() {
+  const [tNav, t] = await Promise.all([getTranslations("Nav"), getTranslations("Seo")]);
+  return createMetadata({
+    title: tNav("community"),
+    description: t("communityDescription"),
+    path: "/community",
+  });
+}
 
 export default function CommunityPage() {
   return (

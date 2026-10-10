@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Bookmark, Eye, Gamepad2, Heart, Loader2, MessageCircle, Reply, SendHorizontal, Share, X } from "lucide-react";
@@ -15,6 +16,7 @@ import {
   getPostComments,
   type CommunityUser,
 } from "@/lib/api/community";
+import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 import { useSavedPosts } from "../lib/savedCommunityPosts";
 import {
@@ -22,16 +24,13 @@ import {
   CommunityAuthorHeader,
   CommunityAvatar,
   communityName,
-  errorMessage,
   inputClass,
-  sharePost,
-  toggleSaved,
+  useErrorMessage,
   useLikePost,
+  useSharePost,
+  useToggleSaved,
 } from "./MobileCommunityUi";
-import { formatTimeAgo } from "./MobileGameDetail";
 import { MobileSubpageHeader } from "./MobileSubpageHeader";
-
-const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 
 /** Must match the API's `Community:CommentMaxLength`. */
 const COMMENT_MAX_LENGTH = 1500;
@@ -52,6 +51,12 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
   const signedIn = Boolean(accessToken);
   const like = useLikePost();
   const saved = useSavedPosts().some((post) => post.id === postId);
+  const { compact } = useFormats();
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
+  const toErrorMessage = useErrorMessage();
+  const toggleSaved = useToggleSaved();
+  const sharePost = useSharePost();
 
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
@@ -89,7 +94,7 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
       await queryClient.invalidateQueries({ queryKey: commentsKey });
       void refreshLists();
     } catch (error) {
-      toast.error(errorMessage(error));
+      toast.error(toErrorMessage(error));
     } finally {
       setSending(false);
     }
@@ -104,9 +109,9 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
       if (replyTo?.id === comment.id) setReplyTo(null);
       await queryClient.invalidateQueries({ queryKey: commentsKey });
       void refreshLists();
-      toast("Comment deleted.");
+      toast(t("commentDeleted"));
     } catch (error) {
-      toast.error(errorMessage(error));
+      toast.error(toErrorMessage(error));
     }
   };
 
@@ -118,14 +123,14 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
   return (
     <div className="pb-28">
       <MobileSubpageHeader
-        title="Post"
+        title={t("postTitle")}
         fallbackHref="/community"
         action={
           post ? (
             <span className="flex shrink-0 items-center">
               <button
                 type="button"
-                aria-label={saved ? "Remove from saved" : "Save post"}
+                aria-label={saved ? t("removeFromSaved") : t("savePost")}
                 onClick={() => toggleSaved(post)}
                 className={cn("grid size-11 place-items-center", saved ? "text-[#ffc83d]" : "text-white")}
               >
@@ -133,7 +138,7 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
               </button>
               <button
                 type="button"
-                aria-label="Share post"
+                aria-label={t("sharePost")}
                 onClick={() => void sharePost(post)}
                 className="grid size-11 place-items-center text-white"
               >
@@ -152,13 +157,13 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
         </div>
       ) : postQuery.isError || !post ? (
         <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
-          <p className="text-sm text-[#9c9cb0]">We couldn&apos;t load this post.</p>
+          <p className="text-sm text-[#9c9cb0]">{t("loadPostError")}</p>
           <button
             type="button"
             onClick={() => void postQuery.refetch()}
             className="mt-2 text-sm font-bold text-[#ffc83d]"
           >
-            Try again
+            {tCommon("retry")}
           </button>
         </div>
       ) : (
@@ -182,7 +187,7 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
               <button
                 type="button"
                 aria-pressed={Boolean(post.viewerReaction)}
-                aria-label={post.viewerReaction ? "Unlike post" : "Like post"}
+                aria-label={post.viewerReaction ? t("unlikePost") : t("likePost")}
                 onClick={() => void like(post)}
                 className={cn(
                   "flex min-h-10 items-center gap-1.5 rounded-full border px-3.5 font-bold",
@@ -195,12 +200,12 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
                 />
                 {compact.format(post.reactionCount)}
               </button>
-              <span className="flex items-center gap-1" aria-label={`${commentCount} comments`}>
+              <span className="flex items-center gap-1" aria-label={t("commentsLabel", { count: commentCount })}>
                 <MessageCircle className="size-[18px] text-[#9c9cb0]" aria-hidden="true" />
                 {compact.format(commentCount)}
               </span>
               {post.viewCount > 0 ? (
-                <span className="flex items-center gap-1" aria-label={`${post.viewCount} views`}>
+                <span className="flex items-center gap-1" aria-label={t("viewsLabel", { count: post.viewCount })}>
                   <Eye className="size-[18px] text-[#9c9cb0]" aria-hidden="true" />
                   {compact.format(post.viewCount)}
                 </span>
@@ -209,25 +214,25 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
           </article>
 
           <div className="my-5 h-px bg-[#2a2a37]" />
-          <h3 className="text-base font-extrabold text-white">Comments ({commentCount})</h3>
+          <h3 className="text-base font-extrabold text-white">{t("commentsCount", { count: commentCount })}</h3>
           <div className="mt-3">
             {commentsQuery.isPending ? (
               <div className="grid place-items-center py-6">
-                <Loader2 className="size-6 animate-spin text-[#ffc83d]" aria-label="Loading comments" />
+                <Loader2 className="size-6 animate-spin text-[#ffc83d]" aria-label={t("loadingComments")} />
               </div>
             ) : commentsQuery.isError ? (
               <div className="py-4 text-center">
-                <p className="text-sm text-[#9c9cb0]">Something went wrong. Please try again.</p>
+                <p className="text-sm text-[#9c9cb0]">{tCommon("errorGeneric")}</p>
                 <button
                   type="button"
                   onClick={() => void commentsQuery.refetch()}
                   className="mt-1 text-sm font-bold text-[#ffc83d]"
                 >
-                  Try again
+                  {tCommon("retry")}
                 </button>
               </div>
             ) : (comments ?? []).length === 0 ? (
-              <p className="py-6 text-center text-sm text-[#9c9cb0]">No comments yet. Start the conversation!</p>
+              <p className="py-6 text-center text-sm text-[#9c9cb0]">{t("noComments")}</p>
             ) : (
               <ul className="space-y-3">
                 {(comments ?? []).map((comment) => (
@@ -261,13 +266,13 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
             <div className="mx-auto max-w-xl py-2 pl-4 pr-2">
               {!signedIn ? (
                 <div className="flex items-center gap-2">
-                  <p className="flex-1 text-sm text-[#9c9cb0]">Sign in to join the conversation.</p>
+                  <p className="flex-1 text-sm text-[#9c9cb0]">{t("signInToComment")}</p>
                   <button
                     type="button"
                     onClick={() => router.push("/login")}
                     className="h-10 px-3 text-sm font-bold text-[#ffc83d]"
                   >
-                    Sign In
+                    {tCommon("signIn")}
                   </button>
                 </div>
               ) : (
@@ -275,10 +280,12 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
                   {replyTo ? (
                     <div className="flex items-center gap-1.5 text-[13px] text-[#9c9cb0]">
                       <Reply className="size-4 shrink-0 text-[#ffc83d]" aria-hidden="true" />
-                      <span className="min-w-0 flex-1 truncate">Replying to {communityName(replyTo.author)}</span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {t("replyingTo", { name: communityName(replyTo.author) })}
+                      </span>
                       <button
                         type="button"
-                        aria-label="Cancel reply"
+                        aria-label={t("cancelReply")}
                         onClick={() => setReplyTo(null)}
                         className="grid size-8 place-items-center"
                       >
@@ -295,8 +302,8 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
                   >
                     <textarea
                       ref={textarea}
-                      aria-label={replyTo ? "Write a reply" : "Write a comment"}
-                      placeholder={replyTo ? "Write a reply..." : "Write a comment..."}
+                      aria-label={replyTo ? t("writeReplyLabel") : t("writeCommentLabel")}
+                      placeholder={replyTo ? t("writeReply") : t("writeComment")}
                       rows={Math.min(4, Math.max(1, text.split("\n").length))}
                       maxLength={COMMENT_MAX_LENGTH}
                       disabled={sending}
@@ -306,7 +313,7 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
                     />
                     <button
                       type="submit"
-                      aria-label="Send comment"
+                      aria-label={t("sendComment")}
                       disabled={sending || !text.trim()}
                       className="grid size-11 shrink-0 place-items-center text-[#ffc83d] disabled:text-[#6b6b7e]"
                     >
@@ -330,22 +337,22 @@ export function MobileCommunityPost({ postId }: { postId: string }) {
           showCloseButton={false}
           className="mx-auto max-w-xl rounded-t-[28px] border-[#2a2a37] bg-[#15151d] px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-5 text-white"
         >
-          <SheetTitle className="text-lg font-extrabold text-white">Delete comment?</SheetTitle>
-          <SheetDescription className="text-sm text-[#9c9cb0]">Your comment will be removed.</SheetDescription>
+          <SheetTitle className="text-lg font-extrabold text-white">{t("deleteCommentTitle")}</SheetTitle>
+          <SheetDescription className="text-sm text-[#9c9cb0]">{t("deleteCommentMessage")}</SheetDescription>
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setToDelete(null)}
               className="h-10 rounded-full px-4 text-sm font-bold text-[#ffc83d]"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="button"
               onClick={() => void confirmDelete()}
               className="h-10 rounded-full px-4 text-sm font-bold text-[#ff5d73]"
             >
-              Delete
+              {tCommon("delete")}
             </button>
           </div>
         </SheetContent>
@@ -366,24 +373,30 @@ function CommentTile({
   onReply?: () => void;
   onDelete: () => void;
 }) {
+  const { timeAgo } = useFormats();
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
+  const tGamification = useTranslations("Gamification");
   return (
     <div className="flex items-start gap-2.5 rounded-[14px] bg-[#17171f] px-3 pb-1 pt-3">
       <CommunityAvatar user={comment.author} size={34} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm">
-          <span className="font-extrabold text-white">{isMine ? "You" : communityName(comment.author)}</span>
-          <span className="ml-2 text-xs text-[#6b6b7e]">{formatTimeAgo(comment.createdAt)}</span>
+          <span className="font-extrabold text-white">
+            {isMine ? tGamification("you") : communityName(comment.author)}
+          </span>
+          <span className="ml-2 text-xs text-[#6b6b7e]">{timeAgo(comment.createdAt)}</span>
         </p>
         <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-snug text-white">{comment.content}</p>
         <div className="flex">
           {onReply ? (
             <button type="button" onClick={onReply} className="h-8 px-2 text-sm font-semibold text-[#ffc83d]">
-              Reply
+              {t("reply")}
             </button>
           ) : null}
           {isMine ? (
             <button type="button" onClick={onDelete} className="h-8 px-2 text-sm font-semibold text-[#ff5d73]">
-              Delete
+              {tCommon("delete")}
             </button>
           ) : null}
         </div>

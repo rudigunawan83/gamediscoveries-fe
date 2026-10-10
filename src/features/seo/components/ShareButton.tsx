@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { analytics } from "@/lib/analytics/client";
@@ -24,7 +25,9 @@ export function ShareButton({
   iconOnly = false,
   className,
 }: ShareButtonProps) {
+  const t = useTranslations("Common");
   const [copied, setCopied] = useState(false);
+  const label = copied ? t("linkCopied") : t("share");
 
   async function handleShare() {
     analytics.track("share_clicked", {
@@ -62,12 +65,12 @@ export function ShareButton({
       type="button"
       variant="outline"
       size={iconOnly ? "icon" : "default"}
-      aria-label={iconOnly ? (copied ? "Link copied" : "Share") : undefined}
+      aria-label={iconOnly ? label : undefined}
       className={className}
       onClick={() => void handleShare()}
     >
       <Share2 className={iconOnly ? "size-5" : "size-4"} aria-hidden="true" />
-      {iconOnly ? null : copied ? "Link copied" : "Share"}
+      {iconOnly ? null : label}
     </Button>
   );
 }

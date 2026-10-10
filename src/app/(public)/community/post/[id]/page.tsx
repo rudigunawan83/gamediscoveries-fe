@@ -15,6 +15,15 @@ import {
 } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
 import { useEffect } from "react";
+import { useTranslations, type Messages } from "next-intl";
+import { sectionLabel } from "@/features/mobile-tabs/components/MobileCommunityUi";
+
+const REACTIONS = [
+  ["like", "reactionLike"],
+  ["helpful", "reactionHelpful"],
+  ["love", "reactionLove"],
+  ["funny", "reactionFunny"],
+] as const satisfies readonly (readonly [string, keyof Messages["Community"]])[];
 
 export default function CommunityPostPage() {
   const params = useParams<{ id: string }>();
@@ -36,6 +45,7 @@ function DesktopCommunityPost() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
+  const t = useTranslations("Community");
 
   const postQuery = useQuery({
     queryKey: ["community", "post", postId],
@@ -69,10 +79,10 @@ function DesktopCommunityPost() {
 
   const post = postQuery.data;
   if (postQuery.isPending) {
-    return <p className="text-sm text-muted-foreground">Loading post…</p>;
+    return <p className="text-sm text-muted-foreground">{t("loadingPost")}</p>;
   }
   if (!post) {
-    return <p className="text-sm text-muted-foreground">Post not found.</p>;
+    return <p className="text-sm text-muted-foreground">{t("postNotFound")}</p>;
   }
 
   return (
@@ -80,19 +90,20 @@ function DesktopCommunityPost() {
       <article className="space-y-4 rounded-xl border border-white/10 bg-white/5 p-6">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {post.type}
+            {sectionLabel(t, post.type)}
           </p>
           <h1 className="font-display text-3xl font-bold text-white">
             {post.title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            by{" "}
-            <Link
-              href={`/profile/${post.author.username}`}
-              className="text-primary"
-            >
-              @{post.author.username}
-            </Link>
+            {t.rich("byAuthor", {
+              username: post.author.username,
+              link: (chunks) => (
+                <Link href={`/profile/${post.author.username}`} className="text-primary">
+                  {chunks}
+                </Link>
+              ),
+            })}
             {post.game ? (
               <>
                 {" "}
@@ -108,7 +119,7 @@ function DesktopCommunityPost() {
           {post.content}
         </p>
         <div className="flex flex-wrap gap-2">
-          {["like", "helpful", "love", "funny"].map((reaction) => (
+          {REACTIONS.map(([reaction, label]) => (
             <Button
               key={reaction}
               size="sm"
@@ -126,18 +137,18 @@ function DesktopCommunityPost() {
                 });
               }}
             >
-              {reaction}
+              {t(label)}
             </Button>
           ))}
           <span className="self-center text-xs text-muted-foreground">
-            {post.reactionCount} reactions · {post.commentCount} comments
+            {t("postMeta", { comments: post.commentCount, reactions: post.reactionCount })}
           </span>
         </div>
       </article>
 
       <section className="space-y-4">
         <h2 className="font-display text-xl font-semibold text-white">
-          Comments
+          {t("commentsHeading")}
         </h2>
         {accessToken ? (
           <form
@@ -153,14 +164,14 @@ function DesktopCommunityPost() {
               onChange={(e) => setComment(e.target.value)}
               rows={3}
               className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white"
-              placeholder="Add a comment"
+              placeholder={t("addComment")}
             />
             <Button type="submit" disabled={commentMutation.isPending}>
-              Comment
+              {t("comment")}
             </Button>
           </form>
         ) : (
-          <p className="text-sm text-muted-foreground">Sign in to comment.</p>
+          <p className="text-sm text-muted-foreground">{t("signInToCommentShort")}</p>
         )}
 
         <div className="space-y-3">

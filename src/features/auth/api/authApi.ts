@@ -1,3 +1,4 @@
+import { parseLanguageMode } from "@/i18n/config";
 import { apiClient } from "@/lib/api/client";
 import type { ApiResponse } from "@/lib/api/types";
 import type {
@@ -13,7 +14,7 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function mapUser(value: unknown): AuthUser | null {
+export function mapUser(value: unknown): AuthUser | null {
   const record = asRecord(value);
   if (!record) {
     return null;
@@ -34,6 +35,7 @@ function mapUser(value: unknown): AuthUser | null {
         : typeof record.name === "string"
           ? record.name
           : null,
+    username: typeof record.username === "string" ? record.username : null,
     avatarUrl:
       typeof record.avatarUrl === "string"
         ? record.avatarUrl
@@ -43,6 +45,7 @@ function mapUser(value: unknown): AuthUser | null {
     roles: Array.isArray(record.roles)
       ? record.roles.filter((role): role is string => typeof role === "string")
       : [],
+    preferredLanguage: parseLanguageMode(record.preferredLanguage),
   };
 }
 

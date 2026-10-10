@@ -1,29 +1,16 @@
-import { Heart, Sparkles, Users, Zap } from "lucide-react";
+import { Heart, Sparkles, Users, Zap, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { AuthMessageKey } from "@/features/auth/authMessages";
 
 const features = [
-  {
-    icon: Heart,
-    title: "Save Your Favorites",
-    description: "Keep track of games you love.",
-  },
-  {
-    icon: Sparkles,
-    title: "Get Personalized Recommendations",
-    description: "Discover games you’ll enjoy.",
-  },
-  {
-    icon: Zap,
-    title: "Play Anytime, Anywhere",
-    description: "Access your games on any device.",
-  },
-  {
-    icon: Users,
-    title: "Join the Community",
-    description: "Be part of a growing gaming community.",
-  },
-] as const;
+  { icon: Heart, title: "benefitFavoritesTitle", description: "benefitFavoritesText" },
+  { icon: Sparkles, title: "benefitRecommendationsTitle", description: "benefitRecommendationsText" },
+  { icon: Zap, title: "benefitAnywhereTitle", description: "benefitAnywhereText" },
+  { icon: Users, title: "benefitCommunityTitle", description: "benefitCommunityText" },
+] as const satisfies readonly { icon: LucideIcon; title: AuthMessageKey; description: AuthMessageKey }[];
 
 export function AuthFeatureList() {
+  const t = useTranslations("Auth");
   return (
     <ul className="space-y-4">
       {features.map(({ icon: Icon, title, description }) => (
@@ -32,8 +19,8 @@ export function AuthFeatureList() {
             <Icon className="size-4" aria-hidden="true" />
           </span>
           <div>
-            <p className="font-semibold text-foreground">{title}</p>
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="font-semibold text-foreground">{t(title)}</p>
+            <p className="text-sm text-muted-foreground">{t(description)}</p>
           </div>
         </li>
       ))}

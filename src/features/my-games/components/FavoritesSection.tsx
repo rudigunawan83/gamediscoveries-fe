@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { GameGridSkeleton } from "@/components/game/GameGridSkeleton";
 import { EmptyFavorites } from "@/features/my-games/components/EmptyFavorites";
@@ -21,6 +22,9 @@ export function FavoritesSection({
   preview = false,
   showHeader = true,
 }: FavoritesSectionProps) {
+  const t = useTranslations("Library");
+  const tNav = useTranslations("Nav");
+  const tCommon = useTranslations("Common");
   const pageSize = preview ? 6 : 24;
   const query = useFavorites({ page: 1, pageSize });
   const [extraItems, setExtraItems] = useState<FavoriteItem[]>([]);
@@ -43,9 +47,9 @@ export function FavoritesSection({
 
   if (query.isPending) {
     return (
-      <section className="space-y-4" aria-busy="true" aria-label="Loading favorites">
+      <section className="space-y-4" aria-busy="true" aria-label={t("favoritesLoading")}>
         {showHeader ? (
-          <h2 className="font-display text-xl font-semibold text-white">Favorites</h2>
+          <h2 className="font-display text-xl font-semibold text-white">{tNav("favorites")}</h2>
         ) : null}
         <GameGridSkeleton />
       </section>
@@ -56,10 +60,15 @@ export function FavoritesSection({
     return (
       <section className="space-y-4">
         {showHeader ? (
-          <h2 className="font-display text-xl font-semibold text-white">Favorites</h2>
+          <h2 className="font-display text-xl font-semibold text-white">{tNav("favorites")}</h2>
         ) : null}
         <LibraryErrorState
-          message={mapLibraryError(query.error, "Unable to load your favorites.")}
+          message={mapLibraryError(
+            query.error,
+            t,
+            t("favoritesLoadError"),
+            tCommon("errorGeneric"),
+          )}
           onRetry={() => {
             void query.refetch();
           }}
@@ -81,10 +90,10 @@ export function FavoritesSection({
               id="favorites-section-title"
               className="font-display text-xl font-semibold text-white"
             >
-              Favorites
+              {tNav("favorites")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Games you saved for quick access.
+              {t("favoritesDescription")}
             </p>
           </div>
           {preview ? (
@@ -92,7 +101,7 @@ export function FavoritesSection({
               href="/my-games?tab=favorites"
               className="text-sm font-medium text-primary hover:underline"
             >
-              View All Favorites
+              {t("viewAllFavorites")}
             </Link>
           ) : null}
         </div>
@@ -125,7 +134,7 @@ export function FavoritesSection({
               })();
             }}
           >
-            {loadingMore ? "Loading…" : "Load More"}
+            {loadingMore ? tCommon("loading") : tCommon("loadMore")}
           </Button>
         </div>
       ) : null}

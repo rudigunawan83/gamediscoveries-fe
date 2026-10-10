@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/components/common/ErrorState";
 import { GameSection } from "@/components/game/GameSection";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
@@ -10,6 +11,7 @@ import { HiddenGemsSection } from "@/features/recommendations/components/Recomme
 import { ApiClientError } from "@/lib/api/types";
 
 export function DiscoverFeed() {
+  const t = useTranslations("Discovery");
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["discoveries", "home", "v2"],
     queryFn: fetchHomeDiscoveries,
@@ -36,8 +38,8 @@ export function DiscoverFeed() {
   if (isError || !data) {
     return (
       <ErrorState
-        title="Discoveries failed to load."
-        description="We couldn't load personalized discovery feeds. Please try again."
+        title={t("feedErrorTitle")}
+        description={t("feedErrorDescription")}
         onRetry={() => {
           void refetch();
         }}
@@ -52,68 +54,68 @@ export function DiscoverFeed() {
     <div className="space-y-10 md:space-y-14">
       <RecommendationHomeShelves />
       <GameSection
-        title="Today's Discoveries"
-        description="Hand-picked picks from the live catalog."
+        title={t("todaysTitle")}
+        description={t("todaysDescription")}
         games={todaysDiscoveries.slice(0, 12)}
         href="/games"
         variant="discovery"
       />
       <HiddenGemsSection />
       <GameSection
-        title="Most Popular"
-        description="Top games players love right now."
+        title={t("popularTitle")}
+        description={t("popularDescription")}
         games={data.popular.slice(0, 12)}
         href="/most-popular"
         variant="discovery"
       />
       <GameSection
-        title="Hot Games"
-        description="Fresh heat from the GameMonetize hot feed."
+        title={t("shelfHot")}
+        description={t("hotDescription")}
         games={data.hotGames.slice(0, 12)}
         href="/hot-games"
         variant="discovery"
       />
       <GameSection
-        title="Best Games"
-        description="Editor-grade favorites and standout titles."
+        title={t("shelfBest")}
+        description={t("bestDescription")}
         games={data.bestGames.slice(0, 12)}
         href="/best-games"
         variant="discovery"
       />
       <GameSection
-        title="Most Played"
-        description="High-engagement games with strong replay value."
+        title={t("shelfMostPlayed")}
+        description={t("mostPlayedDescription")}
         games={data.mostPlayed.slice(0, 12)}
         href="/most-played"
         variant="discovery"
       />
       <GameSection
-        title="Exclusive Games"
-        description="Exclusive-style classics and match gems like Zuma vibes."
+        title={t("exclusiveTitle")}
+        description={t("exclusiveDescription")}
         games={data.exclusiveGames.slice(0, 12)}
         href="/exclusive-games"
         variant="discovery"
       />
       <GameSection
-        title="Trending Now"
+        title={t("shelfTrending")}
         games={data.trending.slice(0, 12)}
         href="/trending"
         variant="discovery"
       />
       <GameSection
-        title="New Games"
+        title={t("newGamesTitle")}
         games={data.latest.slice(0, 12)}
         href="/new"
         variant="discovery"
       />
       <GameSection
-        title="Mobile Ready"
+        title={t("mobileReadyTitle")}
         games={data.mobile.slice(0, 12)}
         href="/mobile"
         variant="discovery"
       />
       <GameSection
-        title="Multiplayer"
+        title={t("shelfMultiplayer")}
         games={data.multiplayer.slice(0, 12)}
         href="/multiplayer"
         variant="discovery"

@@ -1,9 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { getChallenges } from "@/lib/api/community";
 
 export default function ChallengesPage() {
+  const t = useTranslations("Community");
+  const tCommon = useTranslations("Common");
   const { data, isPending } = useQuery({
     queryKey: ["community", "challenges"],
     queryFn: async () => (await getChallenges()).data ?? [],
@@ -13,14 +16,12 @@ export default function ChallengesPage() {
     <div className="space-y-6">
       <header className="space-y-2">
         <h1 className="font-display text-3xl font-bold text-white">
-          Challenges
+          {t("challengesTitle")}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Time-bounded community goals that keep discovery fun.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("challengesIntro")}</p>
       </header>
       {isPending ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
       ) : (
         <div className="space-y-3">
           {(data as Array<{
@@ -47,8 +48,10 @@ export default function ChallengesPage() {
                 {challenge.description}
               </p>
               <p className="mt-2 text-xs text-primary">
-                Progress {challenge.progress}/{challenge.targetValue}
-                {challenge.completed ? " · completed" : ""}
+                {t(challenge.completed ? "challengeProgressDone" : "challengeProgress", {
+                  current: challenge.progress,
+                  target: challenge.targetValue,
+                })}
               </p>
             </article>
           ))}

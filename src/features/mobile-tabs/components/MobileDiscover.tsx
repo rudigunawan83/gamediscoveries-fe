@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useTranslations, type Messages } from "next-intl";
 import {
   Brain,
   Car,
@@ -36,11 +37,11 @@ import {
 } from "./MobileTabUi";
 
 const SORTS = [
-  { label: "Trending", value: "trending" },
-  { label: "New", value: "newest" },
-  { label: "Popular", value: "popular" },
-  { label: "A–Z", value: "title" },
-] as const;
+  { label: "sortTrending", value: "trending" },
+  { label: "sortNew", value: "newest" },
+  { label: "sortPopular", value: "popular" },
+  { label: "sortAz", value: "title" },
+] as const satisfies readonly { label: keyof Messages["Search"]; value: string }[];
 
 const ACCENTS = ["#3b82f6", "#14b8a6", "#ffc83d", "#8b5cf6", "#ec4899", "#f97316", "#2bd576"];
 const PAGE_SIZE = 20;
@@ -64,6 +65,9 @@ export function categoryIcon(slug: string): LucideIcon {
 
 /** Phone layout of search, mirroring the app's Discover tab. */
 export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string }) {
+  const t = useTranslations("Search");
+  const tNav = useTranslations("Nav");
+  const tDiscovery = useTranslations("Discovery");
   const [text, setText] = useState(initialQuery);
   const [search, setSearch] = useState(initialQuery.trim());
   const [category, setCategory] = useState<string | null>(null);
@@ -118,7 +122,7 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
 
   return (
     <div className="space-y-4">
-      <MobileTabTitle title="Discover" />
+      <MobileTabTitle title={tNav("discover")} />
 
       <label className="flex h-12 items-center gap-3 rounded-2xl border border-white/10 bg-[#15151d] px-4">
         <Search className="size-5 shrink-0 text-[#9c9cb0]" aria-hidden="true" />
@@ -126,14 +130,14 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
           type="search"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Search games…"
-          aria-label="Search games"
+          placeholder={t("mobilePlaceholder")}
+          aria-label={t("mobileLabel")}
           className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#9c9cb0] [&::-webkit-search-cancel-button]:hidden"
         />
         {text ? (
           <button
             type="button"
-            aria-label="Clear search"
+            aria-label={t("clear")}
             onClick={() => {
               setText("");
               setSearch("");
@@ -148,7 +152,7 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
       {categories.data?.length ? (
         <ul className="-mx-4 flex gap-3.5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <CategoryItem
-            label="All"
+            label={t("all")}
             icon={LayoutGrid}
             color="#ffc83d"
             selected={category === null}
@@ -169,9 +173,9 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
 
       <div className="py-1">
         <MobilePillTabs
-          label="Sort games"
+          label={t("sortLabel")}
           expanded={false}
-          labels={SORTS.map((s) => s.label)}
+          labels={SORTS.map((s) => t(s.label))}
           selectedIndex={sortIndex}
           onChange={(index) => setSort(SORTS[index].value)}
         />
@@ -181,8 +185,8 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
         <MobileGameListSkeleton />
       ) : games.isError ? (
         <ErrorState
-          title="Games failed to load."
-          description="Please check your connection and try again."
+          title={tDiscovery("loadErrorTitle")}
+          description={tDiscovery("connectionError")}
           onRetry={() => {
             void games.refetch();
           }}
@@ -190,8 +194,8 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
       ) : items.length === 0 ? (
         <MobileMessage
           icon={SearchX}
-          title="No games found"
-          message="Try another keyword or category."
+          title={t("noResultsTitle")}
+          message={t("noResultsMessage")}
         />
       ) : (
         <>
@@ -213,7 +217,7 @@ export function MobileDiscover({ initialQuery = "" }: { initialQuery?: string })
           </ul>
           <div ref={sentinel} className="flex justify-center py-6">
             {isFetchingNextPage ? (
-              <Loader2 className="size-6 animate-spin text-[#ffc83d]" aria-label="Loading more games" />
+              <Loader2 className="size-6 animate-spin text-[#ffc83d]" aria-label={t("loadingMore")} />
             ) : null}
           </div>
         </>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { errorMessage } from "@/features/mobile-tabs/components/MobileCommunityUi";
 import { getGameReviews, upsertGameReview } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
 
@@ -14,6 +16,8 @@ export function GameReviewsSection({ slug }: { slug: string }) {
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("Community");
+  const locale = useLocale();
 
   const reviewsQuery = useQuery({
     queryKey: ["community", "reviews", slug],
@@ -30,7 +34,7 @@ export function GameReviewsSection({ slug }: { slug: string }) {
         queryKey: ["community", "reviews", slug],
       });
     },
-    onError: (err: Error) => setError(err.message || "Failed to save review"),
+    onError: (err: Error) => setError(errorMessage(err, t("saveReviewFailed"))),
   });
 
   const summary = reviewsQuery.data?.summary;
@@ -41,13 +45,18 @@ export function GameReviewsSection({ slug }: { slug: string }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-bold text-white">
-            Community Reviews
+            {t("reviewsTitle")}
           </h2>
           {summary ? (
             <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <Star className="size-4 fill-warning text-warning" aria-hidden />
-              {summary.averageRating.toFixed(1)} / 5 · {summary.reviewCount}{" "}
-              reviews
+              {t("reviewSummary", {
+                rating: summary.averageRating.toLocaleString(locale, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                }),
+                count: summary.reviewCount,
+              })}
             </p>
           ) : null}
         </div>
@@ -63,7 +72,7 @@ export function GameReviewsSection({ slug }: { slug: string }) {
           }}
         >
           <label className="block text-sm text-muted-foreground">
-            Your rating
+            {t("yourRating")}
             <select
               value={rating}
               onChange={(e) => setRating(Number(e.target.value))}
@@ -71,7 +80,7 @@ export function GameReviewsSection({ slug }: { slug: string }) {
             >
               {[5, 4, 3, 2, 1].map((value) => (
                 <option key={value} value={value}>
-                  {value} stars
+                  {t("starsOption", { count: value })}
                 </option>
               ))}
             </select>
@@ -82,16 +91,16 @@ export function GameReviewsSection({ slug }: { slug: string }) {
             rows={3}
             maxLength={2000}
             required
-            placeholder="What did you think about this game?"
+            placeholder={t("reviewHint")}
             className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white"
           />
           {error ? <p className="text-xs text-red-400">{error}</p> : null}
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Saving…" : "Submit review"}
+            {mutation.isPending ? t("saving") : t("submitReview")}
           </Button>
         </form>
       ) : (
-        <p className="text-sm text-muted-foreground">Sign in to write a review.</p>
+        <p className="text-sm text-muted-foreground">{t("signInToReview")}</p>
       )}
 
       <div className="space-y-3">
@@ -111,7 +120,7 @@ export function GameReviewsSection({ slug }: { slug: string }) {
           </article>
         ))}
         {!reviewsQuery.isPending && items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No reviews yet.</p>
+          <p className="text-sm text-muted-foreground">{t("noReviews")}</p>
         ) : null}
       </div>
     </section>

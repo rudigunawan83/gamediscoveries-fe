@@ -1,8 +1,10 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { DiscoveryPills } from "@/components/discovery/DiscoveryPills";
 import { HeroSearchInput } from "@/components/search/HeroSearchInput";
 
 export function DiscoveryHero() {
+  const t = useTranslations("Discovery");
   return (
     <section
       aria-labelledby="discovery-hero-heading"
@@ -41,13 +43,13 @@ export function DiscoveryHero() {
               id="discovery-hero-heading"
               className="font-display text-[2.45rem] leading-[1.05] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-[4.1rem]"
             >
-              Discover{" "}
-              <span className="text-brand-gradient">Your</span>
-              <br className="hidden sm:block" />{" "}
-              Next Game
+              {t.rich("heroTitle", {
+                highlight: (chunks) => <span className="text-brand-gradient">{chunks}</span>,
+                br: () => <br className="hidden sm:block" />,
+              })}
             </h1>
             <p className="max-w-md text-base leading-relaxed text-[#ffe8c2] md:text-lg">
-              Play thousands of free games. Hot picks, best titles, and exclusive classics every day.
+              {t("heroSubtitle")}
             </p>
           </div>
 

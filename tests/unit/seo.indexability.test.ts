@@ -11,6 +11,7 @@ import { gameTitle, categoryTitle } from "@/lib/seo/titles";
 import { gameDescription } from "@/lib/seo/descriptions";
 import { scoreGameSeo } from "@/lib/seo/quality-score";
 import type { Game } from "@/types/game";
+import { seoTranslator } from "./helpers/intl";
 
 const baseGame: Game = {
   id: "1",
@@ -81,11 +82,18 @@ describe("SEO indexability", () => {
 
 describe("SEO metadata helpers", () => {
   it("builds unique game titles and descriptions", () => {
-    expect(gameTitle("Subway Surfers")).toContain("Subway Surfers");
-    expect(categoryTitle("Action")).toContain("Action");
-    const desc = gameDescription(baseGame);
+    const t = seoTranslator();
+    expect(gameTitle(t, "Subway Surfers")).toContain("Subway Surfers");
+    expect(categoryTitle(t, "Action")).toContain("Action");
+    const desc = gameDescription(t, baseGame);
     expect(desc.toLowerCase()).toContain("subway surfers");
     expect(desc).not.toMatch(/best amazing fun exciting/i);
+  });
+
+  it("localizes title templates but keeps the game title", () => {
+    const t = seoTranslator("id");
+    expect(gameTitle(t, "Subway Surfers")).toBe("Main Subway Surfers Online — Game Gratis");
+    expect(gameDescription(t, baseGame)).toMatch(/^Mainkan Subway Surfers online secara gratis\./);
   });
 
   it("normalizes canonical paths", () => {

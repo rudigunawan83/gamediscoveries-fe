@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { GameCard } from "@/components/game/GameCard";
 import { analytics } from "@/lib/analytics/client";
 import type { Game } from "@/types/game";
@@ -21,6 +22,7 @@ export function LibraryGameGrid({
   className,
   columns = "default",
 }: LibraryGameGridProps) {
+  const t = useTranslations("Library");
   return (
     <ul
       className={cn(
@@ -57,7 +59,7 @@ export function LibraryGameGrid({
               href={`/game/${game.slug}/play`}
               className="inline-flex px-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Play Again
+              {t("playAgain")}
             </Link>
           ) : null}
         </li>

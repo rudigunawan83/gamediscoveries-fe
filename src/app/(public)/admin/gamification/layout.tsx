@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Gamification Admin",
-  path: "/admin/gamification",
-  noIndex: true,
-});
+export function generateMetadata() {
+  return createMetadata({
+    title: "Gamification Admin",
+    path: "/admin/gamification",
+    noIndex: true,
+  });
+}
 
 const links = [
   { href: "/admin/gamification", label: "Overview" },
@@ -28,7 +30,7 @@ export default function AdminGamificationLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="container mx-auto space-y-6 px-4 py-8">
+    <div lang="en" className="container mx-auto space-y-6 px-4 py-8">
       <nav className="flex flex-wrap gap-3 text-sm">
         {links.map((link) => (
           <Link

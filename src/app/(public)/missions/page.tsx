@@ -1,13 +1,17 @@
+import { getTranslations } from "next-intl/server";
 import { MissionsPageView } from "@/features/missions/components/MissionsPageView";
 import { MobileMissions } from "@/features/mobile-tabs/components/MobileMissions";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Missions",
-  description: "Daily missions and weekly challenges on GameDiscoveries.",
-  path: "/missions",
-  noIndex: true,
-});
+export async function generateMetadata() {
+  const [tNav, t] = await Promise.all([getTranslations("Nav"), getTranslations("Gamification")]);
+  return createMetadata({
+    title: tNav("missions"),
+    description: t("missionsMetaDescription"),
+    path: "/missions",
+    noIndex: true,
+  });
+}
 
 export default function MissionsRoutePage() {
   return (

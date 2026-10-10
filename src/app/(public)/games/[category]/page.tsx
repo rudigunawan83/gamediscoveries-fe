@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SeoRelatedLinks } from "@/features/seo/components/SeoRelatedLinks";
@@ -11,7 +12,6 @@ import {
   itemListJsonLd,
 } from "@/lib/seo/structured-data";
 import { shouldIndexCategory } from "@/lib/seo/indexability";
-import { categoryDescription } from "@/lib/seo/descriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -65,21 +65,26 @@ export default async function CategoryGamesPage({ params }: CategoryPageProps) {
     notFound();
   }
 
+  const t = await getTranslations("Discovery");
+  const tNav = await getTranslations("Nav");
+  const tCommon = await getTranslations("Common");
+  const gameCount = category.gameCount ?? popular.length;
+  const lowerName = category.name.toLowerCase();
   const intro =
     category.description?.trim() ||
-    categoryDescription(category.name, category.gameCount ?? popular.length);
+    t("categoryIntro", { category: lowerName, count: gameCount });
 
   return (
     <div className="space-y-10">
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Games", path: "/games" },
+            { name: tNav("home"), path: "/" },
+            { name: tNav("games"), path: "/games" },
             { name: category.name, path: `/games/${category.slug}` },
           ]),
           itemListJsonLd(
-            `${category.name} Games`,
+            t("categoryTitle", { category: category.name }),
             `/games/${category.slug}`,
             popular,
           ),
@@ -87,17 +92,17 @@ export default async function CategoryGamesPage({ params }: CategoryPageProps) {
       />
 
       <header className="space-y-3">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+        <nav aria-label={tCommon("breadcrumb")} className="text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
               <Link href="/" className="hover:text-primary">
-                Home
+                {tNav("home")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
             <li>
               <Link href="/games" className="hover:text-primary">
-                Games
+                {tNav("games")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
@@ -107,46 +112,44 @@ export default async function CategoryGamesPage({ params }: CategoryPageProps) {
           </ol>
         </nav>
         <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-          {category.name} Games
+          {t("categoryTitle", { category: category.name })}
         </h1>
         <p className="max-w-3xl text-muted-foreground">{intro}</p>
         <p className="text-xs text-muted-foreground">
-          {category.gameCount ?? popular.length} games in catalog
-          {!decision.index
-            ? " · temporarily noindex (below quality threshold)"
-            : null}
+          {t("categoryCount", { count: gameCount })}
+          {!decision.index ? t("categoryNoindex") : null}
         </p>
       </header>
 
       <GameSection
-        title={`Popular ${category.name} Games`}
-        description={`Top ${category.name.toLowerCase()} picks players are enjoying now.`}
+        title={t("categoryPopularTitle", { category: category.name })}
+        description={t("categoryPopularDescription", { category: lowerName })}
         games={popular}
         variant="discovery"
       />
 
       <GameSection
-        title={`New ${category.name} Games`}
-        description={`Recently added ${category.name.toLowerCase()} titles.`}
+        title={t("categoryNewTitle", { category: category.name })}
+        description={t("categoryNewDescription", { category: lowerName })}
         games={newest}
       />
 
       {mobile.length > 0 ? (
         <GameSection
-          title={`Mobile ${category.name} Games`}
-          description={`Mobile-ready ${category.name.toLowerCase()} games for on-the-go play.`}
+          title={t("categoryMobileTitle", { category: category.name })}
+          description={t("categoryMobileDescription", { category: lowerName })}
           games={mobile}
         />
       ) : null}
 
       <SeoRelatedLinks
-        title="Related discovery"
+        title={t("relatedDiscovery")}
         links={[
-          { href: "/trending", label: "Trending" },
-          { href: "/new", label: "New discoveries" },
-          { href: "/mobile", label: "Mobile games" },
-          { href: "/multiplayer", label: "Multiplayer" },
-          { href: "/collections", label: "Collections" },
+          { href: "/trending", label: t("linkTrending") },
+          { href: "/new", label: t("linkNewDiscoveries") },
+          { href: "/mobile", label: t("linkMobileGames") },
+          { href: "/multiplayer", label: tNav("multiplayer") },
+          { href: "/collections", label: tNav("collections") },
         ]}
       />
     </div>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { MonitorPlay, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,9 @@ export async function generateMetadata({ params }: GameDetailPageProps) {
   const game = await fetchGameBySlug(slug);
 
   if (!game) {
+    const tSeo = await getTranslations("Seo");
     return createMetadata({
-      title: "Game Not Found",
+      title: tSeo("gameNotFound"),
       path: `/game/${slug}`,
       noIndex: true,
     });
@@ -62,6 +64,10 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     notFound();
   }
 
+  const t = await getTranslations("Game");
+  const tNav = await getTranslations("Nav");
+  const tDiscovery = await getTranslations("Discovery");
+  const tCommon = await getTranslations("Common");
   const playable = isPlayableGame(game.status, game.playUrl ?? game.gameUrl);
   const categorySlug = game.categories[0]?.slug;
   const categoryName = game.categories[0]?.name;
@@ -87,8 +93,8 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   ).filter((item) => item.id !== game.id);
 
   const breadcrumbItems = [
-    { name: "Home", path: "/" },
-    { name: "Games", path: "/games" },
+    { name: tNav("home"), path: "/" },
+    { name: tNav("games"), path: "/games" },
     ...(categorySlug && categoryName
       ? [{ name: categoryName, path: `/games/${categorySlug}` }]
       : []),
@@ -118,7 +124,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
         <div className="relative aspect-[21/9] min-h-56 bg-muted">
           <Image
             src={game.coverUrl ?? game.thumbnailUrl}
-            alt={`${game.title} gameplay`}
+            alt={t("gameplayAlt", { title: game.title })}
             fill
             priority
             className="object-cover"
@@ -144,8 +150,12 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               </Badge>
             ) : null}
             {game.orientation ? (
-              <Badge variant="outline" className="capitalize">
-                {game.orientation}
+              <Badge variant="outline">
+                {game.orientation === "portrait"
+                  ? t("portrait")
+                  : game.orientation === "landscape"
+                    ? t("landscape")
+                    : t("anyOrientation")}
               </Badge>
             ) : null}
           </div>
@@ -159,9 +169,11 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                 <Star className="size-4 fill-warning text-warning" aria-hidden="true" />
                 {formatRating(game.rating)}
               </span>
-              {game.mobileReady ? <span>Mobile ready</span> : null}
-              {game.multiplayer ? <span>Multiplayer</span> : null}
-              {game.developer ? <span>by {game.developer}</span> : null}
+              {game.mobileReady ? <span>{t("mobileReady")}</span> : null}
+              {game.multiplayer ? <span>{tNav("multiplayer")}</span> : null}
+              {game.developer ? (
+                <span>{t("byDeveloper", { developer: game.developer })}</span>
+              ) : null}
               {game.width && game.height ? (
                 <span className="inline-flex items-center gap-1">
                   <MonitorPlay className="size-3.5" aria-hidden="true" />
@@ -183,20 +195,20 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               gameSlug={game.slug}
             />
             <ShareButton
-              title={`Play ${game.title} online`}
-              text={`Play ${game.title} free on GameDiscoveries`}
+              title={t("shareTitle", { title: game.title })}
+              text={t("shareText", { title: game.title })}
               url={`${env.NEXT_PUBLIC_APP_URL}/game/${game.slug}`}
               entityType="game"
               entityId={game.id}
             />
             <Button asChild variant="outline">
-              <Link href={`/game/${game.slug}/community`}>Community</Link>
+              <Link href={`/game/${game.slug}/community`}>{tNav("community")}</Link>
             </Button>
           </div>
 
           {game.description ? (
             <div className="max-w-3xl space-y-2">
-              <h2 className="text-sm font-semibold text-white">About this game</h2>
+              <h2 className="text-sm font-semibold text-white">{t("aboutTitle")}</h2>
               <p className="whitespace-pre-line text-muted-foreground">
                 {game.description}
               </p>
@@ -205,7 +217,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
 
           {game.instructions ? (
             <div className="max-w-3xl rounded-2xl border border-border/50 bg-secondary/30 p-4">
-              <h2 className="mb-1 text-sm font-semibold text-white">How to play</h2>
+              <h2 className="mb-1 text-sm font-semibold text-white">{t("howToPlayTitle")}</h2>
               <p className="whitespace-pre-line text-sm text-muted-foreground">
                 {game.instructions}
               </p>
@@ -232,13 +244,13 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
         <section className="space-y-4">
           <div className="flex items-end justify-between gap-3">
             <h2 className="font-display text-xl font-semibold tracking-tight">
-              More {categoryName} games
+              {t("moreInCategory", { category: categoryName })}
             </h2>
             <Link
               href={`/games/${categorySlug}`}
               className="text-sm text-primary hover:underline"
             >
-              View all
+              {tCommon("viewAll")}
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -251,7 +263,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                 <div className="relative aspect-video bg-muted">
                   <Image
                     src={item.thumbnailUrl}
-                    alt={`${item.title} gameplay`}
+                    alt={t("gameplayAlt", { title: item.title })}
                     fill
                     className="object-cover transition-transform group-hover:scale-[1.02]"
                     sizes="(max-width:768px) 50vw, 25vw"
@@ -267,21 +279,21 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       ) : null}
 
       <SeoRelatedLinks
-        title="Keep discovering"
+        title={t("keepDiscovering")}
         links={[
           ...(categorySlug && categoryName
-            ? [{ href: `/games/${categorySlug}`, label: `${categoryName} games` }]
+            ? [{ href: `/games/${categorySlug}`, label: t("categoryGames", { category: categoryName }) }]
             : []),
-          { href: `/games-like/${game.slug}`, label: `Games like ${game.title}` },
-          { href: `/game/${game.slug}/community`, label: "Community" },
-          { href: "/collections", label: "Collections" },
+          { href: `/games-like/${game.slug}`, label: t("gamesLike", { title: game.title }) },
+          { href: `/game/${game.slug}/community`, label: tNav("community") },
+          { href: "/collections", label: tNav("collections") },
           ...(game.mobileReady
-            ? [{ href: "/mobile", label: "Mobile games" }]
+            ? [{ href: "/mobile", label: tDiscovery("linkMobileGames") }]
             : []),
           ...(game.multiplayer
-            ? [{ href: "/multiplayer", label: "Multiplayer" }]
+            ? [{ href: "/multiplayer", label: tNav("multiplayer") }]
             : []),
-          { href: "/trending", label: "Trending" },
+          { href: "/trending", label: tDiscovery("linkTrending") },
         ]}
       />
     </div>

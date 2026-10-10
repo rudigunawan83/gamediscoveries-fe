@@ -2,15 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Play } from "lucide-react";
 import { useHistoryPreview } from "@/features/my-games/hooks/useHistory";
-import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
+import {
+  formatHistoryMeta,
+  useHistoryFormatter,
+} from "@/features/my-games/utils/formatPlayTime";
 
 /**
  * Last game played on any device (web or app) with a one-click Continue that
  * opens the player directly. Hidden for guests and empty history.
  */
 export function HomeContinuePlaying() {
+  const t = useTranslations("Library");
+  const tGame = useTranslations("Game");
+  const fmt = useHistoryFormatter();
   const query = useHistoryPreview(6);
   const item = query.data?.pages[0]?.items[0];
   if (!item) return null;
@@ -24,13 +31,13 @@ export function HomeContinuePlaying() {
           id="home-continue-title"
           className="font-display text-xl font-semibold text-white"
         >
-          Continue Playing
+          {t("continuePlaying")}
         </h2>
         <Link
           href="/my-games?tab=history"
           className="text-sm font-medium text-primary hover:underline"
         >
-          View All History
+          {t("viewAllHistory")}
         </Link>
       </div>
       <div className="flex items-center gap-4 rounded-3xl border border-primary/40 bg-gradient-to-br from-card/80 via-card/50 to-transparent p-3 md:p-4">
@@ -40,7 +47,7 @@ export function HomeContinuePlaying() {
         >
           <Image
             src={game.thumbnailUrl}
-            alt={`${game.title} thumbnail`}
+            alt={tGame("thumbnailAlt", { title: game.title })}
             fill
             sizes="96px"
             className="object-cover"
@@ -54,7 +61,7 @@ export function HomeContinuePlaying() {
             {game.title}
           </Link>
           <p className="line-clamp-2 text-sm text-muted-foreground">
-            {formatHistoryMeta(item)}
+            {formatHistoryMeta(fmt, item)}
           </p>
         </div>
         <Link
@@ -62,7 +69,7 @@ export function HomeContinuePlaying() {
           className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Play className="size-4 fill-current" aria-hidden="true" />
-          Continue
+          {t("continue")}
         </Link>
       </div>
     </section>

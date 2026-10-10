@@ -6,7 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, type ComponentProps, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { type AuthMessageKey, useAuthMessage } from "@/features/auth/authMessages";
 import { loginErrorMessage } from "@/features/auth/components/LoginForm";
 import { signupErrorMessage } from "@/features/auth/components/SignupForm";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -90,6 +92,7 @@ function AppField({ id, icon: Icon, error, trailing, ...props }: AppFieldProps) 
 
 function PasswordField(props: Omit<AppFieldProps, "icon" | "trailing" | "type">) {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations("Auth");
   return (
     <AppField
       {...props}
@@ -99,7 +102,7 @@ function PasswordField(props: Omit<AppFieldProps, "icon" | "trailing" | "type">)
         <button
           type="button"
           onClick={() => setVisible((value) => !value)}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? t("hidePassword") : t("showPassword")}
           className="absolute inset-y-0 right-1 grid w-11 place-items-center text-[#9c9cb0]"
         >
           {visible ? (
@@ -126,6 +129,7 @@ function FormError({ message }: { message: string | null }) {
 }
 
 function SubmitButton({ busy, label }: { busy: boolean; label: string }) {
+  const t = useTranslations("Auth");
   return (
     <button
       type="submit"
@@ -134,7 +138,7 @@ function SubmitButton({ busy, label }: { busy: boolean; label: string }) {
       className="grid h-[52px] w-full place-items-center rounded-2xl bg-[#ffc83d] text-base font-extrabold text-[#1a1205] disabled:opacity-70"
     >
       {busy ? (
-        <Loader2 className="size-5 animate-spin" aria-label={`${label}, please wait`} />
+        <Loader2 className="size-5 animate-spin" aria-label={t("busy", { label })} />
       ) : (
         label
       )}
@@ -157,7 +161,10 @@ function SwitchLink({ href, children }: { href: string; children: ReactNode }) {
 export function MobileLogin() {
   const callbackUrl = useCallbackUrl();
   const { login } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const t = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
+  const message = useAuthMessage();
+  const [formError, setFormError] = useState<AuthMessageKey | null>(null);
   const {
     register,
     handleSubmit,
@@ -177,10 +184,7 @@ export function MobileLogin() {
   });
 
   return (
-    <MobileAuthScaffold
-      title="Welcome back"
-      subtitle="Sign in to keep your XP, streak and achievements."
-    >
+    <MobileAuthScaffold title={t("loginTitle")} subtitle={t("loginSubtitle")}>
       <form onSubmit={onSubmit} noValidate>
         <div className="space-y-3">
           <AppField
@@ -189,30 +193,28 @@ export function MobileLogin() {
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="Email"
-            aria-label="Email"
-            error={errors.email?.message}
+            placeholder={t("email")}
+            aria-label={t("email")}
+            error={message(errors.email?.message)}
             disabled={isSubmitting}
             {...register("email")}
           />
           <PasswordField
             id="m-login-password"
             autoComplete="current-password"
-            placeholder="Password"
-            aria-label="Password"
-            error={errors.password?.message}
+            placeholder={t("password")}
+            aria-label={t("password")}
+            error={message(errors.password?.message)}
             disabled={isSubmitting}
             {...register("password")}
           />
         </div>
         <div className="mt-5">
-          <FormError message={formError} />
-          <SubmitButton busy={isSubmitting} label="Sign In" />
+          <FormError message={formError && t(formError)} />
+          <SubmitButton busy={isSubmitting} label={tCommon("signIn")} />
         </div>
       </form>
-      <SwitchLink href={withCallback("/signup", callbackUrl)}>
-        Don&apos;t have an account? Create one
-      </SwitchLink>
+      <SwitchLink href={withCallback("/signup", callbackUrl)}>{t("noAccount")}</SwitchLink>
     </MobileAuthScaffold>
   );
 }
@@ -220,7 +222,9 @@ export function MobileLogin() {
 export function MobileSignup() {
   const callbackUrl = useCallbackUrl();
   const { register: registerAccount } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const t = useTranslations("Auth");
+  const message = useAuthMessage();
+  const [formError, setFormError] = useState<AuthMessageKey | null>(null);
   const {
     register,
     handleSubmit,
@@ -240,10 +244,7 @@ export function MobileSignup() {
   });
 
   return (
-    <MobileAuthScaffold
-      title="Create your account"
-      subtitle="Earn XP, unlock achievements and compete with players."
-    >
+    <MobileAuthScaffold title={t("signupTitle")} subtitle={t("signupSubtitle")}>
       <form onSubmit={onSubmit} noValidate>
         <div className="space-y-3">
           <AppField
@@ -251,9 +252,9 @@ export function MobileSignup() {
             icon={User}
             type="text"
             autoComplete="nickname"
-            placeholder="Display name"
-            aria-label="Display name"
-            error={errors.displayName?.message}
+            placeholder={t("displayName")}
+            aria-label={t("displayName")}
+            error={message(errors.displayName?.message)}
             disabled={isSubmitting}
             {...register("displayName")}
           />
@@ -263,30 +264,28 @@ export function MobileSignup() {
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="Email"
-            aria-label="Email"
-            error={errors.email?.message}
+            placeholder={t("email")}
+            aria-label={t("email")}
+            error={message(errors.email?.message)}
             disabled={isSubmitting}
             {...register("email")}
           />
           <PasswordField
             id="m-signup-password"
             autoComplete="new-password"
-            placeholder="Password"
-            aria-label="Password"
-            error={errors.password?.message}
+            placeholder={t("password")}
+            aria-label={t("password")}
+            error={message(errors.password?.message)}
             disabled={isSubmitting}
             {...register("password")}
           />
         </div>
         <div className="mt-5">
-          <FormError message={formError} />
-          <SubmitButton busy={isSubmitting} label="Create Account" />
+          <FormError message={formError && t(formError)} />
+          <SubmitButton busy={isSubmitting} label={t("createAccount")} />
         </div>
       </form>
-      <SwitchLink href={withCallback("/login", callbackUrl)}>
-        Already have an account? Sign in
-      </SwitchLink>
+      <SwitchLink href={withCallback("/login", callbackUrl)}>{t("haveAccount")}</SwitchLink>
     </MobileAuthScaffold>
   );
 }

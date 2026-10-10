@@ -1,21 +1,27 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { HistoryItem } from "@/features/my-games/types/my-games.types";
 import { LibraryGameGrid } from "@/features/my-games/components/LibraryGameGrid";
-import { formatHistoryMeta } from "@/features/my-games/utils/formatPlayTime";
+import {
+  formatHistoryMeta,
+  useHistoryFormatter,
+} from "@/features/my-games/utils/formatPlayTime";
 
 type ContinuePlayingProps = {
   items: HistoryItem[];
 };
 
 export function ContinuePlaying({ items }: ContinuePlayingProps) {
+  const t = useTranslations("Library");
+  const fmt = useHistoryFormatter();
   if (items.length === 0) {
     return null;
   }
 
   const games = items.map((item) => item.game);
   const metaByGameId = Object.fromEntries(
-    items.map((item) => [item.gameId, formatHistoryMeta(item)]),
+    items.map((item) => [item.gameId, formatHistoryMeta(fmt, item)]),
   );
 
   return (
@@ -28,10 +34,10 @@ export function ContinuePlaying({ items }: ContinuePlayingProps) {
           id="continue-playing-title"
           className="font-display text-xl font-semibold text-white"
         >
-          Continue Playing
+          {t("continuePlaying")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Jump back into games you played recently.
+          {t("continuePlayingDescription")}
         </p>
       </div>
       <LibraryGameGrid

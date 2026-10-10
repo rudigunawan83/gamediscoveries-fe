@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Play, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/features/my-games/components/FavoriteButton";
 import { analytics } from "@/lib/analytics/client";
 import { displayRating } from "@/lib/utils/display-rating";
-import { formatPlayCount, formatRating } from "@/lib/utils/format";
+import { useFormats } from "@/lib/i18n/format";
+import { formatRating } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
 
@@ -24,11 +26,13 @@ export function GameCard({
   variant = "default",
   contextMeta,
 }: GameCardProps) {
+  const t = useTranslations("Game");
+  const { compact } = useFormats();
   const categoryLabel =
     game.categories
       .slice(0, 2)
       .map((category) => category.name)
-      .join(" · ") || "Game";
+      .join(" · ") || t("fallbackCategory");
   const rating = displayRating(game.id, game.rating);
   const isDiscovery = variant === "discovery";
 
@@ -60,7 +64,7 @@ export function GameCard({
         >
           <Image
             src={game.thumbnailUrl}
-            alt={`${game.title} thumbnail`}
+            alt={t("thumbnailAlt", { title: game.title })}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 16vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -71,7 +75,7 @@ export function GameCard({
               <div className="absolute inset-0 flex items-center justify-center bg-background/40 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                 <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
                   <Play className="size-4 fill-current" aria-hidden="true" />
-                  Play
+                  {t("play")}
                 </span>
               </div>
               {game.provider ? (
@@ -101,11 +105,15 @@ export function GameCard({
           >
             <span className="inline-flex items-center gap-1">
               <Star className="size-3.5 fill-warning text-warning" aria-hidden="true" />
-              <span className="sr-only">Rating</span>
+              <span className="sr-only">{t("rating")}</span>
               {formatRating(rating)}
             </span>
             {!isDiscovery ? (
-              <span>{formatPlayCount(game.playCount)} plays</span>
+              <span>
+                {t("plays", {
+                  count: game.playCount === undefined ? "—" : compact.format(game.playCount),
+                })}
+              </span>
             ) : null}
           </div>
         </div>

@@ -1,4 +1,7 @@
+import type { Messages } from "next-intl";
 import type { Game } from "@/types/game";
+
+export type CollectionMessageKey = keyof Messages["Collections"];
 
 export type SeoCategory = {
   id: string;
@@ -11,6 +14,8 @@ export type SeoCategory = {
 
 export type SeoCollection = {
   slug: string;
+  /** Localized title/description/rationale under `Collections.<messageKey>`. */
+  messageKey?: CollectionMessageKey;
   title: string;
   description: string;
   rationale?: string;

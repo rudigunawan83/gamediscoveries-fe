@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { GamePlayerError } from "@/features/game-player/components/GamePlayerError";
 import { GamePlayerLoading } from "@/features/game-player/components/GamePlayerLoading";
 import { GamePlayerToolbar } from "@/features/game-player/components/GamePlayerToolbar";
@@ -42,6 +43,7 @@ export function GamePlayer({
   height,
   backHref,
 }: GamePlayerProps) {
+  const t = useTranslations("Player");
   const shellRef = useRef<HTMLDivElement>(null);
   const session = usePlaySession({
     gameId,
@@ -117,7 +119,7 @@ export function GamePlayer({
               <iframe
                 key={iframeKey}
                 src={validatedUrl}
-                title={`Playing ${title}`}
+                title={t("frameTitle", { title })}
                 className="absolute inset-0 size-full border-0"
                 sandbox={IFRAME_SANDBOX}
                 allow={IFRAME_ALLOW}

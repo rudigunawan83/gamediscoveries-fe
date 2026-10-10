@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { analytics } from "@/lib/analytics/client";
 
@@ -14,6 +15,7 @@ interface SearchInputProps {
 export function SearchInput({ initialQuery = "", autoFocus = false }: SearchInputProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
+  const t = useTranslations("Search");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,8 +36,8 @@ export function SearchInput({ initialQuery = "", autoFocus = false }: SearchInpu
         value={query}
         autoFocus={autoFocus}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search games, genres, or tags..."
-        aria-label="Search games, genres, or tags"
+        placeholder={t("placeholder")}
+        aria-label={t("label")}
         className="h-12 rounded-2xl border-border/70 bg-background/70 pl-10 text-base shadow-sm"
       />
     </form>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, type MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { analytics } from "@/lib/analytics/client";
@@ -52,6 +53,7 @@ export function GameDetailPlayCta({
   playable,
   orientation,
 }: GameDetailPlayCtaProps) {
+  const t = useTranslations("Game");
   const onPlayClick = usePlayGameClick({ gameId, gameSlug, orientation });
   const viewedRef = useRef(false);
 
@@ -69,7 +71,7 @@ export function GameDetailPlayCta({
     return (
       <Button size="lg" className="gap-2" disabled>
         <Play className="size-4" aria-hidden="true" />
-        Unavailable
+        {t("unavailable")}
       </Button>
     );
   }
@@ -78,7 +80,7 @@ export function GameDetailPlayCta({
     <Button asChild size="lg" className="gap-2 bg-brand-gradient text-[#1a1205]">
       <Link href={`/game/${gameSlug}/play`} onClick={onPlayClick}>
         <Play className="size-4 fill-current" aria-hidden="true" />
-        PLAY NOW
+        {t("playNowCta")}
       </Link>
     </Button>
   );

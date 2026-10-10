@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 type LibraryErrorStateProps = {
@@ -8,6 +9,7 @@ type LibraryErrorStateProps = {
 };
 
 export function LibraryErrorState({ message, onRetry }: LibraryErrorStateProps) {
+  const t = useTranslations("Common");
   return (
     <div
       className="rounded-2xl border border-border/50 bg-card/30 px-4 py-8 text-center"
@@ -15,7 +17,7 @@ export function LibraryErrorState({ message, onRetry }: LibraryErrorStateProps) 
     >
       <p className="text-sm text-muted-foreground">{message}</p>
       <Button type="button" variant="outline" className="mt-4" onClick={onRetry}>
-        Try Again
+        {t("retry")}
       </Button>
     </div>
   );

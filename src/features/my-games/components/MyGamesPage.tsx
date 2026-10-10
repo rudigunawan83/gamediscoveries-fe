@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ContinuePlaying } from "@/features/my-games/components/ContinuePlaying";
 import { EmptyMyGames } from "@/features/my-games/components/EmptyMyGames";
 import { FavoritesSection } from "@/features/my-games/components/FavoritesSection";
@@ -13,6 +14,8 @@ import { BecauseYouPlayedSection } from "@/features/recommendations/components/R
 import { analytics } from "@/lib/analytics/client";
 
 export function MyGamesPage() {
+  const t = useTranslations("Library");
+  const tNav = useTranslations("Nav");
   const searchParams = useSearchParams();
   const activeTab = parseMyGamesTab(searchParams.get("tab"));
   const overview = useMyGamesOverview();
@@ -35,10 +38,10 @@ export function MyGamesPage() {
     <div className="space-y-8">
       <header className="space-y-2">
         <h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-          My Games
+          {tNav("myGames")}
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-          Your personal game library
+          {t("myGamesSubtitle")}
         </p>
       </header>
 

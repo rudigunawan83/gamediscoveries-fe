@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { Game } from "@/types/game";
 
 /** Horizontal shelf matching the app's GameShelf: 148px cards with 4:3 art. */
@@ -12,6 +13,7 @@ export function MobileGameShelf({
   games: Game[];
   href?: string;
 }) {
+  const t = useTranslations("Common");
   if (games.length === 0) return null;
 
   return (
@@ -20,7 +22,7 @@ export function MobileGameShelf({
         <h2 className="text-base font-extrabold text-white">{title}</h2>
         {href ? (
           <Link href={href} className="py-1.5 text-[13px] font-bold text-primary">
-            See All
+            {t("seeAll")}
           </Link>
         ) : null}
       </div>

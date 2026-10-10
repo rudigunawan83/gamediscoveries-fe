@@ -1,20 +1,19 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 type SeoRelatedLinksProps = {
   title?: string;
   links: Array<{ href: string; label: string }>;
 };
 
-export function SeoRelatedLinks({
-  title = "Explore more",
-  links,
-}: SeoRelatedLinksProps) {
+export function SeoRelatedLinks({ title, links }: SeoRelatedLinksProps) {
+  const t = useTranslations("Discovery");
   if (!links.length) return null;
 
   return (
     <section className="space-y-3">
       <h2 className="font-display text-xl font-semibold tracking-tight">
-        {title}
+        {title ?? t("exploreMore")}
       </h2>
       <ul className="flex flex-wrap gap-2">
         {links.map((link) => (

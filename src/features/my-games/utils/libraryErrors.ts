@@ -1,24 +1,30 @@
+import type { LibraryTranslator } from "@/features/my-games/utils/formatPlayedAt";
 import { ApiClientError } from "@/lib/api/types";
 
-export function mapLibraryError(error: unknown, fallback: string): string {
+export function mapLibraryError(
+  error: unknown,
+  t: LibraryTranslator,
+  fallback: string,
+  generic: string,
+): string {
   if (!(error instanceof ApiClientError)) {
     return fallback;
   }
 
   switch (error.status) {
     case 401:
-      return "Please sign in to access your games.";
+      return t("errorSignIn");
     case 403:
-      return "You don't have permission to access this resource.";
+      return t("errorForbidden");
     case 404:
-      return "Game or library item not found.";
+      return t("errorNotFound");
     case 409:
-      return "This game is already in your favorites.";
+      return t("errorAlreadyFavorite");
     case 429:
-      return "Too many requests. Please try again shortly.";
+      return t("errorRateLimited");
     default:
       if (error.status >= 500) {
-        return "Something went wrong. Please try again.";
+        return generic;
       }
       return error.message || fallback;
   }

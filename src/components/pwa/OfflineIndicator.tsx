@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { WifiOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePwa } from "@/hooks/usePwa";
 
 export function OfflineIndicator() {
   const { online } = usePwa();
+  const t = useTranslations("Pwa");
   if (online) return null;
 
   return (
@@ -16,9 +18,9 @@ export function OfflineIndicator() {
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-warning/40 bg-[#1a1408]/95 px-3 py-2 text-xs text-[#ffe8c2] shadow-lg backdrop-blur-xl">
         <WifiOff className="size-3.5" aria-hidden="true" />
-        <span>You&apos;re offline. Some features may be unavailable.</span>
+        <span>{t("offline")}</span>
         <Link href="/offline" className="underline underline-offset-2">
-          Details
+          {t("offlineDetails")}
         </Link>
       </div>
     </div>

@@ -1,20 +1,27 @@
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { SignupGate } from "@/app/(auth)/signup/SignupGate";
 import { AuthFeatureList } from "@/features/auth/components/AuthFeatureList";
 import { MobileSignup } from "@/features/auth/components/MobileAuth";
 import { SignupCard } from "@/features/auth/components/SignupCard";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "Create Account",
-  path: "/signup",
-  noIndex: true,
-});
+export async function generateMetadata() {
+  const t = await getTranslations("Auth");
+  return createMetadata({
+    title: t("createAccount"),
+    path: "/signup",
+    noIndex: true,
+  });
+}
 
 export default function SignupPage() {
+  const t = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
   return (
     <Suspense
-      fallback={<div className="text-sm text-muted-foreground">Loading…</div>}
+      fallback={<div className="text-sm text-muted-foreground">{tCommon("loading")}</div>}
     >
       <SignupGate>
         <div className="lg:hidden">
@@ -24,12 +31,12 @@ export default function SignupPage() {
           <div className="max-w-xl space-y-4 hero-enter lg:space-y-8">
             <div className="space-y-2 sm:space-y-4">
               <h1 className="font-display text-[2rem] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Join the{" "}
-                <span className="text-brand-gradient">Adventure</span>
+                {t.rich("signupHeroTitle", {
+                  highlight: (chunks) => <span className="text-brand-gradient">{chunks}</span>,
+                })}
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-white/80 sm:text-base sm:text-muted-foreground lg:text-lg">
-                Create your account and start discovering amazing games today.
-                It&apos;s free and only takes a minute.
+                {t("signupHeroText")}
               </p>
             </div>
             <div className="hidden lg:block hero-enter-delay">

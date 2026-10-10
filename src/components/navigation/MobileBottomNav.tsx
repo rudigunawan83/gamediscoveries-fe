@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Flag, Gamepad2, Home, Search, User } from "lucide-react";
 import { isMobileFullScreenPath, mobileBottomNavItems } from "@/components/navigation/nav-config";
 import { cn } from "@/lib/utils";
@@ -16,11 +17,12 @@ const icons = {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const t = useTranslations("Nav");
   if (isMobileFullScreenPath(pathname)) return null;
 
   return (
     <nav
-      aria-label="Mobile"
+      aria-label={t("mobileLabel")}
       data-mobile-bottom-nav
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[#2a2a37] bg-[#0b0b10]/95 backdrop-blur-xl lg:hidden"
       style={{
@@ -58,7 +60,7 @@ export function MobileBottomNav() {
                     aria-hidden="true"
                   />
                 </span>
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </Link>
             </li>
           );

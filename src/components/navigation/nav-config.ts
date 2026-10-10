@@ -1,23 +1,27 @@
+import type { Messages } from "next-intl";
+
+export type NavLabelKey = keyof Messages["Nav"];
+
 export const desktopNavItems = [
-  { href: "/", label: "Home" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/community", label: "Community" },
-  { href: "/hot-games", label: "Hot" },
-  { href: "/best-games", label: "Best" },
-  { href: "/most-played", label: "Most Played" },
-  { href: "/exclusive-games", label: "Exclusive" },
-  { href: "/games", label: "Games" },
-  { href: "/multiplayer", label: "Multiplayer" },
-] as const;
+  { href: "/", label: "home" },
+  { href: "/leaderboard", label: "leaderboard" },
+  { href: "/community", label: "community" },
+  { href: "/hot-games", label: "hot" },
+  { href: "/best-games", label: "best" },
+  { href: "/most-played", label: "mostPlayed" },
+  { href: "/exclusive-games", label: "exclusive" },
+  { href: "/games", label: "games" },
+  { href: "/multiplayer", label: "multiplayer" },
+] as const satisfies readonly { href: string; label: NavLabelKey }[];
 
 /** Same tabs as the Flutter app's bottom navigation. */
 export const mobileBottomNavItems = [
-  { href: "/", label: "Home", icon: "home" },
-  { href: "/search", label: "Discover", icon: "search" },
-  { href: "/play", label: "Play", icon: "gamepad" },
-  { href: "/missions", label: "Missions", icon: "flag" },
-  { href: "/profile", label: "Profile", icon: "user" },
-] as const;
+  { href: "/", label: "home", icon: "home" },
+  { href: "/search", label: "discover", icon: "search" },
+  { href: "/play", label: "play", icon: "gamepad" },
+  { href: "/missions", label: "missions", icon: "flag" },
+  { href: "/profile", label: "profile", icon: "user" },
+] as const satisfies readonly { href: string; label: NavLabelKey; icon: string }[];
 
 /** Game detail opens full screen on phones, like the app (no site header or tabs). */
 export function isGameDetailPath(pathname: string) {

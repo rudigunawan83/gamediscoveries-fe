@@ -1,21 +1,22 @@
 import { z } from "zod";
+import { authKey } from "@/features/auth/authMessages";
 
 export const signupSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .min(2, "Display name must be at least 2 characters.")
-    .max(40, "Display name must be at most 40 characters."),
+    .min(2, authKey("displayNameMin"))
+    .max(40, authKey("displayNameMax")),
   email: z
     .string()
     .trim()
-    .min(1, "Email is required.")
-    .email("Enter a valid email address."),
+    .min(1, authKey("emailRequired"))
+    .email(authKey("emailInvalid")),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters.")
-    .regex(/[A-Za-z]/, "Password must include a letter.")
-    .regex(/[0-9]/, "Password must include a number."),
+    .min(8, authKey("passwordMin"))
+    .regex(/[A-Za-z]/, authKey("passwordLetter"))
+    .regex(/[0-9]/, authKey("passwordNumber")),
 });
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
@@ -26,12 +27,8 @@ export function getPasswordChecks(password: string) {
   const isStrong = hasMinLength && hasLetterAndNumber && password.length >= 10;
 
   return [
-    { id: "length", label: "At least 8 characters", met: hasMinLength },
-    {
-      id: "mix",
-      label: "Include a letter and a number",
-      met: hasLetterAndNumber,
-    },
-    { id: "strong", label: "Use a strong password", met: isStrong },
+    { id: "length", label: authKey("checkLength"), met: hasMinLength },
+    { id: "mix", label: authKey("checkMix"), met: hasLetterAndNumber },
+    { id: "strong", label: authKey("checkStrong"), met: isStrong },
   ] as const;
 }

@@ -1,22 +1,17 @@
 "use client";
 
+import { useLocale, useTranslations, type Messages } from "next-intl";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { ComponentProps, ReactNode } from "react";
+import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BadgeCheck,
   BarChart3,
-  Boxes,
+  CalendarDays,
   Crown,
   Flame,
   Gamepad2,
-  Gem,
-  Gift,
-  Grid2X2,
-  Heart,
   Lock,
-  Medal,
   MessageCircle,
   ShieldCheck,
   Sparkles,
@@ -30,20 +25,15 @@ import {
   getMyAchievements,
   type AchievementItem,
 } from "@/lib/api/achievements";
-import {
-  getMyProgress,
-  getMyXpTransactions,
-  xpRuleLabel,
-} from "@/lib/api/progress";
+import { getMyLeaderboardRank } from "@/lib/api/leaderboards";
+import { getMyMissionHistory, getMyMissions, type MissionDto } from "@/lib/api/missions";
+import { getMyProgress, getMyXpTransactions } from "@/lib/api/progress";
+import { useFormats } from "@/lib/i18n/format";
+import { useXpRuleLabel } from "../hooks/useXpRuleLabel";
 
-const TABS = [
-  "Overview",
-  "Level & XP",
-  "Achievements",
-  "Missions",
-  "Streak",
-  "Game Stats",
-] as const;
+type GamificationKey = keyof Messages["Gamification"];
+
+const RANK_BOARD = "GLOBAL_ALL_TIME_XP";
 
 function initials(name?: string) {
   return (name || "U")
@@ -80,9 +70,6 @@ function AvatarMedallion({ name, image }: { name: string; image?: string | null 
           <span className="font-display text-4xl font-black text-amber-200">{initials(name)}</span>
         )}
       </div>
-      <span className="absolute bottom-1 right-1 grid h-8 w-8 place-items-center rounded-full border border-white/20 bg-sky-500 text-white">
-        <BadgeCheck className="h-4 w-4" />
-      </span>
     </div>
   );
 }
@@ -91,12 +78,10 @@ function MetricCard({
   icon,
   label,
   value,
-  sub,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
-  sub?: string;
 }) {
   return (
     <div className="flex items-center gap-3 border-white/10 px-3 py-3 sm:border-l first:sm:border-l-0">
@@ -106,7 +91,6 @@ function MetricCard({
       <div>
         <p className="text-[11px] text-slate-400">{label}</p>
         <p className="font-display text-lg font-black text-white">{value}</p>
-        {sub ? <p className="text-[10px] text-emerald-300">{sub}</p> : null}
       </div>
     </div>
   );
@@ -135,41 +119,6 @@ function SectionHeader({
         </div>
       </div>
       {action}
-    </div>
-  );
-}
-
-function LevelNode({
-  level,
-  xp,
-  active,
-  complete,
-}: {
-  level: number;
-  xp: number;
-  active?: boolean;
-  complete?: boolean;
-}) {
-  return (
-    <div className="flex min-w-24 flex-col items-center">
-      <div
-        className={`grid h-16 w-16 place-items-center rounded-2xl border-2 font-display font-black ${
-          active
-            ? "border-amber-300 bg-gradient-to-br from-amber-300 to-orange-500 text-slate-950 shadow-xl shadow-amber-500/25"
-            : complete
-              ? "border-emerald-300/40 bg-amber-300/15 text-amber-100"
-              : "border-slate-500/40 bg-slate-800 text-slate-400"
-        }`}
-      >
-        <div className="text-center leading-none">
-          <p className="text-[10px]">Lv</p>
-          <p className="text-xl">{level}</p>
-        </div>
-      </div>
-      <p className="mt-2 text-xs font-bold text-white">{xp.toLocaleString()} XP</p>
-      <p className={`text-[10px] ${complete ? "text-emerald-300" : active ? "text-amber-200" : "text-slate-500"}`}>
-        {complete ? "Completed" : active ? "Current Level" : "Locked"}
-      </p>
     </div>
   );
 }
@@ -213,6 +162,8 @@ function ActivityItem({
   index: number;
 }) {
   const tones = ["from-amber-300 to-orange-500", "from-sky-400 to-indigo-700", "from-violet-500 to-rose-600"];
+  const t = useTranslations("Gamification");
+  const { grouped } = useFormats();
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
       <div className="flex items-center gap-3">
@@ -223,34 +174,38 @@ function ActivityItem({
         </div>
       </div>
       <p className={`shrink-0 text-sm font-black ${xp >= 0 ? "text-amber-200" : "text-rose-300"}`}>
-        {xp >= 0 ? "+" : ""}{xp} XP
+        {t(xp >= 0 ? "xpReward" : "xpAmount", { xp: grouped.format(xp) })}
       </p>
     </div>
   );
 }
 
-function CategoryRow({
-  icon,
+function MissionRow({
   label,
-  value,
-  percent,
+  missions,
+  icon,
   tone,
 }: {
+  label: GamificationKey;
+  missions: MissionDto[];
   icon: ReactNode;
-  label: string;
-  value: string;
-  percent: number;
   tone: string;
 }) {
+  const t = useTranslations("Gamification");
+  const done = missions.filter((mission) => mission.status === "COMPLETED").length;
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-      <div className={`grid h-10 w-10 place-items-center rounded-xl ${tone}`}>{icon}</div>
-      <div>
-        <p className="text-sm font-black text-white">{label}</p>
-        <p className="text-xs text-slate-500">{value}</p>
-      </div>
-      <div className="w-36">
-        <ProgressBar value={percent} tone={tone.includes("pink") ? "from-pink-400 to-fuchsia-500" : tone.includes("emerald") ? "from-emerald-300 to-green-500" : tone.includes("sky") ? "from-sky-300 to-blue-500" : "from-amber-300 to-orange-500"} />
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex items-center gap-3">
+        <div className={`grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br ${tone}`}>{icon}</div>
+        <div className="min-w-0 flex-1">
+          <div className="flex justify-between gap-3 text-sm">
+            <p className="font-black text-white">{t(label)}</p>
+            <p className="text-slate-400">{done} / {missions.length}</p>
+          </div>
+          <div className="mt-2">
+            <ProgressBar value={missions.length ? (done / missions.length) * 100 : 0} tone={tone} />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -258,25 +213,47 @@ function CategoryRow({
 
 export function ProgressPageView() {
   const { accessToken } = useAuth();
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
+  const locale = useLocale();
+  const t = useTranslations("Gamification");
+  const tCommon = useTranslations("Common");
+  const ruleLabel = useXpRuleLabel();
+  const signedIn = Boolean(accessToken);
 
   const progressQuery = useQuery({
     queryKey: ["me", "progress"],
     queryFn: async () => (await getMyProgress()).data!,
-    enabled: Boolean(accessToken),
+    enabled: signedIn,
   });
 
   const xpQuery = useQuery({
     queryKey: ["me", "xp", "transactions", 1],
     queryFn: async () =>
       (await getMyXpTransactions({ page: 1, pageSize: 8 })).data!,
-    enabled: Boolean(accessToken),
+    enabled: signedIn,
   });
 
   const achievementsQuery = useQuery({
     queryKey: ["me", "achievements"],
     queryFn: async () => (await getMyAchievements()).data!,
-    enabled: Boolean(accessToken),
+    enabled: signedIn,
+  });
+
+  const missionsQuery = useQuery({
+    queryKey: ["me", "missions"],
+    queryFn: async () => (await getMyMissions()).data!,
+    enabled: signedIn,
+  });
+
+  const completedMissionsQuery = useQuery({
+    queryKey: ["me", "missions", "history", "COMPLETED"],
+    queryFn: async () => (await getMyMissionHistory({ status: "COMPLETED", pageSize: 1 })).data!,
+    enabled: signedIn,
+  });
+
+  const rankQuery = useQuery({
+    queryKey: ["leaderboards", RANK_BOARD, "me"],
+    queryFn: async () => (await getMyLeaderboardRank(RANK_BOARD)).data!,
+    enabled: signedIn,
   });
 
   const achievements = useMemo(
@@ -296,15 +273,15 @@ export function ProgressPageView() {
         <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-gradient-to-br from-amber-300 to-orange-500 text-slate-950">
           <Sparkles className="h-10 w-10" />
         </div>
-        <h1 className="mt-5 font-display text-4xl font-black text-white">Level Up Your Journey</h1>
+        <h1 className="mt-5 font-display text-4xl font-black text-white">{t("progressSignedOutTitle")}</h1>
         <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
-          Masuk untuk melihat XP, level, achievement, streak, dan aktivitas progress kamu.
+          {t("progressSignedOutMessage")}
         </p>
         <Link
           href="/login"
           className="mt-6 inline-flex rounded-2xl bg-gradient-to-r from-amber-300 to-orange-400 px-6 py-3 text-sm font-black text-slate-950"
         >
-          Sign in to view progress
+          {t("signInToViewProgress")}
         </Link>
       </div>
     );
@@ -313,7 +290,7 @@ export function ProgressPageView() {
   if (progressQuery.isPending) {
     return (
       <div className="mx-auto max-w-6xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 text-center text-slate-300">
-        Loading progress…
+        {t("loadingProgress")}
       </div>
     );
   }
@@ -321,7 +298,7 @@ export function ProgressPageView() {
   if (progressQuery.isError || !progressQuery.data) {
     return (
       <p className="mx-auto max-w-4xl rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm text-slate-300">
-        Unable to load progress right now.
+        {t("progressUnavailable")}
       </p>
     );
   }
@@ -332,14 +309,9 @@ export function ProgressPageView() {
   const longestStreak = streak?.longest ?? stats.longestStreak;
   const totalAchievements = achievementOverview?.totalDefinitions ?? achievements.length;
   const unlockedAchievements = achievementOverview?.userUnlocked ?? achievements.filter((item) => item.isUnlocked).length;
-  const missionCompletions = transactions.filter((tx) => tx.ruleCode.includes("MISSION")).length;
-  const levelNodes = [
-    { level: Math.max(1, level.level - 2), xp: Math.max(0, level.totalXp - 8_450), complete: true },
-    { level: Math.max(1, level.level - 1), xp: Math.max(0, level.totalXp - 3_450), complete: true },
-    { level: level.level, xp: level.totalXp, active: true },
-    { level: level.nextLevel ?? level.level + 1, xp: level.nextLevelXp || level.totalXp + 1_550 },
-    { level: (level.nextLevel ?? level.level + 1) + 1, xp: (level.nextLevelXp || level.totalXp + 1_550) + 5_000 },
-  ];
+  const missionsCompleted = completedMissionsQuery.data?.total;
+  const rank = rankQuery.data?.rank;
+  const missions = missionsQuery.data;
 
   return (
     <div className="relative mx-auto max-w-7xl space-y-6 text-white">
@@ -348,14 +320,15 @@ export function ProgressPageView() {
         <div className="absolute right-8 top-8 hidden h-56 w-56 rounded-full bg-amber-300/20 blur-3xl lg:block" />
         <div className="relative grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-center">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-amber-200">Your Progress</p>
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-amber-200">{t("yourProgress")}</p>
             <h1 className="font-display text-4xl font-black leading-tight text-white sm:text-6xl">
-              Level Up <br />
-              <span className="text-amber-300">Your Journey</span>
+              {t.rich("progressHeroTitle", {
+                br: () => <br />,
+                highlight: (chunks) => <span className="text-amber-300">{chunks}</span>,
+              })}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-              Track your XP, level, achievements, and overall progress. Play games,
-              complete missions, and unlock new rewards.
+              {t("progressHeroDescription")}
             </p>
           </div>
 
@@ -367,9 +340,9 @@ export function ProgressPageView() {
               <Gamepad2 className="h-10 w-10 text-white" />
             </div>
             <div className="relative z-10 max-w-xs">
-              <p className="text-sm font-bold text-amber-100">Keep playing!</p>
+              <p className="text-sm font-bold text-amber-100">{t("keepPlaying")}</p>
               <p className="mt-3 font-display text-5xl font-black text-white">+XP</p>
-              <p className="text-sm text-slate-300">You&apos;re doing great.</p>
+              <p className="text-sm text-slate-300">{t("doingGreat")}</p>
             </div>
           </div>
         </div>
@@ -381,15 +354,11 @@ export function ProgressPageView() {
             <AvatarMedallion name={user.name} image={user.avatarUrl} />
             <div>
               <h2 className="font-display text-3xl font-black text-white">{user.name}</h2>
-              <p className="text-sm text-slate-400">@{user.name.toLowerCase().replaceAll(" ", "")}</p>
               <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-200">
                 <Crown className="h-3 w-3" /> {level.title}
               </div>
               <p className="mt-3 max-w-md text-xs text-slate-400">
-                Discovering amazing games and leveling up everyday.
-              </p>
-              <p className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                <Sparkles className="h-3 w-3" /> Joined Oct 2024
+                {t("profileTagline")}
               </p>
             </div>
           </div>
@@ -397,98 +366,37 @@ export function ProgressPageView() {
           <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
             <div className="grid h-28 w-28 place-items-center rounded-[1.75rem] border border-amber-300/30 bg-gradient-to-br from-slate-900 to-amber-950/70">
               <div className="grid h-20 w-20 place-items-center rounded-3xl border-4 border-amber-300 text-center font-display font-black text-amber-200">
-                <span className="text-xs">Lv</span>
+                <span className="text-xs">{t("levelShort")}</span>
                 <span className="-mt-5 text-3xl">{level.level}</span>
               </div>
             </div>
             <div>
-              <p className="text-xs text-slate-400">Total XP</p>
-              <p className="font-display text-3xl font-black text-white">{level.totalXp.toLocaleString()}</p>
+              <p className="text-xs text-slate-400">{t("totalXpLabel")}</p>
+              <p className="font-display text-3xl font-black text-white">{level.totalXp.toLocaleString(locale)}</p>
               <div className="mt-3">
                 <ProgressBar value={level.progressPercentage} />
               </div>
               <div className="mt-2 flex justify-between text-xs text-slate-400">
                 <span>
-                  {level.isMaxLevel ? "Max level reached" : `${(level.nextLevelXp - level.currentLevelXp).toLocaleString()} XP to Level ${level.nextLevel}`}
+                  {level.isMaxLevel
+                    ? t("maxLevelReached")
+                    : t("xpToLevel", {
+                        xp: (level.nextLevelXp - level.currentLevelXp).toLocaleString(locale),
+                        level: level.nextLevel ?? level.level + 1,
+                      })}
                 </span>
-                <span>{level.nextLevelXp.toLocaleString()} XP</span>
+                <span>{t("xpAmount", { xp: level.nextLevelXp.toLocaleString(locale) })}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid border-t border-white/10 bg-white/[0.03] sm:grid-cols-3 lg:grid-cols-6">
-          <MetricCard icon={<Gamepad2 className="h-5 w-5" />} label="Games Played" value={stats.totalGameSessions.toLocaleString()} />
-          <MetricCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={`${unlockedAchievements} / ${totalAchievements || 0}`} />
-          <MetricCard icon={<Target className="h-5 w-5" />} label="Missions Completed" value={missionCompletions.toLocaleString()} />
-          <MetricCard icon={<Flame className="h-5 w-5" />} label="Current Streak" value={`${currentStreak} days`} />
-          <MetricCard icon={<Crown className="h-5 w-5" />} label="Leaderboard Rank" value={`#${Math.max(1, 60 - level.level)}`} sub="+6" />
-          <MetricCard icon={<BarChart3 className="h-5 w-5" />} label="Global Percentile" value={`Top ${Math.max(1, 20 - Math.min(level.level, 18))}%`} />
-        </div>
-      </section>
-
-      <nav className="grid overflow-hidden rounded-2xl border border-white/10 bg-slate-950/75 sm:grid-cols-3 lg:grid-cols-6">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`border-white/10 px-4 py-4 text-sm font-bold transition sm:border-l first:sm:border-l-0 ${
-              activeTab === tab
-                ? "bg-gradient-to-r from-amber-300 to-orange-400 text-slate-950"
-                : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
-
-      <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
-          <SectionHeader
-            icon={<Medal className="h-5 w-5" />}
-            title="Level Progression"
-            subtitle="Play games and complete activities to earn XP and level up."
-            action={
-              <Link href="/progress/xp" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">
-                View All Levels
-              </Link>
-            }
-          />
-          <div className="relative overflow-x-auto">
-            <div className="absolute left-10 right-10 top-8 h-1 rounded-full bg-gradient-to-r from-emerald-400 via-amber-300 to-slate-600" />
-            <div className="relative z-10 flex min-w-[560px] justify-between gap-4">
-              {levelNodes.map((node) => (
-                <LevelNode key={`${node.level}-${node.xp}`} {...node} />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
-          <SectionHeader
-            icon={<Gem className="h-5 w-5" />}
-            title="Next Level Rewards"
-            subtitle={`Unlock these rewards at Level ${level.nextLevel ?? level.level + 1}.`}
-          />
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              ["1x Rare Box", Gift, "from-sky-400 to-blue-700"],
-              ["Explorer Badge", ShieldCheck, "from-purple-400 to-fuchsia-700"],
-              ["+500 XP", Zap, "from-amber-300 to-orange-600"],
-            ].map(([label, Icon, tone]) => {
-              const RewardIcon = Icon as typeof Gift;
-              return (
-                <div key={String(label)} className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-center">
-                  <div className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br ${tone}`}>
-                    <RewardIcon className="h-8 w-8 text-white" />
-                  </div>
-                  <p className="mt-3 text-xs font-bold text-slate-300">{String(label)}</p>
-                </div>
-              );
-            })}
-          </div>
+        <div className="grid border-t border-white/10 bg-white/[0.03] sm:grid-cols-3 lg:grid-cols-5">
+          <MetricCard icon={<Gamepad2 className="h-5 w-5" />} label={t("gamesPlayed")} value={stats.totalGameSessions.toLocaleString(locale)} />
+          <MetricCard icon={<Trophy className="h-5 w-5" />} label={t("achievements")} value={`${unlockedAchievements} / ${totalAchievements || 0}`} />
+          <MetricCard icon={<Target className="h-5 w-5" />} label={t("missionsCompletedLabel")} value={missionsCompleted != null ? missionsCompleted.toLocaleString(locale) : "—"} />
+          <MetricCard icon={<Flame className="h-5 w-5" />} label={t("currentStreak")} value={t("daysCount", { count: currentStreak })} />
+          <MetricCard icon={<Crown className="h-5 w-5" />} label={t("leaderboardRank")} value={rank != null ? `#${rank.toLocaleString(locale)}` : "—"} />
         </div>
       </section>
 
@@ -496,120 +404,79 @@ export function ProgressPageView() {
         <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
           <SectionHeader
             icon={<Sparkles className="h-5 w-5" />}
-            title="Achievements"
-            subtitle="Unlock achievements by completing challenges and exploring games."
-            action={<Link href="/community/achievements" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">View All</Link>}
+            title={t("achievements")}
+            subtitle={t("achievementsHint")}
+            action={<Link href="/community/achievements" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">{tCommon("viewAll")}</Link>}
           />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {featuredAchievements.map((item, index) => (
               <AchievementTile key={item.id} item={item} index={index} />
             ))}
             {featuredAchievements.length === 0 ? (
-              <p className="text-sm text-slate-400 sm:col-span-2 xl:col-span-4">No achievements yet.</p>
+              <p className="text-sm text-slate-400 sm:col-span-2 xl:col-span-4">{t("noAchievements")}</p>
             ) : null}
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
-          <SectionHeader icon={<Target className="h-5 w-5" />} title="Mission Progress" subtitle="Complete missions to earn XP and rewards." />
-          <div className="space-y-4">
-            {[
-              ["Daily Missions", 67, "4 / 6", CalendarIcon, "from-sky-400 to-blue-600"],
-              ["Weekly Challenges", 40, "2 / 5", Trophy, "from-fuchsia-400 to-purple-700"],
-              ["Special Events", 33, "1 / 3", Star, "from-cyan-300 to-blue-500"],
-            ].map(([label, value, count, Icon, tone]) => {
-              const MissionIcon = Icon as typeof Trophy;
-              return (
-                <div key={String(label)} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br ${tone}`}>
-                      <MissionIcon className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex justify-between gap-3 text-sm">
-                        <p className="font-black text-white">{String(label)}</p>
-                        <p className="text-slate-400">{String(count)}</p>
-                      </div>
-                      <div className="mt-2">
-                        <ProgressBar value={Number(value)} tone={String(tone)} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {missions ? (
+          <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
+            <SectionHeader
+              icon={<Target className="h-5 w-5" />}
+              title={t("missionProgress")}
+              subtitle={t("missionProgressHint")}
+              action={<Link href="/missions" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">{tCommon("viewAll")}</Link>}
+            />
+            <div className="space-y-4">
+              <MissionRow
+                label="tabDailyMissions"
+                missions={missions.daily}
+                icon={<CalendarDays className="h-6 w-6 text-white" />}
+                tone="from-sky-400 to-blue-600"
+              />
+              <MissionRow
+                label="tabWeeklyChallenges"
+                missions={missions.weekly}
+                icon={<Trophy className="h-6 w-6 text-white" />}
+                tone="from-fuchsia-400 to-purple-700"
+              />
+            </div>
           </div>
-        </div>
+        ) : null}
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[0.85fr_1fr]">
         <div className="rounded-[1.75rem] border border-orange-300/20 bg-gradient-to-br from-orange-950/55 via-slate-950 to-slate-950 p-5 shadow-2xl shadow-black/20">
-          <SectionHeader icon={<Flame className="h-5 w-5" />} title="Play Streak" subtitle="Keep playing to maintain your streak and earn bonus rewards." />
-          <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
-            <div className="flex items-center gap-4">
-              <Flame className="h-20 w-20 text-orange-300" />
-              <div>
-                <p className="font-display text-6xl font-black text-white">{currentStreak}</p>
-                <p className="text-sm text-slate-300">Days in a row</p>
-              </div>
+          <SectionHeader icon={<Flame className="h-5 w-5" />} title={t("playStreak")} subtitle={t("playStreakHint")} />
+          <div className="flex items-center gap-4">
+            <Flame className="h-20 w-20 text-orange-300" />
+            <div>
+              <p className="font-display text-6xl font-black text-white">{currentStreak}</p>
+              <p className="text-sm text-slate-300">{t("daysInRow")}</p>
+              <p className="mt-1 text-xs text-slate-500">{t("longestStreakValue", { count: longestStreak })}</p>
             </div>
-            <div className="rounded-2xl border border-amber-300/15 bg-amber-300/10 p-4 text-center">
-              <Gift className="mx-auto h-10 w-10 text-amber-200" />
-              <p className="mt-2 text-xs font-bold text-white">Next Streak Reward</p>
-              <p className="text-xs text-amber-200">+200 XP at {streak?.nextMilestone ?? longestStreak + 2} days</p>
-            </div>
-          </div>
-          <div className="mt-5 grid grid-cols-7 gap-2">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => (
-              <div key={day} className="text-center">
-                <div className={`mx-auto grid h-8 w-8 place-items-center rounded-lg ${index < Math.min(6, currentStreak) ? "bg-emerald-400 text-slate-950" : "bg-white/10 text-slate-400"}`}>
-                  {index < Math.min(6, currentStreak) ? <BadgeCheck className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                </div>
-                <p className="mt-1 text-[10px] text-slate-500">{day}</p>
-              </div>
-            ))}
           </div>
         </div>
 
         <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
-          <SectionHeader icon={<Grid2X2 className="h-5 w-5" />} title="Favorite Categories" subtitle="Your most played game categories." action={<Link href="/games" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">View Stats</Link>} />
-          <div className="space-y-4">
-            <CategoryRow icon={<Gamepad2 className="h-5 w-5 text-white" />} label="Puzzle" value={`${Math.max(2, stats.uniqueGamesPlayed)} games`} percent={32} tone="bg-pink-400/20 text-pink-300" />
-            <CategoryRow icon={<Target className="h-5 w-5 text-white" />} label="Action" value={`${Math.max(1, Math.round(stats.totalGameSessions / 6))} games`} percent={20} tone="bg-rose-400/20 text-rose-300" />
-            <CategoryRow icon={<Heart className="h-5 w-5 text-white" />} label="Casual" value={`${Math.max(1, stats.favorites)} games`} percent={17} tone="bg-emerald-400/20 text-emerald-300" />
-            <CategoryRow icon={<MessageCircle className="h-5 w-5 text-white" />} label="Arcade" value={`${Math.max(1, Math.round(stats.totalGameSessions / 8))} games`} percent={14} tone="bg-sky-400/20 text-sky-300" />
-            <CategoryRow icon={<Boxes className="h-5 w-5 text-white" />} label="Strategy" value={`${Math.max(1, Math.round(stats.uniqueGamesPlayed / 2))} games`} percent={10} tone="bg-amber-400/20 text-amber-300" />
+          <SectionHeader icon={<BarChart3 className="h-5 w-5" />} title={t("recentActivity")} subtitle={t("recentActivityHint")} action={<Link href="/progress/xp" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">{tCommon("viewAll")}</Link>} />
+          <div className="space-y-3">
+            {transactions.slice(0, 3).map((tx, index) => (
+              <ActivityItem
+                key={tx.transactionId}
+                title={ruleLabel(tx.ruleCode, tx.description)}
+                subtitle={new Date(tx.createdAt).toLocaleString(locale)}
+                xp={tx.xpAmount}
+                index={index}
+              />
+            ))}
+            {transactions.length === 0 ? (
+              <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-slate-400">
+                {t("noXpActivity")}
+              </p>
+            ) : null}
           </div>
-        </div>
-      </section>
-
-      <section className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-black/20">
-        <SectionHeader icon={<ClockIcon />} title="Recent Activity" subtitle="Your latest games, achievements, and progress." action={<Link href="/progress/xp" className="rounded-full border border-amber-300/30 px-4 py-2 text-xs font-bold text-amber-200">View All</Link>} />
-        <div className="space-y-3">
-          {transactions.slice(0, 3).map((tx, index) => (
-            <ActivityItem
-              key={tx.transactionId}
-              title={xpRuleLabel(tx.ruleCode, tx.description)}
-              subtitle={new Date(tx.createdAt).toLocaleString()}
-              xp={tx.xpAmount}
-              index={index}
-            />
-          ))}
-          {transactions.length === 0 ? (
-            <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-slate-400">
-              No XP activity yet. Play a game to get started.
-            </p>
-          ) : null}
         </div>
       </section>
     </div>
   );
-}
-
-function CalendarIcon(props: ComponentProps<typeof Target>) {
-  return <Target {...props} />;
-}
-
-function ClockIcon() {
-  return <BarChart3 className="h-5 w-5" />;
 }

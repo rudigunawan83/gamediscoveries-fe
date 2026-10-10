@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getLanguageMode } from "@/i18n/request";
 import { createMetadata } from "@/lib/seo/metadata";
 import {
   BRAND_THEME_COLOR,
@@ -30,17 +33,19 @@ const mono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  ...createMetadata(),
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: SITE_NAME,
-  },
-  other: {
-    "mobile-web-app-capable": "yes",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    ...(await createMetadata()),
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: SITE_NAME,
+    },
+    other: {
+      "mobile-web-app-capable": "yes",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: BRAND_THEME_COLOR,
@@ -51,19 +56,30 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const languageMode = await getLanguageMode();
+  const tSeo = await getTranslations("Seo");
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`dark ${display.variable} ${sans.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
-        <JsonLd data={[websiteJsonLd(), organizationJsonLd()]} />
-        <AppProviders>{children}</AppProviders>
+        <JsonLd
+          data={[
+            websiteJsonLd({ description: tSeo("siteDescription"), inLanguage: locale }),
+            organizationJsonLd({ description: tSeo("tagline") }),
+          ]}
+        />
+        <NextIntlClientProvider>
+          <AppProviders languageMode={languageMode}>{children}</AppProviders>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

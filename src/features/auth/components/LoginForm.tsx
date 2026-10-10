@@ -4,8 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, LogIn, Mail } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { type AuthMessageKey, useAuthMessage } from "@/features/auth/authMessages";
 import { AuthError } from "@/features/auth/components/AuthError";
 import { AuthField } from "@/features/auth/components/AuthField";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
@@ -19,28 +21,30 @@ import { ApiClientError } from "@/lib/api/types";
 
 const REMEMBER_EMAIL_KEY = "gd_remember_email";
 
-export function loginErrorMessage(error: unknown): string {
+export function loginErrorMessage(error: unknown): AuthMessageKey {
   if (error instanceof ApiClientError) {
     if (error.status === 401) {
-      return "Invalid email or password.";
+      return "errorInvalidCredentials";
     }
     if (error.status === 404) {
-      return "Sign-in is not available yet. The authentication API is not configured.";
+      return "errorLoginUnavailable";
     }
     if (error.status === 0 || error.status === 408) {
-      return "Unable to reach the server. Please try again.";
+      return "errorNetwork";
     }
-    return "Unable to sign in right now. Please try again.";
   }
 
-  return "Unable to sign in right now. Please try again.";
+  return "errorLoginGeneric";
 }
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const { login } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const t = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
+  const message = useAuthMessage();
+  const [formError, setFormError] = useState<AuthMessageKey | null>(null);
   const [rememberMe, setRememberMe] = useState(true);
 
   const {
@@ -87,13 +91,13 @@ export function LoginForm() {
     <form className="space-y-4 sm:space-y-5" onSubmit={onSubmit} noValidate>
       <AuthField
         id="login-email"
-        label="Email"
+        label={t("email")}
         icon={Mail}
         type="email"
         autoComplete="email"
         inputMode="email"
-        placeholder="Enter your email"
-        error={errors.email?.message}
+        placeholder={t("emailPlaceholder")}
+        error={message(errors.email?.message)}
         disabled={isSubmitting}
         {...register("email")}
       />
@@ -104,19 +108,19 @@ export function LoginForm() {
             htmlFor="login-password"
             className="text-sm font-medium text-foreground"
           >
-            Password
+            {t("password")}
           </label>
           <button
             type="button"
             className="text-sm font-medium text-primary hover:underline"
-            onClick={() => toast.message("Password reset is coming soon.")}
+            onClick={() => toast.message(t("passwordResetSoon"))}
           >
-            Forgot password?
+            {t("forgotPassword")}
           </button>
         </div>
         <PasswordInput
           id="login-password"
-          placeholder="Enter your password"
+          placeholder={t("passwordPlaceholder")}
           invalid={Boolean(errors.password)}
           aria-describedby={
             errors.password ? "login-password-error" : undefined
@@ -130,7 +134,7 @@ export function LoginForm() {
             role="alert"
             className="text-sm text-destructive"
           >
-            {errors.password.message}
+            {message(errors.password.message)}
           </p>
         ) : null}
       </div>
@@ -142,10 +146,10 @@ export function LoginForm() {
           onChange={(event) => setRememberMe(event.target.checked)}
           className="size-4 rounded border-primary/30 bg-[#12161f] accent-primary"
         />
-        Remember me
+        {t("rememberMe")}
       </label>
 
-      {formError ? <AuthError id="login-form-error" message={formError} /> : null}
+      {formError ? <AuthError id="login-form-error" message={t(formError)} /> : null}
 
       <Button
         type="submit"
@@ -156,13 +160,13 @@ export function LoginForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            <span>Signing in...</span>
-            <span className="sr-only">Signing in, please wait</span>
+            <span>{t("signingIn")}</span>
+            <span className="sr-only">{t("signingInWait")}</span>
           </>
         ) : (
           <>
             <LogIn className="size-4" aria-hidden="true" />
-            Sign In
+            {tCommon("signIn")}
           </>
         )}
       </Button>

@@ -28,10 +28,12 @@ function buildUrl(path: string): string {
   return `${base}${normalizedPath}`;
 }
 
+export const REQUEST_FAILED_MESSAGE = "Request failed";
+
 export function normalizeApiError(
   status: number,
   body: unknown,
-  fallbackMessage = "Request failed",
+  fallbackMessage = REQUEST_FAILED_MESSAGE,
 ): ApiClientError {
   if (body && typeof body === "object") {
     const maybeWrapped = body as Partial<ApiResponse<unknown>>;

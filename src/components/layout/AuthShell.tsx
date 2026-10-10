@@ -1,8 +1,10 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function AuthShell({ children }: { children: ReactNode }) {
+  const t = useTranslations("Nav");
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-[#0b0b10] text-foreground lg:bg-transparent">
       <div className="hidden lg:block">
@@ -30,7 +32,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <BrandLogo
             size="md"
             showTagline
-            tagline="Discover · Play · Explore"
+            tagline={t("menuTagline")}
           />
         </header>
         <main className="flex flex-1 flex-col lg:py-10">

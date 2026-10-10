@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, waitFor, within } from "@testing-library/react";
+import { cleanup, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import type { Locale } from "@/i18n/config";
 import { ApiClientError } from "@/lib/api/types";
+import { renderWithIntl } from "./helpers/intl";
 
 const loginMock = vi.fn();
 
@@ -32,15 +34,16 @@ vi.mock("@/features/auth/hooks/useAuth", () => ({
   }),
 }));
 
-function renderForm() {
+function renderForm(locale: Locale = "en") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
 
-  return render(
+  return renderWithIntl(
     <QueryClientProvider client={client}>
       <LoginForm />
     </QueryClientProvider>,
+    locale,
   );
 }
 
@@ -71,6 +74,22 @@ describe("LoginForm", () => {
     expect(await form.findByText("Email is required.")).toBeInTheDocument();
     expect(form.getByText("Password is required.")).toBeInTheDocument();
     expect(loginMock).not.toHaveBeenCalled();
+  });
+
+  it("shows validation and API errors in Indonesian", async () => {
+    const user = userEvent.setup();
+    loginMock.mockRejectedValue(new ApiClientError("Unauthorized", 401));
+    const { container } = renderForm("id");
+    const form = within(container);
+
+    await user.click(form.getByRole("button", { name: "Masuk" }));
+    expect(await form.findByText("Email wajib diisi.")).toBeInTheDocument();
+    expect(form.getByText("Kata sandi wajib diisi.")).toBeInTheDocument();
+
+    await user.type(form.getByLabelText("Email"), "player@example.com");
+    await user.type(form.getByLabelText("Kata sandi"), "bad-password");
+    await user.click(form.getByRole("button", { name: "Masuk" }));
+    expect(await form.findByText("Email atau kata sandi salah.")).toBeInTheDocument();
   });
 
   it("toggles password visibility", async () => {

@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { desktopNavItems } from "@/components/navigation/nav-config";
 import { cn } from "@/lib/utils";
 
 export function DesktopNav() {
   const pathname = usePathname();
+  const t = useTranslations("Nav");
 
   return (
-    <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+    <nav aria-label={t("primaryLabel")} className="hidden items-center gap-1 lg:flex">
       {desktopNavItems.map((item) => {
         const active =
           item.href === "/"
@@ -27,7 +29,7 @@ export function DesktopNav() {
                 : "text-muted-foreground hover:text-white",
             )}
           >
-            {item.label}
+            {t(item.label)}
             {active ? (
               <span
                 aria-hidden="true"

@@ -1,14 +1,18 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
 import { MyGamesPage } from "@/features/my-games";
 import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata = createMetadata({
-  title: "My Games",
-  description: "Your personal GameDiscoveries library.",
-  path: "/my-games",
-  noIndex: true,
-});
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return createMetadata({
+    title: t("Nav.myGames"),
+    description: t("Library.myGamesMetaDescription"),
+    path: "/my-games",
+    noIndex: true,
+  });
+}
 
 export default function MyGamesRoutePage() {
   return (

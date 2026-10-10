@@ -1,19 +1,22 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import type { NavLabelKey } from "@/components/navigation/nav-config";
 import { cn } from "@/lib/utils";
 
 const pills = [
-  { href: "/hot-games", label: "Hot Games", hot: true },
-  { href: "/most-popular", label: "Most Popular" },
-  { href: "/best-games", label: "Best Games" },
-  { href: "/most-played", label: "Most Played" },
-  { href: "/exclusive-games", label: "Exclusive" },
-  { href: "/new", label: "New" },
-  { href: "/multiplayer", label: "Multiplayer" },
-  { href: "/games/puzzle", label: "Puzzle" },
-  { href: "/collections", label: "Collections" },
-] as const;
+  { href: "/hot-games", label: "hotGames", hot: true },
+  { href: "/most-popular", label: "mostPopular" },
+  { href: "/best-games", label: "bestGames" },
+  { href: "/most-played", label: "mostPlayed" },
+  { href: "/exclusive-games", label: "exclusive" },
+  { href: "/new", label: "new" },
+  { href: "/multiplayer", label: "multiplayer" },
+  { href: "/games/puzzle", label: "puzzle" },
+  { href: "/collections", label: "collections" },
+] as const satisfies readonly { href: string; label: NavLabelKey; hot?: boolean }[];
 
 export function DiscoveryPills() {
+  const t = useTranslations("Nav");
   return (
     <ul className="flex w-full gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {pills.map((pill) => {
@@ -36,7 +39,7 @@ export function DiscoveryPills() {
                   aria-hidden="true"
                 />
               ) : null}
-              {pill.label}
+              {t(pill.label)}
               {hot ? (
                 <span
                   aria-hidden="true"

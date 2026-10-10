@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 interface PlaceholderPageProps {
@@ -7,12 +8,13 @@ interface PlaceholderPageProps {
 }
 
 export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
+  const t = useTranslations("Common");
   return (
     <section className="mx-auto max-w-2xl space-y-4 rounded-3xl border border-border/60 bg-card/40 px-6 py-16 text-center">
       <h1 className="font-display text-3xl font-bold tracking-tight">{title}</h1>
       <p className="text-muted-foreground">{description}</p>
       <Button asChild>
-        <Link href="/">Return Home</Link>
+        <Link href="/">{t("returnHome")}</Link>
       </Button>
     </section>
   );

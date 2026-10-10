@@ -1,0 +1,13 @@
+---
+description: Hemat token saat bekerja di frontend Next.js GameDiscoveries
+alwaysApply: true
+---
+
+# Token Efficiency (Frontend)
+
+- Jawab singkat dalam Bahasa Indonesia; update progres 1-2 kalimat.
+- Kontrak API: cek `src/lib/api/*.ts` dulu sebelum membaca halaman; jangan menebak endpoint.
+- Halaman ada di `src/app/` (route groups seperti `(public)`); cari komponen dengan Grep/Glob, baca hanya file terkait.
+- Abaikan `node_modules/`, `.next/`, `out/`, file lock.
+- Jalankan lint/typecheck/test hanya untuk area terdampak bila memungkinkan; batasi output terminal.
+- Ubah hanya file terdampak; ikuti pola komponen yang sudah ada. Jangan commit/deploy kecuali diminta.

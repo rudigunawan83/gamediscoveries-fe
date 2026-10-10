@@ -1,8 +1,9 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileLogin, MobileSignup } from "@/features/auth/components/MobileAuth";
 import { ApiClientError } from "@/lib/api/types";
+import { renderWithIntl } from "./helpers/intl";
 
 const loginMock = vi.fn();
 const registerMock = vi.fn();
@@ -33,7 +34,7 @@ describe("MobileLogin", () => {
 
   it("validates empty submit without calling the API", async () => {
     const user = userEvent.setup();
-    render(<MobileLogin />);
+    renderWithIntl(<MobileLogin />);
 
     await user.click(screen.getByRole("button", { name: "Sign In" }));
 
@@ -45,7 +46,7 @@ describe("MobileLogin", () => {
   it("signs in with the callback url and shows API failures", async () => {
     const user = userEvent.setup();
     loginMock.mockRejectedValue(new ApiClientError("Unauthorized", 401));
-    render(<MobileLogin />);
+    renderWithIntl(<MobileLogin />);
 
     await user.type(screen.getByLabelText("Email"), "player@example.com");
     await user.type(screen.getByLabelText("Password"), "bad-password");
@@ -61,7 +62,7 @@ describe("MobileLogin", () => {
   });
 
   it("keeps the callback url when switching to sign up", () => {
-    render(<MobileLogin />);
+    renderWithIntl(<MobileLogin />);
     expect(
       screen.getByRole("link", { name: /Create one/ }),
     ).toHaveAttribute("href", "/signup?callbackUrl=%2Fmy-games");
@@ -79,7 +80,7 @@ describe("MobileSignup", () => {
   it("maps duplicate email errors", async () => {
     const user = userEvent.setup();
     registerMock.mockRejectedValue(new ApiClientError("Conflict", 409));
-    render(<MobileSignup />);
+    renderWithIntl(<MobileSignup />);
 
     await user.type(screen.getByLabelText("Display name"), "Player One");
     await user.type(screen.getByLabelText("Email"), "player@example.com");

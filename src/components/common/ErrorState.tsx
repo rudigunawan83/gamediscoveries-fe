@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 interface ErrorStateProps {
@@ -7,11 +8,9 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-export function ErrorState({
-  title = "Something went wrong.",
-  description = "We couldn't load the games.",
-  onRetry,
-}: ErrorStateProps) {
+export function ErrorState({ title, description, onRetry }: ErrorStateProps) {
+  const t = useTranslations("Errors");
+  const tCommon = useTranslations("Common");
   return (
     <div
       role="alert"
@@ -19,12 +18,12 @@ export function ErrorState({
     >
       <AlertTriangle className="size-10 text-warning" aria-hidden="true" />
       <div className="space-y-2">
-        <h2 className="font-display text-2xl font-semibold">{title}</h2>
-        <p className="max-w-md text-muted-foreground">{description}</p>
+        <h2 className="font-display text-2xl font-semibold">{title ?? t("title")}</h2>
+        <p className="max-w-md text-muted-foreground">{description ?? t("gamesDescription")}</p>
       </div>
       {onRetry ? (
         <Button type="button" onClick={onRetry}>
-          Try Again
+          {tCommon("retry")}
         </Button>
       ) : null}
     </div>

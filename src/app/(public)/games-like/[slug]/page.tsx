@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SeoRelatedLinks } from "@/features/seo/components/SeoRelatedLinks";
@@ -65,69 +66,84 @@ export default async function GamesLikePage({ params }: GamesLikePageProps) {
   const decision = shouldIndexGamesLike(similar.length);
   if (!decision.index) notFound();
 
+  const [t, tNav, tGame, tCommunity, tDiscovery] = await Promise.all([
+    getTranslations("Seo"),
+    getTranslations("Nav"),
+    getTranslations("Game"),
+    getTranslations("Community"),
+    getTranslations("Discovery"),
+  ]);
+  const heading = t("gamesLikeHeading", { game: game.title });
+
   return (
     <div className="space-y-10">
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Games", path: "/games" },
+            { name: tNav("home"), path: "/" },
+            { name: tNav("games"), path: "/games" },
             { name: game.title, path: `/game/${game.slug}` },
-            { name: `Games like ${game.title}`, path: `/games-like/${game.slug}` },
+            { name: heading, path: `/games-like/${game.slug}` },
           ]),
-          itemListJsonLd(
-            `Games like ${game.title}`,
-            `/games-like/${game.slug}`,
-            similar,
-          ),
+          itemListJsonLd(heading, `/games-like/${game.slug}`, similar),
         ]}
       />
 
       <header className="space-y-3">
         <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-          Games Like {game.title}
+          {heading}
         </h1>
         <p className="max-w-3xl text-muted-foreground">
-          Similar free browser games based on shared{" "}
-          {category ? `${category.name.toLowerCase()} ` : ""}
-          catalog signals — category, popularity, and gameplay adjacency. These
-          alternatives are drawn from verified GameDiscoveries catalog data.
+          {category
+            ? t("gamesLikeIntroCategory", { category: category.name.toLowerCase() })
+            : t("gamesLikeIntro")}
         </p>
         <p className="text-sm text-muted-foreground">
-          Looking for the original?{" "}
-          <Link href={`/game/${game.slug}`} className="text-primary hover:underline">
-            Play {game.title}
-          </Link>
+          {t.rich("gamesLikeOriginal", {
+            game: game.title,
+            link: (chunks) => (
+              <Link href={`/game/${game.slug}`} className="text-primary hover:underline">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </header>
 
       <GameSection
-        title="Similar games"
-        description={`${similar.length} alternatives players also enjoy.`}
+        title={t("gamesLikeSectionTitle")}
+        description={t("gamesLikeSectionDescription", { count: similar.length })}
         games={similar}
         variant="discovery"
       />
 
       <section className="space-y-2">
         <h2 className="font-display text-xl font-semibold">
-          Why these games are similar
+          {t("gamesLikeWhyTitle")}
         </h2>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Similarity uses public catalog attributes such as category
-          {category ? ` (${category.name})` : ""}, tags, and popularity — not
-          personalized history — so crawlers and anonymous visitors see the same
-          deterministic set.
+          {category
+            ? t("gamesLikeWhyCategory", { category: category.name })
+            : t("gamesLikeWhy")}
         </p>
       </section>
 
       <SeoRelatedLinks
         links={[
           ...(category
-            ? [{ href: `/games/${category.slug}`, label: `${category.name} games` }]
+            ? [
+                {
+                  href: `/games/${category.slug}`,
+                  label: tGame("categoryGames", { category: category.name }),
+                },
+              ]
             : []),
-          { href: `/game/${game.slug}/community`, label: `${game.title} community` },
-          { href: "/collections", label: "Collections" },
-          { href: "/trending", label: "Trending" },
+          {
+            href: `/game/${game.slug}/community`,
+            label: tCommunity("gameCommunityTitle", { game: game.title }),
+          },
+          { href: "/collections", label: tNav("collections") },
+          { href: "/trending", label: tDiscovery("linkTrending") },
         ]}
       />
     </div>

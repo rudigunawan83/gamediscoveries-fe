@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,13 @@ import {
   unfollowUser,
 } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
+import { useFormats } from "@/lib/i18n/format";
 
 export function UserProfileView({ username }: { username: string }) {
   const { accessToken, user } = useAuth();
   const queryClient = useQueryClient();
+  const t = useTranslations("Profile");
+  const { date } = useFormats();
 
   const profileQuery = useQuery({
     queryKey: ["community", "profile", username],
@@ -51,15 +55,11 @@ export function UserProfileView({ username }: { username: string }) {
   });
 
   if (profileQuery.isPending) {
-    return <p className="text-sm text-muted-foreground">Loading profile…</p>;
+    return <p className="text-sm text-muted-foreground">{t("loadingProfile")}</p>;
   }
 
   if (profileQuery.isError || !profileQuery.data) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Profile not found or private.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("notFound")}</p>;
   }
 
   const profile = profileQuery.data;
@@ -78,7 +78,7 @@ export function UserProfileView({ username }: { username: string }) {
               <p className="mt-3 max-w-2xl text-sm text-white/90">{profile.bio}</p>
             ) : null}
             <p className="mt-2 text-xs text-muted-foreground">
-              Joined {new Date(profile.joinedAt).toLocaleDateString()}
+              {t("joined", { date: date.format(new Date(profile.joinedAt)) })}
             </p>
           </div>
           {accessToken && !isSelf ? (
@@ -87,14 +87,14 @@ export function UserProfileView({ username }: { username: string }) {
                 onClick={() => followMutation.mutate()}
                 disabled={followMutation.isPending}
               >
-                {profile.isFollowing ? "Unfollow" : "Follow"}
+                {profile.isFollowing ? t("unfollow") : t("follow")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => blockMutation.mutate()}
                 disabled={blockMutation.isPending}
               >
-                Block
+                {t("block")}
               </Button>
             </div>
           ) : null}
@@ -102,10 +102,10 @@ export function UserProfileView({ username }: { username: string }) {
 
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            ["Games Played", profile.gamesPlayed],
-            ["Favorites", profile.favorites],
-            ["Achievements", profile.achievements],
-            ["Reviews", profile.reviews],
+            [t("gamesPlayed"), profile.gamesPlayed],
+            [t("favorites"), profile.favorites],
+            [t("achievements"), profile.achievements],
+            [t("reviews"), profile.reviews],
           ].map(([label, value]) => (
             <div
               key={label as string}
@@ -117,13 +117,13 @@ export function UserProfileView({ username }: { username: string }) {
           ))}
         </dl>
         <p className="text-xs text-muted-foreground">
-          {profile.followers} followers · {profile.following} following
+          {t("followStats", { followers: profile.followers, following: profile.following })}
         </p>
       </header>
 
       <section className="space-y-3">
         <h2 className="font-display text-xl font-semibold text-white">
-          Favorite Games
+          {t("favoriteGames")}
         </h2>
         <div className="flex flex-wrap gap-3">
           {profile.favoriteGames.map((game) => (
@@ -136,14 +136,14 @@ export function UserProfileView({ username }: { username: string }) {
             </Link>
           ))}
           {profile.favoriteGames.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No favorites shown.</p>
+            <p className="text-sm text-muted-foreground">{t("noFavorites")}</p>
           ) : null}
         </div>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-display text-xl font-semibold text-white">
-          Achievements
+          {t("achievements")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {profile.recentAchievements.map((item) => (
@@ -160,9 +160,7 @@ export function UserProfileView({ username }: { username: string }) {
             </div>
           ))}
           {profile.recentAchievements.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No achievements shown.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("noAchievements")}</p>
           ) : null}
         </div>
       </section>
