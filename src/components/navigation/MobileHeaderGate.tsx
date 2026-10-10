@@ -2,9 +2,12 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { mobileBottomNavItems } from "@/components/navigation/nav-config";
 
-/** Home has its own greeting header on phones, like the app's Home tab. */
+const TAB_PATHS = new Set<string>(mobileBottomNavItems.map((item) => item.href));
+
+/** Bottom-nav tabs render their own app-style header on phones. */
 export function MobileHeaderGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  return pathname === "/" ? null : children;
+  return TAB_PATHS.has(pathname) ? null : children;
 }

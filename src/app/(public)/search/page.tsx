@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SectionSkeleton } from "@/components/game/SectionSkeleton";
 import { SearchInput } from "@/components/search/SearchInput";
+import { MobileDiscover } from "@/features/mobile-tabs/components/MobileDiscover";
 import { SearchResults } from "@/features/search/components/SearchResults";
 import { createMetadata } from "@/lib/seo/metadata";
 
@@ -21,7 +22,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q = "" } = await searchParams;
 
   return (
-    <div className="space-y-8">
+    <>
+    <div className="lg:hidden">
+      <MobileDiscover key={q} initialQuery={q} />
+    </div>
+    <div className="hidden space-y-8 lg:block">
       <div className="space-y-3">
         <h1 className="font-display text-3xl font-bold tracking-tight">Search</h1>
         <p className="text-muted-foreground">
@@ -34,5 +39,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <SearchResults query={q} />
       </Suspense>
     </div>
+    </>
   );
 }

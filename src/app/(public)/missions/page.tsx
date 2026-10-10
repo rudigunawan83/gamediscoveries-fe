@@ -1,4 +1,5 @@
 import { MissionsPageView } from "@/features/missions/components/MissionsPageView";
+import { MobileMissions } from "@/features/mobile-tabs/components/MobileMissions";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -10,8 +11,13 @@ export const metadata = createMetadata({
 
 export default function MissionsRoutePage() {
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
-      <MissionsPageView />
-    </main>
+    <>
+      <div className="lg:hidden">
+        <MobileMissions />
+      </div>
+      <main className="container mx-auto hidden px-4 py-8 md:py-12 lg:block">
+        <MissionsPageView />
+      </main>
+    </>
   );
 }

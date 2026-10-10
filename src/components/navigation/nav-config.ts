@@ -14,7 +14,7 @@ export const desktopNavItems = [
 export const mobileBottomNavItems = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/search", label: "Discover", icon: "search" },
-  { href: "/my-games", label: "Play", icon: "gamepad" },
+  { href: "/play", label: "Play", icon: "gamepad" },
   { href: "/missions", label: "Missions", icon: "flag" },
-  { href: "/progress", label: "Profile", icon: "user" },
+  { href: "/profile", label: "Profile", icon: "user" },
 ] as const;

@@ -36,7 +36,7 @@ export function MobileHomeHeader() {
   return (
     <div className="flex items-center gap-3 py-1">
       <Link
-        href={signedIn ? "/progress" : "/login"}
+        href="/profile"
         aria-label="Profile"
         className="shrink-0 rounded-full p-0.5 ring-2 ring-primary"
       >
