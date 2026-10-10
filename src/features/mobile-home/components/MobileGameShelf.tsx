@@ -24,7 +24,7 @@ export function MobileGameShelf({
           </Link>
         ) : null}
       </div>
-      <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ul className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {games.map((game) => (
           <li key={game.id} className="w-[148px] shrink-0 snap-start">
             <MobileGameCard game={game} />

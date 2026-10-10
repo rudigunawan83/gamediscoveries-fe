@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { GameReviewsSection } from "@/features/community/components/GameReviewsSection";
 import { GameDetailFavoriteButton } from "@/features/my-games/components/GameDetailFavoriteButton";
 import { GameDetailPlayCta } from "@/features/games/components/GameDetailPlayCta";
+import { MobileGameDetail } from "@/features/mobile-tabs/components/MobileGameDetail";
 import { ShareButton } from "@/features/seo/components/ShareButton";
 import { SeoRelatedLinks } from "@/features/seo/components/SeoRelatedLinks";
 import {
@@ -95,14 +96,22 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   ];
 
   return (
-    <div className="space-y-10">
-      <JsonLd
-        data={[
-          gameSoftwareJsonLd(game, playable),
-          breadcrumbJsonLd(breadcrumbItems),
-        ]}
+    <>
+    <JsonLd
+      data={[
+        gameSoftwareJsonLd(game, playable),
+        breadcrumbJsonLd(breadcrumbItems),
+      ]}
+    />
+    <div className="lg:hidden">
+      <MobileGameDetail
+        game={game}
+        playable={playable}
+        shareUrl={`${env.NEXT_PUBLIC_APP_URL}/game/${game.slug}`}
+        fallbackSimilar={similarGames}
       />
-
+    </div>
+    <div className="hidden space-y-10 lg:block">
       <GameBreadcrumbs gameTitle={game.title} categories={game.categories} />
 
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/50">
@@ -276,5 +285,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
         ]}
       />
     </div>
+    </>
   );
 }

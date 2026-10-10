@@ -36,11 +36,11 @@ type MenuEntry = { icon: LucideIcon; label: string; accent: string; href?: strin
 
 /** App menu rows; entries without `href` have no web page yet and show "Soon". */
 const MAIN_MENU: MenuEntry[] = [
-  { icon: Heart, label: "My Favorites", accent: "#ffc83d", href: "/my-games?tab=favorites" },
-  { icon: History, label: "Play History", accent: "#8b5cf6", href: "/my-games?tab=history" },
-  { icon: MessageCircle, label: "My Reviews", accent: "#3b82f6" },
-  { icon: Settings, label: "Account Settings", accent: "#2bd576" },
-  { icon: HelpCircle, label: "Help & Support", accent: "#ff5d73" },
+  { icon: Heart, label: "My Favorites", accent: "#ffc83d", href: "/favorites" },
+  { icon: History, label: "Play History", accent: "#8b5cf6", href: "/history" },
+  { icon: MessageCircle, label: "My Reviews", accent: "#3b82f6", href: "/my-reviews" },
+  { icon: Settings, label: "Account Settings", accent: "#2bd576", href: "/settings" },
+  { icon: HelpCircle, label: "Help & Support", accent: "#ff5d73", href: "/help" },
 ];
 
 const COMMUNITY_MENU: MenuEntry[] = [
@@ -52,7 +52,7 @@ const COMMUNITY_MENU: MenuEntry[] = [
 
 const SIGNED_IN_MORE: MenuEntry[] = [
   { icon: TrendingUp, label: "My Progress", accent: "#14b8a6", href: "/progress" },
-  { icon: Trophy, label: "Achievements", accent: "#ffc83d", href: "/community/achievements" },
+  { icon: Trophy, label: "Achievements", accent: "#ffc83d", href: "/achievements" },
   ...COMMUNITY_MENU,
 ];
 
@@ -198,7 +198,16 @@ function ProfileHero({
       </div>
 
       <div className="relative">
-        <h1 className="min-h-11 text-[22px] font-extrabold leading-[44px] text-white">Profile</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="min-h-11 text-[22px] font-extrabold leading-[44px] text-white">Profile</h1>
+          <Link
+            href="/settings"
+            aria-label="Account Settings"
+            className="grid size-12 place-items-center rounded-[14px] border border-[#ffc83d]/60 bg-black/45 text-white"
+          >
+            <Settings className="size-[26px]" aria-hidden="true" />
+          </Link>
+        </div>
         <div className="mt-1 flex flex-col items-center">
           <div
             className={cn(

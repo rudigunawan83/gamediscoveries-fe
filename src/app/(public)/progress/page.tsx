@@ -1,3 +1,4 @@
+import { MobileProgress } from "@/features/mobile-tabs/components/MobileGamification";
 import { ProgressPageView } from "@/features/progress/components/ProgressPageView";
 import { createMetadata } from "@/lib/seo/metadata";
 
@@ -10,8 +11,13 @@ export const metadata = createMetadata({
 
 export default function ProgressRoutePage() {
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
-      <ProgressPageView />
-    </main>
+    <>
+      <div className="mx-auto max-w-xl lg:hidden">
+        <MobileProgress />
+      </div>
+      <main className="container mx-auto hidden px-4 py-8 md:py-12 lg:block">
+        <ProgressPageView />
+      </main>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { MobileCommunityPost } from "@/features/mobile-tabs/components/MobileCommunityPost";
 import {
   createComment,
   getCommunityPost,
@@ -16,6 +17,20 @@ import { analytics } from "@/lib/analytics/client";
 import { useEffect } from "react";
 
 export default function CommunityPostPage() {
+  const params = useParams<{ id: string }>();
+  return (
+    <>
+      <div className="mx-auto max-w-xl lg:hidden">
+        <MobileCommunityPost postId={params.id} />
+      </div>
+      <div className="hidden lg:block">
+        <DesktopCommunityPost />
+      </div>
+    </>
+  );
+}
+
+function DesktopCommunityPost() {
   const params = useParams<{ id: string }>();
   const postId = params.id;
   const { accessToken } = useAuth();

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SignupGate } from "@/app/(auth)/signup/SignupGate";
 import { AuthFeatureList } from "@/features/auth/components/AuthFeatureList";
+import { MobileSignup } from "@/features/auth/components/MobileAuth";
 import { SignupCard } from "@/features/auth/components/SignupCard";
 import { createMetadata } from "@/lib/seo/metadata";
 
@@ -16,7 +17,10 @@ export default function SignupPage() {
       fallback={<div className="text-sm text-muted-foreground">Loading…</div>}
     >
       <SignupGate>
-        <div className="grid flex-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] lg:items-center lg:gap-14 xl:gap-20">
+        <div className="lg:hidden">
+          <MobileSignup />
+        </div>
+        <div className="hidden flex-1 items-start lg:grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] lg:items-center lg:gap-14 xl:gap-20">
           <div className="max-w-xl space-y-4 hero-enter lg:space-y-8">
             <div className="space-y-2 sm:space-y-4">
               <h1 className="font-display text-[2rem] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">

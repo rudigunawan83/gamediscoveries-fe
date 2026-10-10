@@ -21,6 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { MobileNotifications } from "@/features/mobile-tabs/components/MobileNotifications";
 import {
   getNotifications,
   markNotificationsRead,
@@ -245,6 +246,19 @@ function PreferenceRow({ icon, label, enabled = true }: { icon: ReactNode; label
 }
 
 export default function NotificationsPage() {
+  return (
+    <>
+      <div className="mx-auto max-w-xl lg:hidden">
+        <MobileNotifications />
+      </div>
+      <div className="hidden lg:block">
+        <DesktopNotifications />
+      </div>
+    </>
+  );
+}
+
+function DesktopNotifications() {
   const { accessToken } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -74,11 +74,14 @@ export function MobilePillTabs({
 export function MobileGameListTile({
   game,
   trailing,
+  subtitle,
 }: {
   game: Game;
   trailing?: ReactNode;
+  /** Replaces the category line (e.g. play history details). */
+  subtitle?: string;
 }) {
-  const category = game.categories[0]?.name;
+  const category = subtitle ?? game.categories[0]?.name;
 
   return (
     <div className="flex items-center gap-2 rounded-[18px] bg-[#17171f] p-2.5">
@@ -102,7 +105,12 @@ export function MobileGameListTile({
             {game.title}
           </span>
           {category ? (
-            <span className="mt-0.5 block truncate text-xs text-[#9c9cb0]">
+            <span
+              className={cn(
+                "mt-0.5 block text-xs text-[#9c9cb0]",
+                subtitle ? "line-clamp-2" : "truncate",
+              )}
+            >
               {category}
             </span>
           ) : null}
@@ -143,11 +151,13 @@ export function MobileMessage({
   title,
   message,
   signIn = false,
+  action,
 }: {
   icon: LucideIcon;
   title?: string;
   message: string;
   signIn?: boolean;
+  action?: { href: string; label: string };
 }) {
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
@@ -173,6 +183,14 @@ export function MobileMessage({
             Create an account
           </Link>
         </div>
+      ) : null}
+      {action ? (
+        <Link
+          href={action.href}
+          className="mt-6 grid h-12 w-full max-w-xs place-items-center rounded-2xl bg-[#ffc83d] text-sm font-extrabold text-[#1a1205]"
+        >
+          {action.label}
+        </Link>
       ) : null}
     </div>
   );

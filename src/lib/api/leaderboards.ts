@@ -15,6 +15,7 @@ export interface LeaderboardUserDto {
   displayName?: string | null;
   username?: string | null;
   avatarUrl?: string | null;
+  level?: number | null;
 }
 
 export interface LeaderboardItemDto {

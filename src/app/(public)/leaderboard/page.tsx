@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { MobileLeaderboard } from "@/features/mobile-tabs/components/MobileLeaderboard";
 import { analytics } from "@/lib/analytics/client";
 import {
   getLeaderboard,
@@ -339,7 +340,11 @@ export default function LeaderboardPage() {
     : 0;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#070917] pb-16 text-white">
+    <>
+    <div className="mx-auto max-w-xl lg:hidden">
+      <MobileLeaderboard />
+    </div>
+    <main className="relative hidden min-h-screen overflow-hidden bg-[#070917] pb-16 text-white lg:block">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.24),transparent_28%),radial-gradient(circle_at_78%_8%,rgba(124,58,237,0.26),transparent_30%),radial-gradient(circle_at_50%_48%,rgba(14,165,233,0.10),transparent_34%)]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-transparent via-[#0b1024]/60 to-[#070917]" />
 
@@ -546,5 +551,6 @@ export default function LeaderboardPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

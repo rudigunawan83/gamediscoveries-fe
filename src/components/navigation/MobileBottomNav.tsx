@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Flag, Gamepad2, Home, Search, User } from "lucide-react";
-import { mobileBottomNavItems } from "@/components/navigation/nav-config";
+import { isMobileFullScreenPath, mobileBottomNavItems } from "@/components/navigation/nav-config";
 import { cn } from "@/lib/utils";
 
 const icons = {
@@ -16,6 +16,7 @@ const icons = {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  if (isMobileFullScreenPath(pathname)) return null;
 
   return (
     <nav

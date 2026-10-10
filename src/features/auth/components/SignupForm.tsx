@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ApiClientError } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
-function toUserFacingError(error: unknown): string {
+export function signupErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.status === 409) {
       return "An account with this email already exists.";
@@ -67,7 +67,7 @@ export function SignupForm() {
     try {
       await registerAccount(values, callbackUrl);
     } catch (error) {
-      setFormError(toUserFacingError(error));
+      setFormError(signupErrorMessage(error));
     }
   });
 

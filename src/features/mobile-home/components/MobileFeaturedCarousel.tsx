@@ -12,7 +12,7 @@ export function MobileFeaturedCarousel({ games }: { games: Game[] }) {
   return (
     <ul
       aria-label="Featured games"
-      className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {items.map((game) => {
         const category = game.categories[0]?.name;

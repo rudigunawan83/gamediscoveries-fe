@@ -19,7 +19,7 @@ import { ApiClientError } from "@/lib/api/types";
 
 const REMEMBER_EMAIL_KEY = "gd_remember_email";
 
-function toUserFacingError(error: unknown): string {
+export function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.status === 401) {
       return "Invalid email or password.";
@@ -79,7 +79,7 @@ export function LoginForm() {
         // Ignore storage access errors.
       }
     } catch (error) {
-      setFormError(toUserFacingError(error));
+      setFormError(loginErrorMessage(error));
     }
   });
 

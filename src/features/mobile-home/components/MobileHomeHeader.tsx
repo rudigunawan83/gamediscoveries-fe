@@ -20,18 +20,12 @@ export function MobileHomeHeader() {
     queryFn: async () => (await getMyProgress()).data!,
     enabled: signedIn,
   });
-  const notificationsQuery = useQuery({
-    queryKey: ["community", "notifications"],
-    queryFn: async () => (await getNotifications()).data,
-    enabled: signedIn,
-  });
 
   const progress = signedIn ? progressQuery.data : undefined;
   const name = progress?.user.name || user?.displayName || "Player";
   const firstName = name.split(" ")[0];
   const avatarUrl = progress?.user.avatarUrl ?? user?.avatarUrl;
   const level = progress?.level;
-  const unread = signedIn ? (notificationsQuery.data?.unread ?? 0) : 0;
 
   return (
     <div className="flex items-center gap-3 py-1">
@@ -83,18 +77,34 @@ export function MobileHomeHeader() {
         )}
       </div>
 
-      <Link
-        href="/community/notifications"
-        aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
-        className="relative grid size-11 shrink-0 place-items-center rounded-full text-white hover:bg-white/5"
-      >
-        <Bell className="size-6" aria-hidden="true" />
-        {unread > 0 ? (
-          <span className="absolute right-1 top-1 min-w-4 rounded-full bg-[#ff5d73] px-1 text-center text-[10px] font-bold leading-4 text-white">
-            {unread > 99 ? "99+" : unread}
-          </span>
-        ) : null}
-      </Link>
+      <MobileNotificationBell />
     </div>
+  );
+}
+
+/** Bell with the unread badge, as in the app's Home and Leaderboard app bars. */
+export function MobileNotificationBell() {
+  const { accessToken } = useAuth();
+  const signedIn = Boolean(accessToken);
+  const notificationsQuery = useQuery({
+    queryKey: ["community", "notifications"],
+    queryFn: async () => (await getNotifications()).data,
+    enabled: signedIn,
+  });
+  const unread = signedIn ? (notificationsQuery.data?.unread ?? 0) : 0;
+
+  return (
+    <Link
+      href="/community/notifications"
+      aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+      className="relative grid size-11 shrink-0 place-items-center rounded-full text-white hover:bg-white/5"
+    >
+      <Bell className="size-6" aria-hidden="true" />
+      {unread > 0 ? (
+        <span className="absolute right-1 top-1 min-w-4 rounded-full bg-[#ff5d73] px-1 text-center text-[10px] font-bold leading-4 text-white">
+          {unread > 99 ? "99+" : unread}
+        </span>
+      ) : null}
+    </Link>
   );
 }

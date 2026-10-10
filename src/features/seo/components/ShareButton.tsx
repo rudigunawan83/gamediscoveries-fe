@@ -11,6 +11,8 @@ type ShareButtonProps = {
   url: string;
   entityType: "game" | "collection" | "community";
   entityId?: string;
+  iconOnly?: boolean;
+  className?: string;
 };
 
 export function ShareButton({
@@ -19,6 +21,8 @@ export function ShareButton({
   url,
   entityType,
   entityId,
+  iconOnly = false,
+  className,
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
@@ -54,9 +58,16 @@ export function ShareButton({
   }
 
   return (
-    <Button type="button" variant="outline" onClick={() => void handleShare()}>
-      <Share2 className="size-4" aria-hidden="true" />
-      {copied ? "Link copied" : "Share"}
+    <Button
+      type="button"
+      variant="outline"
+      size={iconOnly ? "icon" : "default"}
+      aria-label={iconOnly ? (copied ? "Link copied" : "Share") : undefined}
+      className={className}
+      onClick={() => void handleShare()}
+    >
+      <Share2 className={iconOnly ? "size-5" : "size-4"} aria-hidden="true" />
+      {iconOnly ? null : copied ? "Link copied" : "Share"}
     </Button>
   );
 }

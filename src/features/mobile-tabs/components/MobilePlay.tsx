@@ -32,7 +32,7 @@ export function MobilePlay() {
       <MobileTabTitle title="Play" />
 
       <HomeContinuePlaying />
-      <MobileGameShelf title="Recently Played" games={recent} href="/my-games?tab=history" />
+      <MobileGameShelf title="Recently Played" games={recent} href="/history" />
 
       <section aria-labelledby="quick-play-title" className="space-y-3">
         <h2 id="quick-play-title" className="text-base font-extrabold text-white">

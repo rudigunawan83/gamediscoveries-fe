@@ -6,6 +6,7 @@ export interface CommunityUser {
   username: string;
   displayName?: string | null;
   avatarUrl?: string | null;
+  level?: number | null;
 }
 
 export interface CommunityGame {
@@ -13,6 +14,7 @@ export interface CommunityGame {
   slug: string;
   title: string;
   thumbnailUrl?: string | null;
+  categories?: string[] | null;
 }
 
 export interface CommunityPost {
@@ -103,8 +105,39 @@ export async function getCommunityFeed(cursor?: string) {
   );
 }
 
+export type CommunityPostSort = "latest" | "trending" | "most_liked";
+
+export async function listCommunityPosts(params: {
+  sort?: CommunityPostSort;
+  q?: string;
+  cursor?: string | null;
+  limit?: number;
+}) {
+  const search = new URLSearchParams({
+    sort: params.sort ?? "latest",
+    limit: String(params.limit ?? 20),
+  });
+  if (params.q) search.set("q", params.q);
+  if (params.cursor) search.set("cursor", params.cursor);
+  return apiClient.get<{ items: CommunityPost[]; nextCursor?: string | null }>(
+    `/api/v1/community/posts?${search.toString()}`,
+  );
+}
+
 export async function getCommunityPost(id: string) {
   return apiClient.get<CommunityPost>(`/api/v1/community/posts/${id}`);
+}
+
+export async function deleteCommunityPost(id: string) {
+  return apiClient.delete(`/api/v1/community/posts/${encodeURIComponent(id)}`);
+}
+
+export async function deleteComment(id: string) {
+  return apiClient.delete(`/api/v1/community/comments/${encodeURIComponent(id)}`);
+}
+
+export async function removeReaction(targetType: string, targetId: string) {
+  return apiClient.delete(`/api/v1/community/${targetType}/${targetId}/reactions`);
 }
 
 export async function createCommunityPost(body: {
@@ -220,6 +253,44 @@ export async function upsertGameReview(
   content: string,
 ) {
   return apiClient.post(`/api/v1/games/${slug}/reviews`, { rating, content });
+}
+
+export interface MyReview {
+  id: string;
+  rating: number;
+  content: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  game: CommunityGame;
+}
+
+export async function getMyReviews() {
+  return apiClient.get<MyReview[]>("/api/v1/users/me/reviews");
+}
+
+export async function deleteReview(id: string) {
+  return apiClient.delete(`/api/v1/reviews/${encodeURIComponent(id)}`);
+}
+
+export interface PrivacySettings {
+  showFavorites: boolean;
+  showHistory: boolean;
+  showAchievements: boolean;
+  showActivity: boolean;
+  showOnLeaderboards: boolean;
+  bio?: string | null;
+}
+
+export type PrivacyOption = Exclude<keyof PrivacySettings, "bio">;
+
+export async function getPrivacySettings() {
+  return apiClient.get<PrivacySettings>("/api/v1/users/me/privacy");
+}
+
+/** The API only changes the fields that are sent. */
+export async function updatePrivacySetting(option: PrivacyOption, value: boolean) {
+  return apiClient.put("/api/v1/users/me/privacy", { [option]: value });
 }
 
 export async function getUserProfile(username: string) {
