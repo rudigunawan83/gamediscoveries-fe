@@ -254,6 +254,8 @@ export async function getNotifications() {
       id: string;
       type: string;
       message?: string;
+      entityType?: string | null;
+      entityId?: string | null;
       createdAt: string;
       readAt?: string | null;
     }>;

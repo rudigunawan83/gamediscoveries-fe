@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
@@ -24,14 +25,24 @@ import {
   getNotifications,
   markNotificationsRead,
 } from "@/lib/api/community";
+import {
+  categoryFor,
+  notificationHref,
+} from "@/features/notifications/utils/notificationHref";
 
 type NotificationItem = {
   id: string;
   type: string;
   message?: string;
+  entityType?: string | null;
+  entityId?: string | null;
   createdAt: string;
   readAt?: string | null;
 };
+
+type NotificationsData = { items: NotificationItem[]; unread: number };
+
+const NOTIFICATIONS_KEY = ["community", "notifications"] as const;
 
 const FILTERS = [
   { id: "all", label: "All", longLabel: "All Notifications" },
@@ -86,15 +97,6 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     readAt: new Date().toISOString(),
   },
 ];
-
-function categoryFor(type: string) {
-  const normalized = type.toLowerCase();
-  if (normalized.includes("achievement")) return "achievements";
-  if (normalized.includes("mission") || normalized.includes("challenge")) return "missions";
-  if (normalized.includes("leaderboard") || normalized.includes("rank")) return "leaderboard";
-  if (normalized.includes("game") || normalized.includes("review") || normalized.includes("community")) return "games";
-  return "system";
-}
 
 function metaFor(type: string): {
   icon: ReactNode;
@@ -156,13 +158,35 @@ function timeAgo(createdAt: string) {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
-function NotificationCard({ item }: { item: NotificationItem }) {
+function NotificationCard({
+  item,
+  unread,
+  onOpen,
+}: {
+  item: NotificationItem;
+  unread: boolean;
+  onOpen: (item: NotificationItem) => void;
+}) {
   const meta = metaFor(item.type);
-  const unread = !item.readAt;
   const content = titleAndBody(item);
 
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onOpen(item);
+  };
+
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/75 p-4 shadow-lg shadow-black/10 transition hover:border-amber-300/25 hover:bg-white/[0.055]">
+    <article
+      role="button"
+      tabIndex={0}
+      aria-label={`${content.title}${unread ? " (unread)" : ""}`}
+      onClick={() => onOpen(item)}
+      onKeyDown={onKeyDown}
+      className={`group relative cursor-pointer overflow-hidden rounded-2xl border p-4 shadow-lg shadow-black/10 outline-none transition hover:border-amber-300/25 hover:bg-white/[0.055] focus-visible:ring-2 focus-visible:ring-amber-300 ${
+        unread ? "border-amber-300/20 bg-slate-900/90" : "border-white/10 bg-slate-950/75"
+      }`}
+    >
       <div className={`absolute bottom-0 left-0 top-0 w-1 ${meta.rail}`} />
       <div className="grid gap-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
         <div className={`grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br ${meta.tone} shadow-xl shadow-black/30`}>
@@ -175,9 +199,9 @@ function NotificationCard({ item }: { item: NotificationItem }) {
         <div className="flex items-center justify-between gap-4 sm:justify-end">
           <p className="text-xs text-slate-400">{timeAgo(item.createdAt)}</p>
           <span className={`h-3 w-3 rounded-full ${unread ? "bg-amber-300 shadow-[0_0_14px_rgba(251,191,36,0.8)]" : "border border-slate-500"}`} />
-          <button className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.06] text-slate-300 transition group-hover:bg-amber-300 group-hover:text-slate-950" type="button">
+          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.06] text-slate-300 transition group-hover:bg-amber-300 group-hover:text-slate-950">
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </span>
         </div>
       </div>
     </article>
@@ -222,28 +246,70 @@ function PreferenceRow({ icon, label, enabled = true }: { icon: ReactNode; label
 
 export default function NotificationsPage() {
   const { accessToken } = useAuth();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const [readSampleIds, setReadSampleIds] = useState<ReadonlySet<string>>(new Set());
 
   const notificationsQuery = useQuery({
-    queryKey: ["community", "notifications"],
-    queryFn: async () => (await getNotifications()).data,
+    queryKey: NOTIFICATIONS_KEY,
+    queryFn: async (): Promise<NotificationsData> => (await getNotifications()).data,
     enabled: Boolean(accessToken),
   });
 
   const markRead = useMutation({
     mutationFn: () => markNotificationsRead(),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["community", "notifications"],
-      });
+      await queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+    },
+  });
+
+  const markOneRead = useMutation({
+    mutationFn: (id: string) => markNotificationsRead(id),
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
+      const previous = queryClient.getQueryData<NotificationsData>(NOTIFICATIONS_KEY);
+      queryClient.setQueryData<NotificationsData>(NOTIFICATIONS_KEY, (old) =>
+        old
+          ? {
+              unread: Math.max(0, old.unread - 1),
+              items: old.items.map((item) =>
+                item.id === id ? { ...item, readAt: new Date().toISOString() } : item,
+              ),
+            }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(NOTIFICATIONS_KEY, context.previous);
+      }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
     },
   });
 
   const sourceItems = notificationsQuery.data?.items ?? [];
-  const items = sourceItems.length > 0 ? sourceItems : SAMPLE_NOTIFICATIONS;
+  const isSample = sourceItems.length === 0;
+  const items = isSample ? SAMPLE_NOTIFICATIONS : sourceItems;
+  const isUnread = (item: NotificationItem) =>
+    !item.readAt && !(isSample && readSampleIds.has(item.id));
   const unread = notificationsQuery.data?.unread ?? 0;
-  const unreadCount = sourceItems.length > 0 ? unread : items.filter((item) => !item.readAt).length;
+  const unreadCount = isSample ? items.filter(isUnread).length : unread;
+
+  const openNotification = (item: NotificationItem) => {
+    if (isUnread(item)) {
+      if (isSample) {
+        setReadSampleIds((previous) => new Set(previous).add(item.id));
+      } else {
+        markOneRead.mutate(item.id);
+      }
+    }
+    const href = notificationHref(item);
+    if (href) router.push(href);
+  };
   const filteredItems = useMemo(
     () =>
       activeFilter === "all"
@@ -352,7 +418,14 @@ export default function NotificationsPage() {
               Loading notifications…
             </div>
           ) : (
-            filteredItems.map((item) => <NotificationCard key={item.id} item={item} />)
+            filteredItems.map((item) => (
+              <NotificationCard
+                key={item.id}
+                item={item}
+                unread={isUnread(item)}
+                onOpen={openNotification}
+              />
+            ))
           )}
           {!notificationsQuery.isPending && filteredItems.length === 0 ? (
             <p className="rounded-2xl border border-white/10 bg-slate-950/75 p-5 text-sm text-slate-400">
