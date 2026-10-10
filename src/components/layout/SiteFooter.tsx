@@ -32,6 +32,9 @@ export function SiteFooter() {
           <Link href="/community" className="hover:text-primary">
             Community
           </Link>
+          <Link href="/download" className="font-semibold text-primary hover:underline">
+            Download App
+          </Link>
         </nav>
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} {SITE_NAME}. Find · Play · Explore More.

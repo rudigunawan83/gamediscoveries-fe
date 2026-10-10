@@ -10,9 +10,11 @@ export const desktopNavItems = [
   { href: "/multiplayer", label: "Multiplayer" },
 ] as const;
 
+/** Same tabs as the Flutter app's bottom navigation. */
 export const mobileBottomNavItems = [
   { href: "/", label: "Home", icon: "home" },
-  { href: "/community", label: "Community", icon: "users" },
-  { href: "/search", label: "Search", icon: "search" },
-  { href: "/my-games", label: "My Games", icon: "gamepad" },
+  { href: "/search", label: "Discover", icon: "search" },
+  { href: "/my-games", label: "Play", icon: "gamepad" },
+  { href: "/missions", label: "Missions", icon: "flag" },
+  { href: "/progress", label: "Profile", icon: "user" },
 ] as const;

@@ -47,6 +47,7 @@ const extraItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/progress", label: "Progress", icon: Sparkles },
   { href: "/my-games", label: "My Games", icon: Gamepad2 },
+  { href: "/download", label: "Download App", icon: Smartphone },
 ] as const;
 
 export function MobileNavMenu() {
