@@ -16,6 +16,7 @@ import type {
   MonitoringCount,
   MonitoringDuration,
   MonitoringRange,
+  MonitoringRatio,
   MonitoringUnavailable,
 } from "@/lib/api/monitoring";
 import { ApiClientError, type ApiResponse } from "@/lib/api/types";
@@ -235,6 +236,36 @@ export function DurationCard({
           {metric.seconds == null ? "No finished sessions" : hint}
         </span>
       </div>
+    </article>
+  );
+}
+
+export function RatioCard({
+  label,
+  hint,
+  metric,
+  icon,
+  format,
+  emptyHint,
+}: {
+  label: string;
+  hint: string;
+  metric: MonitoringRatio;
+  icon?: LucideIcon;
+  format: (value: number) => string;
+  emptyHint: string;
+}) {
+  return (
+    <article className="flex flex-col rounded-2xl border border-[#f5c542]/25 bg-[#12141c] p-4">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs text-[#c7c8d6]">{label}</p>
+        {icon ? <CardIcon icon={icon} /> : null}
+      </div>
+      <div className="mt-1 flex items-baseline gap-2">
+        <p className="text-2xl font-black tabular-nums">{metric.value == null ? "—" : format(metric.value)}</p>
+        <Change value={metric.changePercent} />
+      </div>
+      <p className="mt-auto pt-2 text-right text-[10px] text-[#8b8ca3]">{metric.value == null ? emptyHint : hint}</p>
     </article>
   );
 }

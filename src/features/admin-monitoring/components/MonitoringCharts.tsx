@@ -26,7 +26,23 @@ function useSvgId() {
 export interface ChartSeries {
   label: string;
   color: string;
-  values: number[];
+  /** Null values are gaps in the line, not zero. */
+  values: Array<number | null>;
+}
+
+function segments(values: Array<number | null>): Array<Array<{ index: number; value: number }>> {
+  const runs: Array<Array<{ index: number; value: number }>> = [];
+  let run: Array<{ index: number; value: number }> = [];
+  values.forEach((value, index) => {
+    if (value == null) {
+      if (run.length > 0) runs.push(run);
+      run = [];
+    } else {
+      run.push({ index, value });
+    }
+  });
+  if (run.length > 0) runs.push(run);
+  return runs;
 }
 
 function pickLabels(count: number, wanted = 6): number[] {
@@ -120,7 +136,9 @@ export function LineChart({
   formatValue?: ValueFormatter;
 }) {
   const gradientId = useSvgId();
-  const scale = niceScale(Math.max(0, ...series.flatMap((item) => item.values)));
+  const scale = niceScale(
+    Math.max(0, ...series.flatMap((item) => item.values.filter((value): value is number => value != null))),
+  );
   const x = (index: number) => (buckets.length === 1 ? 50 : (index / (buckets.length - 1)) * 100);
   const y = (value: number) => 100 - (value / scale.max) * 100;
 
@@ -145,22 +163,46 @@ export function LineChart({
                 </linearGradient>
               ))}
             </defs>
-            {series.map((item, index) => {
-              const line = item.values.map((value, i) => `${x(i)},${y(value)}`).join(" ");
-              return (
-                <g key={item.label}>
-                  <polygon points={`0,100 ${line} ${x(item.values.length - 1)},100`} fill={`url(#${gradientId}-${index})`} />
-                  <polyline
-                    points={line}
-                    fill="none"
-                    stroke={item.color}
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </g>
-              );
-            })}
+            {series.map((item, index) => (
+              <g key={item.label}>
+                {segments(item.values).map((run) => {
+                  const first = run[0];
+                  const last = run[run.length - 1];
+                  if (run.length === 1) {
+                    return (
+                      <line
+                        key={first.index}
+                        x1={x(first.index)}
+                        y1={y(first.value)}
+                        x2={x(first.index)}
+                        y2={y(first.value)}
+                        stroke={item.color}
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    );
+                  }
+                  const line = run.map((point) => `${x(point.index)},${y(point.value)}`).join(" ");
+                  return (
+                    <g key={first.index}>
+                      <polygon
+                        points={`${x(first.index)},100 ${line} ${x(last.index)},100`}
+                        fill={`url(#${gradientId}-${index})`}
+                      />
+                      <polyline
+                        points={line}
+                        fill="none"
+                        stroke={item.color}
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </g>
+                  );
+                })}
+              </g>
+            ))}
           </svg>
         </div>
       </div>
@@ -198,6 +240,57 @@ export function BarChart({
                 title={`${formatBucket(buckets[index], hourly)}: ${value.toLocaleString("en")}`}
                 style={{ height: `${(value / scale.max) * 100}%`, backgroundColor: color }}
               />
+            ))}
+          </div>
+        </div>
+      </div>
+      <XAxis buckets={buckets} hourly={hourly} centered />
+    </div>
+  );
+}
+
+export function StackedBarChart({
+  buckets,
+  series,
+  hourly,
+  label,
+}: {
+  buckets: string[];
+  series: Array<{ label: string; color: string; values: number[] }>;
+  hourly: boolean;
+  label: string;
+}) {
+  const totals = buckets.map((_, index) => series.reduce((sum, item) => sum + (item.values[index] ?? 0), 0));
+  const scale = niceScale(Math.max(0, ...totals));
+
+  return (
+    <div>
+      <div className="flex h-52 gap-2">
+        <YAxis ticks={scale.ticks} />
+        <div className="relative flex-1" role="img" aria-label={label}>
+          <GridLines ticks={scale.ticks} max={scale.max} />
+          <div className="absolute inset-0 flex items-end gap-[3px]">
+            {buckets.map((bucket, index) => (
+              <span
+                key={bucket}
+                className="flex flex-1 flex-col-reverse overflow-hidden rounded-t-sm"
+                style={{ height: `${(totals[index] / scale.max) * 100}%` }}
+                title={`${formatBucket(bucket, hourly)}: ${series
+                  .map((item) => `${item.label} ${(item.values[index] ?? 0).toLocaleString("en")}`)
+                  .join(", ")}`}
+              >
+                {series.map((item) =>
+                  item.values[index] ? (
+                    <span
+                      key={item.label}
+                      style={{
+                        height: `${(item.values[index] / totals[index]) * 100}%`,
+                        backgroundColor: item.color,
+                      }}
+                    />
+                  ) : null,
+                )}
+              </span>
             ))}
           </div>
         </div>
@@ -274,11 +367,14 @@ export function Donut({
   shares,
   label,
   centerLabel,
+  centerValue,
   size = "h-32 w-32",
 }: {
   shares: Array<{ key: string; sessions: number }>;
   label: (key: string) => string;
   centerLabel: string;
+  /** Replaces the total in the middle, e.g. a rate. */
+  centerValue?: string;
   size?: string;
 }) {
   const total = shares.reduce((sum, share) => sum + share.sessions, 0);
@@ -311,7 +407,7 @@ export function Donut({
         </svg>
         <span className="absolute inset-0 grid place-items-center text-center">
           <span>
-            <span className="block text-base font-black tabular-nums">{total.toLocaleString("en")}</span>
+            <span className="block text-base font-black tabular-nums">{centerValue ?? total.toLocaleString("en")}</span>
             <span className="block text-[9px] text-[#8b8ca3]">{centerLabel}</span>
           </span>
         </span>

@@ -16,7 +16,11 @@ import {
   UnavailablePanel,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
-import { formatDuration, formatShare } from "@/features/admin-monitoring/monitoringFormat";
+import {
+  formatDuration,
+  formatShare,
+  sourceLabels,
+} from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringTraffic,
   type MonitoringRange,
@@ -25,16 +29,6 @@ import {
 } from "@/lib/api/monitoring";
 
 const trendColors = { visitors: "#5b8def", pageViews: "#f5c542" };
-
-const sourceLabels: Record<string, string> = {
-  organic_search: "Organic Search",
-  direct: "Direct",
-  social: "Social",
-  referral: "Referral",
-  paid_ads: "Paid Ads",
-  mobile_app: "Mobile App",
-  others: "Others",
-};
 
 const platformLabels: Record<string, string> = {
   web: "Website",

@@ -1,3 +1,13 @@
+export const sourceLabels: Record<string, string> = {
+  organic_search: "Organic Search",
+  direct: "Direct",
+  social: "Social",
+  referral: "Referral",
+  paid_ads: "Paid Ads",
+  mobile_app: "Mobile App",
+  others: "Others",
+};
+
 export function formatChange(value: number | null | undefined): string | null {
   if (value == null || Number.isNaN(value)) return null;
   const sign = value > 0 ? "+" : "";
