@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -10,9 +11,12 @@ import { fetchHomeDiscoveries } from "@/features/games/api/games.api";
 import { HomeContinuePlaying } from "@/features/my-games/components/HomeContinuePlaying";
 import { mapRecommendationItems } from "@/features/recommendations/mappers";
 import { getRecommendationHome } from "@/lib/api/recommendations";
+import { isAppleBrowser } from "@/lib/pwa/detection";
 import { MobileFeaturedCarousel } from "./MobileFeaturedCarousel";
 import { MobileGameShelf, MobileGameShelfSkeleton } from "./MobileGameShelf";
 import { MobileHomeHeader } from "./MobileHomeHeader";
+
+const subscribeNever = () => () => {};
 
 /**
  * Phone layout of the home page, mirroring the Flutter app's Home tab.
@@ -31,6 +35,9 @@ export function MobileHome() {
     queryFn: async () => (await getRecommendationHome(12)).data!,
     staleTime: 60_000,
   });
+
+  // Hidden during SSR so iPhone and Safari never flash an Android download.
+  const showAndroidApp = useSyncExternalStore(subscribeNever, () => !isAppleBrowser(), () => false);
 
   const data = home.data;
   const forYou = recommendations.data?.sections?.[0]?.items;
@@ -65,27 +72,29 @@ export function MobileHome() {
 
       <HomeContinuePlaying />
 
-      <Link
-        href="/download"
-        className="flex items-center gap-3 rounded-2xl border border-[#ffc83d]/30 bg-[#1e1e29] p-3"
-      >
-        <Image
-          src="/images/app-icon.png"
-          alt=""
-          width={44}
-          height={44}
-          className="rounded-xl"
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-extrabold text-white">
-            {t("appBannerTitle")}
+      {showAndroidApp ? (
+        <Link
+          href="/download"
+          className="flex items-center gap-3 rounded-2xl border border-[#ffc83d]/30 bg-[#1e1e29] p-3"
+        >
+          <Image
+            src="/images/app-icon.png"
+            alt=""
+            width={44}
+            height={44}
+            className="rounded-xl"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-extrabold text-white">
+              {t("appBannerTitle")}
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              {t("appBannerSubtitle")}
+            </span>
           </span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {t("appBannerSubtitle")}
-          </span>
-        </span>
-        <Download className="size-5 shrink-0 text-primary" aria-hidden="true" />
-      </Link>
+          <Download className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        </Link>
+      ) : null}
 
       {home.isPending ? (
         <div className="space-y-7">

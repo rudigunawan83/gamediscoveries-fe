@@ -32,3 +32,15 @@ export function isIos(): boolean {
   if (typeof navigator === "undefined") return false;
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
+
+/** Desktop or mobile Safari; Chromium and Firefox builds also say "Safari/". */
+export function isSafari(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|OPR\/|SamsungBrowser|Android/.test(ua);
+}
+
+/** The Android APK is useless here: iOS devices (iPadOS reports as a Mac) or Safari. */
+export function isAppleBrowser(): boolean {
+  return isIos() || isSafari();
+}
