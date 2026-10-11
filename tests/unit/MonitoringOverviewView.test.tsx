@@ -89,6 +89,6 @@ describe("MonitoringOverviewView", () => {
     expect(screen.getByText("Application error logs are not stored.")).toBeInTheDocument();
     expect(screen.getByText("Incident tracking is not configured.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "View Details" })).toHaveAttribute("href", "/admin/monitoring/uptime");
-    expect(await screen.findAllByText("No website visits in this range.")).toHaveLength(2);
+    expect(await screen.findAllByText("No visits in this range.")).toHaveLength(2);
   });
 });

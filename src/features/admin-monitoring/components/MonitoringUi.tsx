@@ -9,10 +9,12 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   formatChange,
   formatDateRange,
+  formatDuration,
   rangeLabel,
 } from "@/features/admin-monitoring/monitoringFormat";
 import type {
   MonitoringCount,
+  MonitoringDuration,
   MonitoringRange,
   MonitoringUnavailable,
 } from "@/lib/api/monitoring";
@@ -197,6 +199,41 @@ export function CountCard({
       <div className="mt-2 flex items-end gap-2">
         <div className="min-w-0 flex-1">{trend ? <Sparkline values={trend} color={color} /> : null}</div>
         <span className="shrink-0 text-[10px] text-[#8b8ca3]">{hint}</span>
+      </div>
+    </article>
+  );
+}
+
+export function DurationCard({
+  label,
+  hint,
+  metric,
+  icon,
+  trend,
+  color = "#f5c542",
+}: {
+  label: string;
+  hint: string;
+  metric: MonitoringDuration;
+  icon?: LucideIcon;
+  trend?: number[];
+  color?: string;
+}) {
+  return (
+    <article className="flex flex-col rounded-2xl border border-[#f5c542]/25 bg-[#12141c] p-4">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs text-[#c7c8d6]">{label}</p>
+        {icon ? <CardIcon icon={icon} /> : null}
+      </div>
+      <div className="mt-1 flex items-baseline gap-2">
+        <p className="text-2xl font-black tabular-nums">{formatDuration(metric.seconds) ?? "—"}</p>
+        <Change value={metric.changePercent} />
+      </div>
+      <div className="mt-2 flex items-end gap-2">
+        <div className="min-w-0 flex-1">{trend ? <Sparkline values={trend} color={color} /> : null}</div>
+        <span className="shrink-0 text-[10px] text-[#8b8ca3]">
+          {metric.seconds == null ? "No finished sessions" : hint}
+        </span>
       </div>
     </article>
   );

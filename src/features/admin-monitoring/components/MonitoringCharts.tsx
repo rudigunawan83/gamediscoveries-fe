@@ -48,11 +48,13 @@ export function ChartLegend({ series }: { series: Array<{ label: string; color: 
   );
 }
 
-function YAxis({ ticks }: { ticks: number[] }) {
+type ValueFormatter = (value: number) => string;
+
+function YAxis({ ticks, format = formatCompact }: { ticks: number[]; format?: ValueFormatter }) {
   return (
     <div className="flex h-full w-9 shrink-0 flex-col justify-between text-right text-[10px] leading-none text-[#8b8ca3]">
       {[...ticks].reverse().map((tick) => (
-        <span key={tick}>{formatCompact(tick)}</span>
+        <span key={tick}>{format(tick)}</span>
       ))}
     </div>
   );
@@ -109,11 +111,13 @@ export function LineChart({
   series,
   hourly,
   label,
+  formatValue,
 }: {
   buckets: string[];
   series: ChartSeries[];
   hourly: boolean;
   label: string;
+  formatValue?: ValueFormatter;
 }) {
   const gradientId = useSvgId();
   const scale = niceScale(Math.max(0, ...series.flatMap((item) => item.values)));
@@ -123,7 +127,7 @@ export function LineChart({
   return (
     <div>
       <div className="flex h-52 gap-2">
-        <YAxis ticks={scale.ticks} />
+        <YAxis ticks={scale.ticks} format={formatValue} />
         <div className="relative flex-1">
           <GridLines ticks={scale.ticks} max={scale.max} />
           <svg
@@ -199,6 +203,47 @@ export function BarChart({
         </div>
       </div>
       <XAxis buckets={buckets} hourly={hourly} centered />
+    </div>
+  );
+}
+
+/** Bars with fixed category labels instead of time buckets. */
+export function LabeledBarChart({
+  items,
+  label,
+  color = "#f5c542",
+}: {
+  items: Array<{ key: string; label: string; value: number }>;
+  label: string;
+  color?: string;
+}) {
+  const scale = niceScale(Math.max(0, ...items.map((item) => item.value)));
+
+  return (
+    <div>
+      <div className="flex h-52 gap-2">
+        <YAxis ticks={scale.ticks} />
+        <div className="relative flex-1" role="img" aria-label={label}>
+          <GridLines ticks={scale.ticks} max={scale.max} />
+          <div className="absolute inset-0 flex items-end gap-4 px-2">
+            {items.map((item) => (
+              <span
+                key={item.key}
+                className="flex-1 rounded-t-sm"
+                title={`${item.label}: ${item.value.toLocaleString("en")}`}
+                style={{ height: `${(item.value / scale.max) * 100}%`, backgroundColor: color }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="ml-11 mt-2 flex gap-4 px-2 text-center text-[10px] text-[#8b8ca3]">
+        {items.map((item) => (
+          <span key={item.key} className="flex-1 truncate">
+            {item.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

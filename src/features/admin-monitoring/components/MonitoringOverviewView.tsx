@@ -48,6 +48,7 @@ const sourceLabels: Record<string, string> = {
   social: "Social Media",
   referral: "Referral",
   paid_ads: "Paid Ads",
+  mobile_app: "Mobile App",
   others: "Others",
 };
 
@@ -290,15 +291,15 @@ function TrafficPanels({ range }: { range: MonitoringRange }) {
 
   return (
     <>
-      <Panel title="Traffic Sources" subtitle="Website visits by source" action={trafficLink}>
+      <Panel title="Traffic Sources" subtitle="Website and app visits by source" action={trafficLink}>
         {state ??
           (data && totalSessions > 0 ? (
             <Donut shares={data.sources} label={(key) => sourceLabels[key] ?? key} centerLabel="Total Visits" />
           ) : (
-            <Empty text="No website visits in this range." />
+            <Empty text="No visits in this range." />
           ))}
       </Panel>
-      <Panel title="Device & Browser" subtitle="Website visits by device and browser">
+      <Panel title="Device & Browser" subtitle="Website and app visits by device and browser">
         {state ??
           (data && totalSessions > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -317,7 +318,7 @@ function TrafficPanels({ range }: { range: MonitoringRange }) {
               </div>
             </div>
           ) : (
-            <Empty text="No website visits in this range." />
+            <Empty text="No visits in this range." />
           ))}
       </Panel>
     </>

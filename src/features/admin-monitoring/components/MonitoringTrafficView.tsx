@@ -32,7 +32,15 @@ const sourceLabels: Record<string, string> = {
   social: "Social",
   referral: "Referral",
   paid_ads: "Paid Ads",
+  mobile_app: "Mobile App",
   others: "Others",
+};
+
+const platformLabels: Record<string, string> = {
+  web: "Website",
+  android: "Android App",
+  ios: "iOS App",
+  app: "Mobile App",
 };
 
 const deviceLabels: Record<string, string> = {
@@ -48,7 +56,7 @@ export function MonitoringTrafficView() {
       queryName="traffic"
       path="/admin/monitoring/traffic"
       title="Traffic & Growth"
-      description="Website visits from analytics events and sessions. Missing sources stay unavailable."
+      description="Website and mobile app visits from analytics events and sessions. Missing sources stay unavailable."
       icon={TrendingUp}
       load={getMonitoringTraffic}
     >
@@ -78,10 +86,6 @@ function TrafficData({ data, range }: { data: MonitoringTraffic; range: Monitori
 
   return (
     <>
-      <p className="rounded-xl border border-[#f5c542]/30 bg-[#f5c542]/5 px-4 py-2 text-xs text-[#c7c8d6]">
-        Website only. {data.mobileApp.reason}
-      </p>
-
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <CountCard label="Total Visits" hint={vs} icon={MousePointerClick} metric={data.visits} />
         <CountCard
@@ -177,7 +181,10 @@ function TrafficData({ data, range }: { data: MonitoringTraffic; range: Monitori
         </Panel>
       </section>
 
-      <section className="grid gap-3 xl:grid-cols-3">
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <Panel title="Visitors by Platform" subtitle="Website and mobile app">
+          <ShareDonut shares={data.platforms} label={(key) => platformLabels[key] ?? key} />
+        </Panel>
         <UnavailablePanel title="Visitors by Country" metric={data.countries} />
         <Panel title="Visitors by Device">
           <ShareDonut shares={data.devices} label={(key) => deviceLabels[key] ?? key} />

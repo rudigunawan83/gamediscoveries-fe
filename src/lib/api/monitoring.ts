@@ -114,7 +114,48 @@ export interface MonitoringTraffic {
   landingPages: TrafficPage[];
   exitPages: TrafficExitPage[];
   searchKeywords: TrafficKeyword[];
-  mobileApp: MonitoringUnavailable;
+  /** Keys: `web`, `android`, `ios`, or `app` for an unrecognised app platform. */
+  platforms: TrafficShare[];
+}
+
+/** Players include guests; playtime is server-measured active time of finished sessions. */
+export interface GamePlaysPoint {
+  bucket: string;
+  plays: number;
+  uniquePlayers: number;
+  averagePlaytimeSeconds: number | null;
+}
+
+export interface GamePlaytimeBucket {
+  /** `lt_1m`, `1_5m`, `5_10m`, `10_30m`, `30_60m`, `gt_60m`. */
+  key: string;
+  sessions: number;
+}
+
+export interface GameAnalyticsTopGame {
+  title: string;
+  slug: string;
+  thumbnailUrl: string | null;
+  plays: number;
+  uniquePlayers: number;
+  averagePlaytimeSeconds: number | null;
+}
+
+export interface MonitoringGames {
+  range: string;
+  from: string;
+  to: string;
+  generatedAt: string;
+  totalGames: MonitoringCount;
+  totalPlays: MonitoringCount;
+  averagePlaytime: MonitoringDuration;
+  activeGames: MonitoringCount;
+  launchOutcomes: MonitoringUnavailable;
+  trend: GamePlaysPoint[];
+  playtimeDistribution: GamePlaytimeBucket[];
+  topGames: GameAnalyticsTopGame[];
+  categories: Array<{ name: string; plays: number }>;
+  newVsReturning: { newPlayers: number; returningPlayers: number };
 }
 
 function monitoringQuery(range: MonitoringRange, refresh: boolean) {
@@ -132,5 +173,11 @@ export function getMonitoringOverview(range: MonitoringRange, refresh = false) {
 export function getMonitoringTraffic(range: MonitoringRange, refresh = false) {
   return apiClient.get<MonitoringTraffic>(
     `/api/v1/admin/monitoring/traffic?${monitoringQuery(range, refresh)}`,
+  );
+}
+
+export function getMonitoringGames(range: MonitoringRange, refresh = false) {
+  return apiClient.get<MonitoringGames>(
+    `/api/v1/admin/monitoring/games?${monitoringQuery(range, refresh)}`,
   );
 }

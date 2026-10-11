@@ -43,7 +43,10 @@ const traffic: MonitoringTraffic = {
   landingPages: [{ path: "/game/space-run", count: 12, changePercent: 50 }],
   exitPages: [{ path: "/search", exits: 5, exitRate: 41.7 }],
   searchKeywords: [],
-  mobileApp: { reason: "The mobile app does not send page view events yet." },
+  platforms: [
+    { key: "web", sessions: 32 },
+    { key: "android", sessions: 8 },
+  ],
 };
 
 function renderView() {
@@ -86,5 +89,17 @@ describe("MonitoringTrafficView", () => {
     expect(screen.getByText("/game/space-run")).toBeInTheDocument();
     expect(screen.getByText("41.7%")).toBeInTheDocument();
     expect(screen.getByText("No searches in this range.")).toBeInTheDocument();
+  });
+
+  it("splits visits between the website and the mobile app", async () => {
+    getMonitoringTraffic.mockResolvedValue({ data: traffic });
+    useAuthStore.setState({ accessToken: "token", user: { roles: ["SuperAdmin"] } as never });
+    renderView();
+
+    expect(await screen.findByText("Visitors by Platform")).toBeInTheDocument();
+    expect(screen.getByText("Website")).toBeInTheDocument();
+    expect(screen.getByText("Android App")).toBeInTheDocument();
+    expect(screen.getByText("80.0%")).toBeInTheDocument();
+    expect(screen.queryByText(/Website only/)).not.toBeInTheDocument();
   });
 });
