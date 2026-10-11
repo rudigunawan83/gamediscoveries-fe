@@ -27,8 +27,9 @@ interface UserMenuProps {
 
 export function UserMenu({ compact = false }: UserMenuProps) {
   const router = useRouter();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user: session } = useAuth();
   const { user } = useCurrentUser();
+  const isSuperAdmin = session?.roles?.includes("SuperAdmin") ?? false;
   const t = useTranslations("Nav");
   const tCommon = useTranslations("Common");
 
@@ -121,6 +122,18 @@ export function UserMenu({ compact = false }: UserMenuProps) {
         >
           {t("recentlyPlayed")}
         </DropdownMenuItem>
+        {isSuperAdmin ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                router.push("/admin/monitoring");
+              }}
+            >
+              {t("adminPortal")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
