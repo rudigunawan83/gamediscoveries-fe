@@ -167,7 +167,7 @@ Practical budgets (mobile mid-tier, 4G):
 | CLS | ≤ 0.1 |
 | Initial JS (critical route) | keep lean; prefer Server Components |
 | Hero / LCP image | responsive, prioritized only above the fold |
-| Fonts | Montserrat subset via `next/font` |
+| Fonts | Self-hosted Montserrat and Geist Mono (latin, variable) in `src/app/fonts` via `next/font/local` |
 | Third-party scripts | deferred / non-blocking |
 
 Cache strategy (service worker `gd-v1`):

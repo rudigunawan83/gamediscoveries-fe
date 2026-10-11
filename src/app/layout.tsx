@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -13,24 +13,31 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/structured-data";
+import { PageViewTracker } from "@/features/seo/components/PageViewTracker";
 import { AppProviders } from "@/providers/AppProviders";
 import "./globals.css";
 
-const display = Montserrat({
+// Self-hosted: next/font/google fetches at build time and Turbopack fails on
+// Google's extensionless font URLs (vercel/next.js#99114).
+const display = localFont({
+  src: "./fonts/montserrat-latin.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: "400 800",
+  display: "swap",
 });
 
-const sans = Montserrat({
+const sans = localFont({
+  src: "./fonts/montserrat-latin.woff2",
   variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: "400 800",
+  display: "swap",
 });
 
-const mono = Geist_Mono({
+const mono = localFont({
+  src: "./fonts/geist-mono-latin.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -78,7 +85,10 @@ export default async function RootLayout({
           ]}
         />
         <NextIntlClientProvider>
-          <AppProviders languageMode={languageMode}>{children}</AppProviders>
+          <AppProviders languageMode={languageMode}>
+            {children}
+            <PageViewTracker />
+          </AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>

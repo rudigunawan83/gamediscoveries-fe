@@ -22,6 +22,7 @@ const links = [
   { href: "/admin/gamification/leaderboards", label: "Leaderboards" },
   { href: "/admin/gamification/competitions", label: "Competitions" },
   { href: "/admin/gamification/audit-logs", label: "Audit Logs" },
+  { href: "/admin/monitoring", label: "Monitoring" },
 ];
 
 export default function AdminGamificationLayout({

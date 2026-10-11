@@ -14,6 +14,7 @@ import { FavoriteButton } from "@/features/my-games/components/FavoriteButton";
 import { useSimilarGames } from "@/features/recommendations/hooks/useRecommendations";
 import { ShareButton } from "@/features/seo/components/ShareButton";
 import { getGameReviews } from "@/lib/api/community";
+import { MobileReviewComposer } from "./MobileReviewComposer";
 import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
@@ -198,21 +199,24 @@ export function MobileGameDetail({
         ) : tab === 1 ? (
           <TextSection text={game.instructions} empty={t("defaultInstructions")} />
         ) : tab === 2 ? (
-          reviews.isPending ? (
-            <MobileGameListSkeleton count={3} />
-          ) : reviews.isError ? (
-            <TextSection text={null} empty={t("reviewsError")} />
-          ) : !reviews.data?.items.length ? (
-            <TextSection text={null} empty={t("noReviews")} />
-          ) : (
-            <ul className="space-y-3.5">
-              {reviews.data.items.slice(0, 10).map((review) => (
-                <li key={review.id}>
-                  <ReviewTile review={review} />
-                </li>
-              ))}
-            </ul>
-          )
+          <div className="space-y-3.5">
+            <MobileReviewComposer slug={game.slug} />
+            {reviews.isPending ? (
+              <MobileGameListSkeleton count={3} />
+            ) : reviews.isError ? (
+              <TextSection text={null} empty={t("reviewsError")} />
+            ) : !reviews.data?.items.length ? (
+              <TextSection text={null} empty={t("noReviews")} />
+            ) : (
+              <ul className="space-y-3.5">
+                {reviews.data.items.slice(0, 10).map((review) => (
+                  <li key={review.id}>
+                    <ReviewTile review={review} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         ) : similar.length === 0 ? (
           <TextSection
             text={null}
