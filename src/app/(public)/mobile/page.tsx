@@ -23,6 +23,7 @@ export default async function MobileGamesPage() {
       page: 1,
       pageSize: 48,
       mobileReady: true,
+      orientation: "portrait",
       sort: "newest",
     }),
     getTranslations("Seo"),

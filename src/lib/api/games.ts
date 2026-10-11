@@ -13,6 +13,7 @@ export interface ListGamesParams {
   category?: string;
   platform?: string;
   mobileReady?: boolean;
+  orientation?: "portrait" | "landscape";
   sort?: string;
   tag?: string;
 }
@@ -29,6 +30,7 @@ export async function getGames(
   if (params.mobileReady !== undefined) {
     query.set("mobileReady", String(params.mobileReady));
   }
+  if (params.orientation) query.set("orientation", params.orientation);
   if (params.sort) query.set("sort", params.sort);
   if (params.tag) query.set("tag", params.tag);
 
