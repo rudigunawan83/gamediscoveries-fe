@@ -1,6 +1,6 @@
 /** Only admin pages that exist today; no placeholder destinations. */
 export const adminPortalNav = [
-  { href: "/admin/gamification/users", label: "Users", icon: "users" },
+  { href: "/admin/users", label: "Users", icon: "users" },
   { href: "/admin/community", label: "Content Moderation", icon: "shield" },
   { href: "/admin/gamification", label: "Gamification", icon: "trophy" },
   { href: "/admin/gamification/missions", label: "Missions", icon: "target" },

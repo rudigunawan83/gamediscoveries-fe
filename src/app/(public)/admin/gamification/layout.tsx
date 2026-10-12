@@ -12,7 +12,7 @@ export function generateMetadata() {
 
 const links = [
   { href: "/admin/gamification", label: "Overview" },
-  { href: "/admin/gamification/users", label: "Users" },
+  { href: "/admin/users", label: "Users" },
   { href: "/admin/gamification/levels", label: "Levels" },
   { href: "/admin/gamification/missions", label: "Missions" },
   { href: "/admin/gamification/streaks", label: "Streaks" },
