@@ -81,7 +81,9 @@ async function requestOnce<T>(
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
 
-  if (options.body !== undefined) {
+  // The browser sets the multipart boundary itself for FormData bodies.
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body !== undefined && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -100,7 +102,12 @@ async function requestOnce<T>(
     const response = await fetch(buildUrl(path), {
       method,
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body:
+        options.body === undefined
+          ? undefined
+          : isFormData
+            ? (options.body as FormData)
+            : JSON.stringify(options.body),
       signal: options.signal ?? controller.signal,
       cache: "no-store",
     });

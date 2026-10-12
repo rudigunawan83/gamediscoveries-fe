@@ -136,7 +136,16 @@
     "favoriteGames": "Favorite Games",
     "noFavorites": "No favorites shown.",
     "noAchievements": "No achievements shown.",
-    "publicMetaDescription": "Player profile for {username} on GameDiscoveries."
+    "publicMetaDescription": "Player profile for {username} on GameDiscoveries.",
+    "changeAvatar": "Change avatar",
+    "uploadingAvatar": "Uploading avatar",
+    "chooseFromGallery": "Choose from gallery",
+    "takePhoto": "Take a photo",
+    "removePhoto": "Remove photo",
+    "avatarUpdated": "Avatar updated.",
+    "avatarRemoved": "Avatar removed.",
+    "avatarTooLarge": "Image must be {maxMb} MB or smaller.",
+    "avatarNotImage": "Choose an image file."
   },
   "Help": {
     "title": "Help & Support",

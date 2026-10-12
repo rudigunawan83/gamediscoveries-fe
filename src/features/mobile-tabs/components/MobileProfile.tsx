@@ -30,6 +30,7 @@ import { getMyAchievements } from "@/lib/api/achievements";
 import { getMyProgress, type LevelInfo } from "@/lib/api/progress";
 import { useFormats } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
+import { MobileAvatarEditor } from "./MobileAvatarEditor";
 
 type ProfileKey = keyof Messages["Profile"];
 type MenuEntry = { icon: LucideIcon; label: ProfileKey; accent: string; href?: string };
@@ -107,7 +108,13 @@ export function MobileProfile() {
 
   return (
     <div className="space-y-6">
-      <ProfileHero name={name} subtitle={user?.email} avatarUrl={avatarUrl} highlighted />
+      <ProfileHero
+        name={name}
+        subtitle={user?.email}
+        avatarUrl={avatarUrl}
+        highlighted
+        editableAvatar
+      />
 
       {progressQuery.isError ? (
         <div className="rounded-[18px] border border-[#ff5d73]/40 bg-[#15151d] p-4">
@@ -159,19 +166,18 @@ function ProfileHero({
   subtitle,
   avatarUrl,
   highlighted,
+  editableAvatar = false,
 }: {
   name: string;
   subtitle?: string | null;
   avatarUrl?: string | null;
   highlighted: boolean;
+  editableAvatar?: boolean;
 }) {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
-    .join("");
   const t = useTranslations("Profile");
+  const avatarRing = (
+    <ProfileAvatarRing name={name} avatarUrl={avatarUrl} highlighted={highlighted} />
+  );
 
   return (
     <div className="relative -mx-4 -mt-6 overflow-hidden px-4 pb-2 pt-4">
@@ -211,26 +217,11 @@ function ProfileHero({
           </Link>
         </div>
         <div className="mt-1 flex flex-col items-center">
-          <div
-            className={cn(
-              "rounded-full p-[5px]",
-              highlighted
-                ? "bg-gradient-to-b from-[#ffe08a] via-[#ffc83d] to-[#f5a524] shadow-[0_0_36px_2px_rgba(255,200,61,0.55)]"
-                : "bg-[#2a2a37]",
-            )}
-          >
-            <Avatar className="size-32">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-              <AvatarFallback
-                className={cn(
-                  "bg-[radial-gradient(circle_at_50%_35%,#2a2416,#0e0e14)] text-5xl font-black",
-                  highlighted ? "text-[#ffc83d]" : "text-[#9c9cb0]",
-                )}
-              >
-                {initials || "?"}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          {editableAvatar ? (
+            <MobileAvatarEditor hasAvatar={Boolean(avatarUrl)}>{avatarRing}</MobileAvatarEditor>
+          ) : (
+            avatarRing
+          )}
           <p className="mt-3.5 line-clamp-2 text-center text-[28px] font-black text-white [text-shadow:0_0_12px_rgba(0,0,0,0.54)]">
             {name}
           </p>
@@ -241,6 +232,46 @@ function ProfileHero({
           ) : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProfileAvatarRing({
+  name,
+  avatarUrl,
+  highlighted,
+}: {
+  name: string;
+  avatarUrl?: string | null;
+  highlighted: boolean;
+}) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join("");
+
+  return (
+    <div
+      className={cn(
+        "rounded-full p-[5px]",
+        highlighted
+          ? "bg-gradient-to-b from-[#ffe08a] via-[#ffc83d] to-[#f5a524] shadow-[0_0_36px_2px_rgba(255,200,61,0.55)]"
+          : "bg-[#2a2a37]",
+      )}
+    >
+      <Avatar className="size-32">
+        {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+        <AvatarFallback
+          className={cn(
+            "bg-[radial-gradient(circle_at_50%_35%,#2a2416,#0e0e14)] text-5xl font-black",
+            highlighted ? "text-[#ffc83d]" : "text-[#9c9cb0]",
+          )}
+        >
+          {initials || "?"}
+        </AvatarFallback>
+      </Avatar>
     </div>
   );
 }

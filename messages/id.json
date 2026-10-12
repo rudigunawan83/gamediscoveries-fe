@@ -136,7 +136,16 @@
     "favoriteGames": "Game Favorit",
     "noFavorites": "Tidak ada favorit yang ditampilkan.",
     "noAchievements": "Tidak ada pencapaian yang ditampilkan.",
-    "publicMetaDescription": "Profil pemain {username} di GameDiscoveries."
+    "publicMetaDescription": "Profil pemain {username} di GameDiscoveries.",
+    "changeAvatar": "Ganti avatar",
+    "uploadingAvatar": "Mengunggah avatar",
+    "chooseFromGallery": "Pilih dari galeri",
+    "takePhoto": "Ambil foto",
+    "removePhoto": "Hapus foto",
+    "avatarUpdated": "Avatar diperbarui.",
+    "avatarRemoved": "Avatar dihapus.",
+    "avatarTooLarge": "Ukuran gambar maksimal {maxMb} MB.",
+    "avatarNotImage": "Pilih file gambar."
   },
   "Help": {
     "title": "Bantuan & Dukungan",

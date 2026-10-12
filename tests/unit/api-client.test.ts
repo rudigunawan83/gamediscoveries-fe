@@ -1,5 +1,44 @@
-import { describe, expect, it } from "vitest";
-import { normalizeApiError } from "@/lib/api/client";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { apiClient, normalizeApiError } from "@/lib/api/client";
+
+describe("apiClient request bodies", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function stubFetch() {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: {}, error: null, meta: null }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("sends FormData as-is so the browser sets the multipart boundary", async () => {
+    const fetchMock = stubFetch();
+    const body = new FormData();
+    body.append("file", new Blob(["x"], { type: "image/png" }), "a.png");
+
+    await apiClient.post("/api/v1/users/me/avatar", body);
+
+    const init = fetchMock.mock.calls[0]![1] as RequestInit;
+    expect(init.body).toBe(body);
+    expect(new Headers(init.headers).has("Content-Type")).toBe(false);
+  });
+
+  it("serializes plain objects as JSON", async () => {
+    const fetchMock = stubFetch();
+
+    await apiClient.post("/api/v1/users/me/favorites", { gameId: "g1" });
+
+    const init = fetchMock.mock.calls[0]![1] as RequestInit;
+    expect(init.body).toBe(JSON.stringify({ gameId: "g1" }));
+    expect(new Headers(init.headers).get("Content-Type")).toBe("application/json");
+  });
+});
 
 describe("normalizeApiError", () => {
   it("normalizes wrapped API error payloads", () => {
