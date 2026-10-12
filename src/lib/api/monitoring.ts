@@ -329,6 +329,89 @@ export interface MonitoringGamification {
   recentMissions: GamificationRecentMission[];
 }
 
+/** CTR is a percentage; position is the average Google rank (lower is better). */
+export interface SeoMetricRow {
+  key: string;
+  clicks: number;
+  impressions: number;
+  ctr: number | null;
+  position: number | null;
+}
+
+export interface SeoTrendPoint {
+  bucket: string;
+  clicks: number;
+  impressions: number;
+  ctr: number | null;
+  position: number | null;
+}
+
+/** Distinct queries per day by average position: 1–3, 4–10, and 11–50. */
+export interface SeoRankingPoint {
+  bucket: string;
+  top3: number;
+  top10: number;
+  top50: number;
+}
+
+export interface SeoSearchPerformance {
+  clicks: MonitoringCount;
+  impressions: MonitoringCount;
+  ctr: MonitoringRatio;
+  position: MonitoringRatio;
+  trend: SeoTrendPoint[];
+  rankings: SeoRankingPoint[];
+  pages: SeoMetricRow[];
+  queries: SeoMetricRow[];
+  /** Keys are ISO alpha-2 when known, otherwise Search Console's alpha-3 (`ZZZ` = unknown). */
+  countries: SeoMetricRow[];
+  /** Keys: `desktop`, `mobile`, `tablet`. */
+  devices: SeoMetricRow[];
+}
+
+export interface SeoSitemap {
+  path: string;
+  lastSubmitted: string | null;
+  lastDownloaded: string | null;
+  isPending: boolean;
+  isSitemapsIndex: boolean;
+  submitted: number;
+  errors: number;
+  warnings: number;
+}
+
+export interface SeoVital {
+  metric: "lcp" | "inp" | "cls";
+  /** Milliseconds for LCP and INP; unitless for CLS. */
+  p75: number | null;
+  goodPercent: number | null;
+  rating: "good" | "needs_improvement" | "poor" | null;
+}
+
+export interface SeoIssue {
+  kind: string;
+  severity: "high" | "medium" | "low";
+  target: string;
+  detail: string;
+}
+
+/** Dates are Search Console days (Pacific Time) ending yesterday. */
+export interface MonitoringSeo {
+  range: string;
+  from: string;
+  to: string;
+  generatedAt: string;
+  siteUrl: string;
+  search: SeoSearchPerformance | null;
+  searchUnavailable: MonitoringUnavailable | null;
+  sitemaps: SeoSitemap[] | null;
+  sitemapsUnavailable: MonitoringUnavailable | null;
+  coreWebVitals: { firstDate: string | null; lastDate: string | null; metrics: SeoVital[] } | null;
+  coreWebVitalsUnavailable: MonitoringUnavailable | null;
+  issues: SeoIssue[];
+  indexCoverage: MonitoringUnavailable;
+}
+
 function monitoringQuery(range: MonitoringRange, refresh: boolean) {
   const query = new URLSearchParams({ range });
   if (refresh) query.set("refresh", "true");
@@ -357,6 +440,10 @@ export function getMonitoringUsers(range: MonitoringRange, refresh = false) {
   return apiClient.get<MonitoringUsers>(
     `/api/v1/admin/monitoring/users?${monitoringQuery(range, refresh)}`,
   );
+}
+
+export function getMonitoringSeo(range: MonitoringRange, refresh = false) {
+  return apiClient.get<MonitoringSeo>(`/api/v1/admin/monitoring/seo?${monitoringQuery(range, refresh)}`);
 }
 
 export function getMonitoringGamification(range: MonitoringRange, refresh = false) {

@@ -349,7 +349,8 @@ export function Empty({ text }: { text: string }) {
   return <p className="text-sm text-[#8b8ca3]">{text}</p>;
 }
 
-export function Change({ value }: { value: number | null }) {
+/** `invert` colors a decrease as good, e.g. average search position. */
+export function Change({ value, invert = false }: { value: number | null; invert?: boolean }) {
   const label = formatChange(value);
   if (!label) return <span className="text-xs text-[#8b8ca3]">—</span>;
   const up = (value ?? 0) > 0;
@@ -358,7 +359,7 @@ export function Change({ value }: { value: number | null }) {
     <span
       className={cn(
         "text-xs font-semibold",
-        flat ? "text-[#8b8ca3]" : up ? "text-[#3dd68c]" : "text-[#ff6b6b]",
+        flat ? "text-[#8b8ca3]" : up !== invert ? "text-[#3dd68c]" : "text-[#ff6b6b]",
       )}
     >
       {flat ? "" : up ? "▲ " : "▼ "}
