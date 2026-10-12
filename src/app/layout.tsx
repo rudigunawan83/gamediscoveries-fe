@@ -48,6 +48,10 @@ export async function generateMetadata(): Promise<Metadata> {
       statusBarStyle: "black-translucent",
       title: SITE_NAME,
     },
+    // Removing this tag un-verifies the site in Google Search Console.
+    verification: {
+      google: "uHIg0Gv9_VufOqWmT97IubR4F53EnNRNiqb-mqXC7Tc",
+    },
     other: {
       "mobile-web-app-capable": "yes",
     },
