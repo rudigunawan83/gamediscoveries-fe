@@ -1,6 +1,6 @@
 export type GamePlayerState = "idle" | "loading" | "playing" | "error" | "ended";
 
-export type GamePlayerErrorKind = "unavailable" | "invalid_url" | "load_failed";
+export type GamePlayerErrorKind = "unavailable" | "invalid_url" | "load_failed" | "load_timeout";
 
 export type PlaySessionPhase =
   | "game_view"

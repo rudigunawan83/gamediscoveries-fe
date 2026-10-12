@@ -9,7 +9,9 @@ const LEGACY_TO_CANONICAL: Record<string, string> = {
   game_click: "SEARCH_RESULT_CLICK",
   game_start: "GAME_START",
   game_started: "GAME_START",
-  game_play_clicked: "GAME_START",
+  game_play_clicked: "PLAY_CLICK",
+  game_loaded: "GAME_LOADED",
+  game_load_failed: "GAME_LOAD_FAILED",
   game_exit: "GAME_SESSION_END",
   game_exited: "GAME_SESSION_END",
   game_completed: "GAME_SESSION_END",
@@ -53,7 +55,12 @@ const LEGACY_TO_CANONICAL: Record<string, string> = {
   my_games_game_clicked: "GAME_VIEW",
 };
 
+/** Recorded by the API when the action succeeds; the client only forwards them to GA4. */
+export const SERVER_RECORDED_EVENTS = new Set(["FAVORITE_ADDED"]);
+
 export const IMMEDIATE_FLUSH_EVENTS = new Set([
+  "PLAY_CLICK",
+  "GAME_LOAD_FAILED",
   "GAME_START",
   "GAME_SESSION_START",
   "GAME_SESSION_END",

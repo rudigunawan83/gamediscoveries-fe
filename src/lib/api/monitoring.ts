@@ -141,6 +141,26 @@ export interface GameAnalyticsTopGame {
   averagePlaytimeSeconds: number | null;
 }
 
+export interface GameLaunchFailure {
+  title: string;
+  slug: string;
+  attempts: number;
+  failed: number;
+}
+
+/** Player events (clicks, loads) only exist from the release that added them. */
+export interface GameLaunchFunnel {
+  views: number;
+  playClicks: number;
+  loaded: number;
+  loadFailed: number;
+  sessions: number;
+  validSessions: number;
+  /** Percent of reported load outcomes that succeeded; null when none were reported. */
+  loadSuccessRate: number | null;
+  failingGames: GameLaunchFailure[];
+}
+
 export interface MonitoringGames {
   range: string;
   from: string;
@@ -150,7 +170,7 @@ export interface MonitoringGames {
   totalPlays: MonitoringCount;
   averagePlaytime: MonitoringDuration;
   activeGames: MonitoringCount;
-  launchOutcomes: MonitoringUnavailable;
+  launch: GameLaunchFunnel;
   trend: GamePlaysPoint[];
   playtimeDistribution: GamePlaytimeBucket[];
   topGames: GameAnalyticsTopGame[];

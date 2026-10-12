@@ -29,31 +29,23 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const label = copied ? t("linkCopied") : t("share");
 
-  async function handleShare() {
-    analytics.track("share_clicked", {
-      entityType,
-      entityId,
-      url,
-    });
+  // GAME_SHARED is a per-game metric; other entities have no first-party share event.
+  function trackShared(method: string) {
+    if (entityType !== "game" || !entityId) return;
+    analytics.track("share_completed", { gameId: entityId, method });
+  }
 
+  async function handleShare() {
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({ title, text, url });
-        analytics.track("share_completed", {
-          entityType,
-          entityId,
-          method: "web_share",
-        });
+        trackShared("web_share");
         return;
       }
 
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      analytics.track("share_completed", {
-        entityType,
-        entityId,
-        method: "clipboard",
-      });
+      trackShared("clipboard");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       // User cancelled share sheet — ignore.

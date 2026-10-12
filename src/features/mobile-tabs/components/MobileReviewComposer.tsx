@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const REVIEW_MAX_LENGTH = 2000;
 
-export function MobileReviewComposer({ slug }: { slug: string }) {
+export function MobileReviewComposer({ slug, gameId }: { slug: string; gameId: string }) {
   const t = useTranslations("Game");
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -25,7 +25,7 @@ export function MobileReviewComposer({ slug }: { slug: string }) {
   const mutation = useMutation({
     mutationFn: () => upsertGameReview(slug, rating, content.trim()),
     onSuccess: async () => {
-      analytics.track("community_review_created", { gameSlug: slug, rating });
+      analytics.track("community_review_created", { gameId, gameSlug: slug, rating });
       setContent("");
       setError(null);
       toast.success(t("reviewSaved"));

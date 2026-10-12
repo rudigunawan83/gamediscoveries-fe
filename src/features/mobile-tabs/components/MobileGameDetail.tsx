@@ -200,7 +200,7 @@ export function MobileGameDetail({
           <TextSection text={game.instructions} empty={t("defaultInstructions")} />
         ) : tab === 2 ? (
           <div className="space-y-3.5">
-            <MobileReviewComposer slug={game.slug} />
+            <MobileReviewComposer slug={game.slug} gameId={game.id} />
             {reviews.isPending ? (
               <MobileGameListSkeleton count={3} />
             ) : reviews.isError ? (

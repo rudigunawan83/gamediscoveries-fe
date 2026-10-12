@@ -15,6 +15,8 @@ export interface RequestOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
   authToken?: string;
+  /** Lets the request outlive the page (unload/pagehide); body must stay under 64KB. */
+  keepalive?: boolean;
 }
 
 const DEFAULT_TIMEOUT_MS = 15_000;
@@ -110,6 +112,7 @@ async function requestOnce<T>(
             : JSON.stringify(options.body),
       signal: options.signal ?? controller.signal,
       cache: "no-store",
+      keepalive: options.keepalive,
     });
 
     const contentType = response.headers.get("content-type") ?? "";

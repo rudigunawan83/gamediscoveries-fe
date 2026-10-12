@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   GamePlayerErrorKind,
   GamePlayerState,
@@ -8,10 +8,17 @@ import type {
 import { isPlayableGame, validatePlayUrl } from "@/features/game-player/utils/playerUrl";
 import type { GameOrientation } from "@/types/game";
 
+/** Embeds that never fire `load` (blocked, hanging CDN) are reported as failed after this. */
+export const GAME_LOAD_TIMEOUT_MS = 45_000;
+
+export type GameLoadFailure = "load_failed" | "load_timeout";
+
 type UseGamePlayerArgs = {
   status?: string | null;
   playUrl?: string | null;
   orientation?: GameOrientation;
+  onLoaded?: (loadMs: number) => void;
+  onLoadFailed?: (reason: GameLoadFailure) => void;
 };
 
 type LockableScreenOrientation = ScreenOrientation & {
@@ -23,7 +30,13 @@ function detectFullscreenSupport(): boolean {
   return typeof document.documentElement.requestFullscreen === "function";
 }
 
-export function useGamePlayer({ status, playUrl, orientation }: UseGamePlayerArgs) {
+export function useGamePlayer({
+  status,
+  playUrl,
+  orientation,
+  onLoaded,
+  onLoadFailed,
+}: UseGamePlayerArgs) {
   const validation = useMemo(() => validatePlayUrl(playUrl), [playUrl]);
   const playable = isPlayableGame(status, playUrl);
 
@@ -61,12 +74,47 @@ export function useGamePlayer({ status, playUrl, orientation }: UseGamePlayerArg
 
   const validatedUrl = validation.ok ? validation.url : null;
 
+  const callbacksRef = useRef({ onLoaded, onLoadFailed });
+  useEffect(() => {
+    callbacksRef.current = { onLoaded, onLoadFailed };
+  });
+
+  // One outcome per attempt: games navigate inside the frame and re-fire `load`.
+  const attemptRef = useRef<{ startedAt: number; settled: boolean }>({
+    startedAt: 0,
+    settled: true,
+  });
+
+  useEffect(() => {
+    if (state !== "loading") return;
+    const attempt = { startedAt: performance.now(), settled: false };
+    attemptRef.current = attempt;
+    const timer = window.setTimeout(() => {
+      if (attempt.settled) return;
+      attempt.settled = true;
+      setState("error");
+      setErrorKind("load_timeout");
+      callbacksRef.current.onLoadFailed?.("load_timeout");
+    }, GAME_LOAD_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [state, iframeKey]);
+
   const onFrameLoad = useCallback(() => {
+    const attempt = attemptRef.current;
+    if (!attempt.settled) {
+      attempt.settled = true;
+      callbacksRef.current.onLoaded?.(Math.round(performance.now() - attempt.startedAt));
+    }
     setState("playing");
     setErrorKind(null);
   }, []);
 
   const onFrameError = useCallback(() => {
+    const attempt = attemptRef.current;
+    if (!attempt.settled) {
+      attempt.settled = true;
+      callbacksRef.current.onLoadFailed?.("load_failed");
+    }
     setState("error");
     setErrorKind("load_failed");
   }, []);

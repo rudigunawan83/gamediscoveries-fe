@@ -1,4 +1,10 @@
 {
+  "Consent": {
+    "title": "Analytics consent",
+    "message": "We use Google Analytics to learn which games load and get played, so we can fix broken ones and improve recommendations. No ads or personalization.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
   "Common": {
     "back": "Back",
     "cancel": "Cancel",
@@ -183,6 +189,7 @@
     "mobileLabel": "Mobile",
     "menuLabel": "Mobile menu",
     "footerLabel": "Footer",
+    "footerCategoriesLabel": "Game categories",
     "footerTagline": "Find · Play · Explore More.",
     "openMenu": "Open menu",
     "menuTagline": "Discover · Play · Explore",
@@ -317,6 +324,12 @@
     "catalogRefreshing": "Refreshing catalog…",
     "newestTitle": "Newest Games",
     "newestDescription": "{count, plural, one {Showing # latest game from the live catalog.} other {Showing # latest games from the live catalog.}}",
+    "catalogPageDescription": "Page {page} of {pages} · {total, plural, one {# game} other {# games}} in the catalog.",
+    "catalogPagination": "Catalog pages",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "pageNumber": "Page {page}",
+    "browseCategories": "Browse by category",
     "quickPlay": "Quick Play",
     "quickPlayError": "Quick play failed to load.",
     "quickPlayEmpty": "No quick play picks right now.",

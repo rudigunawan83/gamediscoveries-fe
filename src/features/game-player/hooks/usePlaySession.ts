@@ -60,6 +60,20 @@ export function usePlaySession({
     analytics.track("game_play_clicked", { gameId, gameSlug, source });
   }, [gameId, gameSlug, source]);
 
+  const markLoaded = useCallback(
+    (loadMs: number) => {
+      analytics.track("game_loaded", { gameId, gameSlug, source, loadMs });
+    },
+    [gameId, gameSlug, source],
+  );
+
+  const markLoadFailed = useCallback(
+    (reason: string) => {
+      analytics.track("game_load_failed", { gameId, gameSlug, source, reason });
+    },
+    [gameId, gameSlug, source],
+  );
+
   const markStarted = useCallback(() => {
     if (phaseRef.current === "game_started" || phaseRef.current === "play_session_active") {
       return;
@@ -113,6 +127,8 @@ export function usePlaySession({
   return {
     markViewed,
     markPlayClicked,
+    markLoaded,
+    markLoadFailed,
     markStarted,
     markExit,
   };

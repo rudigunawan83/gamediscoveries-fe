@@ -83,6 +83,6 @@ export async function endGamePlaySession(
   return apiClient.post<GamePlaySessionDto>(
     `/api/v1/games/sessions/${sessionId}/end`,
     { anonymousId: getAnonymousId(), reason },
-    { timeoutMs: 8_000 },
+    { timeoutMs: 8_000, keepalive: true },
   );
 }

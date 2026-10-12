@@ -13,6 +13,7 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/structured-data";
+import { GoogleAnalytics } from "@/features/seo/components/GoogleAnalytics";
 import { PageViewTracker } from "@/features/seo/components/PageViewTracker";
 import { AppProviders } from "@/providers/AppProviders";
 import "./globals.css";
@@ -41,8 +42,12 @@ const mono = localFont({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Children without their own metadata must not inherit the homepage canonical/og:url.
+  const base = await createMetadata();
   return {
-    ...(await createMetadata()),
+    ...base,
+    alternates: undefined,
+    openGraph: { ...base.openGraph, url: undefined },
     appleWebApp: {
       capable: true,
       statusBarStyle: "black-translucent",
@@ -92,6 +97,7 @@ export default async function RootLayout({
           <AppProviders languageMode={languageMode}>
             {children}
             <PageViewTracker />
+            <GoogleAnalytics />
           </AppProviders>
         </NextIntlClientProvider>
       </body>

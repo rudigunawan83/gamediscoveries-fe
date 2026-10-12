@@ -24,7 +24,16 @@ const games: MonitoringGames = {
   totalPlays: { value: 320, changePercent: 18.7 },
   averagePlaytime: { seconds: 504, changePercent: 12.5 },
   activeGames: { value: 42, changePercent: null },
-  launchOutcomes: { reason: "The game player does not report load failures." },
+  launch: {
+    views: 500,
+    playClicks: 240,
+    loaded: 180,
+    loadFailed: 20,
+    sessions: 170,
+    validSessions: 150,
+    loadSuccessRate: 90,
+    failingGames: [{ title: "Broken Embed", slug: "broken-embed", attempts: 8, failed: 6 }],
+  },
   trend: [
     { bucket: "2026-10-10T00:00:00Z", plays: 120, uniquePlayers: 40, averagePlaytimeSeconds: 480 },
     { bucket: "2026-10-11T00:00:00Z", plays: 200, uniquePlayers: 60, averagePlaytimeSeconds: null },
@@ -81,7 +90,7 @@ describe("MonitoringGamesView", () => {
     expect(getMonitoringGames).not.toHaveBeenCalled();
   });
 
-  it("renders real game metrics and keeps launch outcomes unavailable", async () => {
+  it("renders real game metrics and the launch funnel", async () => {
     getMonitoringGames.mockResolvedValue({ data: games });
     useAuthStore.setState({ accessToken: "token", user: { roles: ["SuperAdmin"] } as never });
     renderView();
@@ -89,7 +98,12 @@ describe("MonitoringGamesView", () => {
     expect(await screen.findByText("1,245")).toBeInTheDocument();
     expect(getMonitoringGames).toHaveBeenCalledWith("30d", false);
     expect(screen.getByText("8m 24s")).toBeInTheDocument();
-    expect(screen.getAllByText("The game player does not report load failures.")).toHaveLength(4);
+    expect(screen.getByText("90%")).toBeInTheDocument();
+    expect(screen.getByText("200 reported loads")).toBeInTheDocument();
+    expect(screen.getByText("Play clicks")).toBeInTheDocument();
+    expect(screen.getByText("240")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Broken Embed" })).toHaveAttribute("href", "/game/broken-embed");
+    expect(screen.getByText("75%")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Space Runner/ })).toHaveAttribute("href", "/game/space-runner");
     expect(screen.getByText("12m 14s")).toBeInTheDocument();
     expect(screen.getByText("Action")).toBeInTheDocument();

@@ -42,7 +42,7 @@ afterEach(() => {
 
 describe("MobileReviewComposer", () => {
   it("asks guests to sign in", () => {
-    renderComposer(<MobileReviewComposer slug="asteroid-dodge" />);
+    renderComposer(<MobileReviewComposer slug="asteroid-dodge" gameId="g-1" />);
 
     const link = screen.getByRole("link", { name: "Sign in to write a review." });
     expect(link).toHaveAttribute(
@@ -55,7 +55,7 @@ describe("MobileReviewComposer", () => {
   it("posts a rating and review when signed in", async () => {
     upsertGameReview.mockResolvedValue({ data: { id: "r1" } });
     useAuthStore.setState({ accessToken: "token", user: null });
-    renderComposer(<MobileReviewComposer slug="asteroid-dodge" />);
+    renderComposer(<MobileReviewComposer slug="asteroid-dodge" gameId="g-1" />);
 
     fireEvent.click(screen.getByRole("radio", { name: "4 out of 5 stars" }));
     fireEvent.change(screen.getByPlaceholderText("What did you think about this game?"), {

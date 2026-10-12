@@ -147,8 +147,13 @@ export class GameSessionTracker {
     }
   };
 
+  // Clicking into the game iframe blurs the host window; that is playing, not leaving.
+  // activeElement only points at the iframe after the blur event has finished.
   private onBlur = () => {
-    this.pause("WINDOW_BLUR");
+    window.setTimeout(() => {
+      if (this.ended || document.activeElement instanceof HTMLIFrameElement) return;
+      this.pause("WINDOW_BLUR");
+    }, 0);
   };
 
   private onFocus = () => {

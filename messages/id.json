@@ -1,4 +1,10 @@
 {
+  "Consent": {
+    "title": "Persetujuan analitik",
+    "message": "Kami memakai Google Analytics untuk melihat game mana yang berhasil dimuat dan dimainkan, agar game rusak bisa diperbaiki dan rekomendasi makin tepat. Tanpa iklan atau personalisasi.",
+    "accept": "Setuju",
+    "decline": "Tolak"
+  },
   "Common": {
     "back": "Kembali",
     "cancel": "Batal",
@@ -183,6 +189,7 @@
     "mobileLabel": "Navigasi",
     "menuLabel": "Menu",
     "footerLabel": "Footer",
+    "footerCategoriesLabel": "Kategori game",
     "footerTagline": "Temukan · Mainkan · Jelajahi Lebih Banyak.",
     "openMenu": "Buka menu",
     "menuTagline": "Temukan · Main · Jelajahi",
@@ -317,6 +324,12 @@
     "catalogRefreshing": "Memperbarui katalog…",
     "newestTitle": "Game Terbaru",
     "newestDescription": "{count, plural, other {Menampilkan # game terbaru dari katalog.}}",
+    "catalogPageDescription": "Halaman {page} dari {pages} · {total, plural, other {# game}} di katalog.",
+    "catalogPagination": "Halaman katalog",
+    "previousPage": "Sebelumnya",
+    "nextPage": "Berikutnya",
+    "pageNumber": "Halaman {page}",
+    "browseCategories": "Jelajahi per kategori",
     "quickPlay": "Main Cepat",
     "quickPlayError": "Main cepat gagal dimuat.",
     "quickPlayEmpty": "Belum ada pilihan main cepat saat ini.",

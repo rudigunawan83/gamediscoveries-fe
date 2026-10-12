@@ -62,7 +62,13 @@ export function GamePlayer({
     onFrameError,
     retry,
     toggleFullscreen,
-  } = useGamePlayer({ status, playUrl, orientation });
+  } = useGamePlayer({
+    status,
+    playUrl,
+    orientation,
+    onLoaded: session.markLoaded,
+    onLoadFailed: session.markLoadFailed,
+  });
 
   useEffect(() => {
     if (state === "playing") {

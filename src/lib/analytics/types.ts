@@ -5,6 +5,8 @@ export type AnalyticsEventName =
   | "game_start"
   | "game_viewed"
   | "game_play_clicked"
+  | "game_loaded"
+  | "game_load_failed"
   | "game_started"
   | "game_exit"
   | "search"

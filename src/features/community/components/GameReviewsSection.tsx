@@ -10,7 +10,7 @@ import { errorMessage } from "@/features/mobile-tabs/components/MobileCommunityU
 import { getGameReviews, upsertGameReview } from "@/lib/api/community";
 import { analytics } from "@/lib/analytics/client";
 
-export function GameReviewsSection({ slug }: { slug: string }) {
+export function GameReviewsSection({ slug, gameId }: { slug: string; gameId: string }) {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [rating, setRating] = useState(5);
@@ -27,7 +27,7 @@ export function GameReviewsSection({ slug }: { slug: string }) {
   const mutation = useMutation({
     mutationFn: () => upsertGameReview(slug, rating, content),
     onSuccess: async () => {
-      analytics.track("community_review_created", { gameSlug: slug, rating });
+      analytics.track("community_review_created", { gameId, gameSlug: slug, rating });
       setContent("");
       setError(null);
       await queryClient.invalidateQueries({

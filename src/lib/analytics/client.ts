@@ -1,8 +1,10 @@
 import type { AnalyticsEventName, AnalyticsPayload } from "@/lib/analytics/types";
 import {
   IMMEDIATE_FLUSH_EVENTS,
+  SERVER_RECORDED_EVENTS,
   toCanonicalEventType,
 } from "@/lib/analytics/catalog";
+import { sendGaEvent } from "@/lib/analytics/ga4";
 import {
   createEventId,
   getAnalyticsSessionId,
@@ -145,8 +147,10 @@ function emit(event: AnalyticsEventName | string, payload?: AnalyticsPayload) {
   }
 
   bindLifecycleListeners();
+  sendGaEvent(event, payload);
 
   const item = buildEvent(event, payload);
+  if (SERVER_RECORDED_EVENTS.has(item.eventType)) return;
   queue.push(item);
   if (queue.length > MAX_QUEUE) {
     queue = queue.slice(queue.length - MAX_QUEUE);

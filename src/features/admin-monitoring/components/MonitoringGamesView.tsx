@@ -2,7 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle, Clock, Gamepad2, Layers, PlayCircle, Rocket } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Gamepad2,
+  Layers,
+  PlayCircle,
+  Rocket,
+  type LucideIcon,
+} from "lucide-react";
 import {
   ChartLegend,
   Donut,
@@ -15,13 +23,12 @@ import {
   Empty,
   MonitoringFrame,
   Panel,
-  UnavailableCard,
-  UnavailablePanel,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
 import { formatDuration } from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringGames,
+  type GameLaunchFunnel,
   type MonitoringGames,
   type MonitoringRange,
 } from "@/lib/api/monitoring";
@@ -71,6 +78,7 @@ function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRa
   const finishedSessions = data.playtimeDistribution.reduce((sum, bucket) => sum + bucket.sessions, 0);
   const { newPlayers, returningPlayers } = data.newVsReturning;
   const topCategoryPlays = Math.max(0, ...data.categories.map((category) => category.plays));
+  const launch = data.launch;
 
   return (
     <>
@@ -85,8 +93,18 @@ function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRa
           trend={hasPlaytime ? playtime : undefined}
           color={trendColors.playtime}
         />
-        <UnavailableCard label="Launch Success Rate" icon={Rocket} metric={data.launchOutcomes} />
-        <UnavailableCard label="Failed Launches" icon={AlertTriangle} metric={data.launchOutcomes} />
+        <StatCard
+          label="Load Success Rate"
+          icon={Rocket}
+          value={launch.loadSuccessRate == null ? "—" : `${launch.loadSuccessRate}%`}
+          hint={`${(launch.loaded + launch.loadFailed).toLocaleString("en")} reported loads`}
+        />
+        <StatCard
+          label="Failed Loads"
+          icon={AlertTriangle}
+          value={launch.loadFailed.toLocaleString("en")}
+          hint="Load errors and timeouts"
+        />
         <CountCard label="Active Games" hint={vs} icon={Layers} metric={data.activeGames} />
       </section>
 
@@ -186,7 +204,9 @@ function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRa
             </table>
           )}
         </Panel>
-        <UnavailablePanel title="Game Launch Status" metric={data.launchOutcomes} />
+        <Panel title="Launch Funnel" subtitle="Detail view to valid play session">
+          <LaunchFunnelSteps launch={launch} />
+        </Panel>
         <Panel title="Games by Category" subtitle="Plays per category; a game can be in several">
           {data.categories.length === 0 || topCategoryPlays === 0 ? (
             <Empty text="No categorized plays in this range." />
@@ -225,7 +245,38 @@ function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRa
             <Empty text="No finished sessions in this range." />
           )}
         </Panel>
-        <UnavailablePanel title="Games with Highest Failure Rate" metric={data.launchOutcomes} />
+        <Panel title="Games with Highest Failure Rate" subtitle="Failed loads out of reported loads">
+          {launch.failingGames.length === 0 ? (
+            <Empty text="No failed loads in this range." />
+          ) : (
+            <table className="w-full table-fixed text-sm">
+              <thead>
+                <tr className="text-left text-xs text-[#8b8ca3]">
+                  <th className="pb-2 font-medium">Game</th>
+                  <th className="w-16 pb-2 text-right font-medium">Failed</th>
+                  <th className="w-16 pb-2 text-right font-medium">Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {launch.failingGames.map((game) => (
+                  <tr key={game.slug} className="border-t border-white/5">
+                    <td className="py-2">
+                      <Link href={`/game/${game.slug}`} className="block truncate font-semibold hover:underline">
+                        {game.title}
+                      </Link>
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {game.failed.toLocaleString("en")}/{game.attempts.toLocaleString("en")}
+                    </td>
+                    <td className="py-2 text-right tabular-nums text-[#ff6b6b]">
+                      {Math.round((game.failed / game.attempts) * 100)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Panel>
         <Panel title="New vs Returning Players" subtitle="Returning players played before this range">
           {newPlayers + returningPlayers === 0 ? (
             <Empty text="No players in this range." />
@@ -246,5 +297,59 @@ function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRa
         Generated {new Date(data.generatedAt).toLocaleString("en")}. Cached for about 5 minutes. Refresh bypasses the cache.
       </p>
     </>
+  );
+}
+
+function StatCard({
+  label,
+  icon,
+  value,
+  hint,
+}: {
+  label: string;
+  icon: LucideIcon;
+  value: string;
+  hint: string;
+}) {
+  const Icon = icon;
+  return (
+    <article className="flex flex-col rounded-2xl border border-[#f5c542]/25 bg-[#12141c] p-4">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs text-[#c7c8d6]">{label}</p>
+        <Icon className="h-4 w-4 text-[#f5c542]" aria-hidden />
+      </div>
+      <p className="mt-1 text-2xl font-black tabular-nums">{value}</p>
+      <p className="mt-2 text-[10px] text-[#8b8ca3]">{hint}</p>
+    </article>
+  );
+}
+
+function LaunchFunnelSteps({ launch }: { launch: GameLaunchFunnel }) {
+  const steps = [
+    { label: "Game views", value: launch.views },
+    { label: "Play clicks", value: launch.playClicks },
+    { label: "Games loaded", value: launch.loaded },
+    { label: "Play sessions", value: launch.sessions },
+    { label: "Valid sessions", value: launch.validSessions },
+  ];
+  const top = Math.max(1, ...steps.map((step) => step.value));
+  if (steps.every((step) => step.value === 0)) {
+    return <Empty text="No launch activity in this range." />;
+  }
+  return (
+    <ul className="space-y-2.5">
+      {steps.map((step) => (
+        <li key={step.label} className="grid grid-cols-[7rem_1fr_4rem] items-center gap-3 text-sm">
+          <span className="truncate">{step.label}</span>
+          <span className="h-2.5 overflow-hidden rounded-full bg-[#07080f]">
+            <span
+              className="block h-full rounded-full bg-[#5b8def]"
+              style={{ width: `${(step.value / top) * 100}%` }}
+            />
+          </span>
+          <span className="text-right tabular-nums text-[#c7c8d6]">{step.value.toLocaleString("en")}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
