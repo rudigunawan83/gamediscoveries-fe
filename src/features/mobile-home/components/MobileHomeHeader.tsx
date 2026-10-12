@@ -6,9 +6,13 @@ import { useTranslations } from "next-intl";
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { getNotifications } from "@/lib/api/community";
 import { getMyProgress } from "@/lib/api/progress";
 import { useFormats } from "@/lib/i18n/format";
+
+// These headers sit inside `lg:hidden` layouts that stay mounted on desktop.
+const MOBILE_LAYOUT_QUERY = "(max-width: 1023.98px)";
 
 /** Greeting row from the app's Home tab: avatar, level progress and the notification bell. */
 export function MobileHomeHeader() {
@@ -18,11 +22,12 @@ export function MobileHomeHeader() {
   const { accessToken, user } = useAuth();
   const { grouped } = useFormats();
   const signedIn = Boolean(accessToken);
+  const isMobileLayout = useMediaQuery(MOBILE_LAYOUT_QUERY);
 
   const progressQuery = useQuery({
     queryKey: ["me", "progress"],
     queryFn: async () => (await getMyProgress()).data!,
-    enabled: signedIn,
+    enabled: signedIn && isMobileLayout,
   });
 
   const progress = signedIn ? progressQuery.data : undefined;
@@ -95,10 +100,11 @@ export function MobileNotificationBell() {
   const tNav = useTranslations("Nav");
   const { accessToken } = useAuth();
   const signedIn = Boolean(accessToken);
+  const isMobileLayout = useMediaQuery(MOBILE_LAYOUT_QUERY);
   const notificationsQuery = useQuery({
     queryKey: ["community", "notifications"],
     queryFn: async () => (await getNotifications()).data,
-    enabled: signedIn,
+    enabled: signedIn && isMobileLayout,
   });
   const unread = signedIn ? (notificationsQuery.data?.unread ?? 0) : 0;
 

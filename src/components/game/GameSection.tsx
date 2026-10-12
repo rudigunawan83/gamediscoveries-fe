@@ -1,3 +1,4 @@
+import { useId } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
@@ -20,16 +21,17 @@ export function GameSection({
   variant = "default",
 }: GameSectionProps) {
   const t = useTranslations("Common");
+  const headingId = useId();
   if (games.length === 0) {
     return null;
   }
 
   return (
-    <section className="space-y-5" aria-labelledby={`${title}-heading`}>
+    <section className="space-y-5" aria-labelledby={headingId}>
       <div className="flex items-end justify-between gap-4">
         <div className="space-y-1">
           <h2
-            id={`${title}-heading`}
+            id={headingId}
             className="font-display text-2xl font-bold tracking-tight text-white md:text-[1.75rem]"
           >
             {title}

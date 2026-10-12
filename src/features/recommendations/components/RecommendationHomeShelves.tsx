@@ -73,7 +73,6 @@ export function RecommendationHomeShelves() {
             section.type === "EXPLORATION" ? t("explorationDescription") : undefined
           }
           games={mapRecommendationItems(section.items)}
-          href="/"
           variant="discovery"
         />
       ))}

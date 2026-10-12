@@ -23,7 +23,7 @@ export function MobileFeaturedCarousel({ games }: { games: Game[] }) {
             <Link
               href={`/game/${game.slug}`}
               aria-label={t("featuredLabel", { title: game.title })}
-              className="relative block h-[200px] overflow-hidden rounded-3xl bg-[#15151d]"
+              className="relative block h-[200px] overflow-hidden rounded-3xl bg-[#15151d] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
             >
               {game.coverUrl || game.thumbnailUrl ? (
                 <Image

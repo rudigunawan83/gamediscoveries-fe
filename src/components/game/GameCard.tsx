@@ -39,7 +39,7 @@ export function GameCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden transition-transform duration-300 hover:-translate-y-1",
+        "group relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 has-[>a:focus-visible]:ring-2 has-[>a:focus-visible]:ring-primary has-[>a:focus-visible]:ring-offset-2 has-[>a:focus-visible]:ring-offset-background",
         isDiscovery
           ? "rounded-2xl"
           : "game-card-surface rounded-2xl border border-border/60",

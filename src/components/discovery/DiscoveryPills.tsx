@@ -27,7 +27,7 @@ export function DiscoveryPills() {
             <Link
               href={pill.href}
               className={cn(
-                "relative inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                "relative inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
                 hot
                   ? "border-primary/40 bg-[#1a1408]/80 text-white"
                   : "border-primary/20 bg-[#12161f]/85 text-slate-100 hover:border-primary/45 hover:bg-primary/10",

@@ -1,7 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import Image from "next/image";
+import { preload } from "react-dom";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -17,6 +18,13 @@ import { MobileGameShelf, MobileGameShelfSkeleton } from "./MobileGameShelf";
 import { MobileHomeHeader } from "./MobileHomeHeader";
 
 const subscribeNever = () => () => {};
+
+const BANNER_IMAGE = {
+  src: "/images/home-banner.jpg",
+  alt: "",
+  fill: true,
+  sizes: "100vw",
+} as const;
 
 /**
  * Phone layout of the home page, mirroring the Flutter app's Home tab.
@@ -43,8 +51,21 @@ export function MobileHome() {
   const forYou = recommendations.data?.sections?.[0]?.items;
   const recommended = forYou?.length ? mapRecommendationItems(forYou) : (data?.trending ?? []);
 
+  // The page also renders the desktop hero; preload only for the viewport that shows this banner.
+  const { props: banner } = getImageProps(BANNER_IMAGE);
+  preload(banner.src, {
+    as: "image",
+    imageSrcSet: banner.srcSet,
+    imageSizes: banner.sizes,
+    fetchPriority: "high",
+    media: "(max-width: 1023.98px)",
+  });
+
   return (
     <div className="space-y-7">
+      <h1 className="sr-only">
+        {t.rich("heroTitle", { highlight: (chunks) => chunks, br: () => " " })}
+      </h1>
       <MobileHomeHeader />
 
       <Link
@@ -61,11 +82,10 @@ export function MobileHome() {
         className="relative block aspect-[950/330] overflow-hidden rounded-[20px] bg-[#15151d]"
       >
         <Image
-          src="/images/home-banner.jpg"
+          {...BANNER_IMAGE}
           alt=""
-          fill
-          priority
-          sizes="100vw"
+          loading="lazy"
+          fetchPriority="high"
           className="object-cover"
         />
       </Link>

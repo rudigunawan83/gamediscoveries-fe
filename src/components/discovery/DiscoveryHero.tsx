@@ -1,21 +1,39 @@
-import Image from "next/image";
+import { preload } from "react-dom";
+import Image, { getImageProps } from "next/image";
 import { useTranslations } from "next-intl";
 import { DiscoveryPills } from "@/components/discovery/DiscoveryPills";
 import { HeroSearchInput } from "@/components/search/HeroSearchInput";
 
+const HERO_IMAGE = {
+  src: "/images/hero-background.jpg",
+  alt: "",
+  fill: true,
+  sizes: "100vw",
+} as const;
+
 export function DiscoveryHero() {
   const t = useTranslations("Discovery");
+
+  // The page also renders the mobile home; preload only for the viewport that shows this hero.
+  const { props: hero } = getImageProps(HERO_IMAGE);
+  preload(hero.src, {
+    as: "image",
+    imageSrcSet: hero.srcSet,
+    imageSizes: hero.sizes,
+    fetchPriority: "high",
+    media: "(min-width: 1024px)",
+  });
+
   return (
     <section
       aria-labelledby="discovery-hero-heading"
       className="relative left-1/2 isolate w-screen max-w-[100vw] -translate-x-1/2 -mt-6 min-h-[32rem] overflow-hidden md:min-h-[38rem] lg:min-h-[42rem]"
     >
       <Image
-        src="/images/hero-background.jpg"
+        {...HERO_IMAGE}
         alt=""
-        fill
-        priority
-        sizes="100vw"
+        loading="lazy"
+        fetchPriority="high"
         className="object-cover object-[72%_center] sm:object-[68%_center] lg:object-right"
       />
 

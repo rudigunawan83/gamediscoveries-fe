@@ -41,8 +41,8 @@ function MobileGameCard({ game }: { game: Game }) {
   const category = game.categories[0]?.name;
 
   return (
-    <Link href={`/game/${game.slug}`} className="block rounded-[18px]">
-      <span className="relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-[#1e1e29]">
+    <Link href={`/game/${game.slug}`} className="group block rounded-[18px] outline-none">
+      <span className="relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-[#1e1e29] group-focus-visible:outline-2 group-focus-visible:-outline-offset-2 group-focus-visible:outline-primary">
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}

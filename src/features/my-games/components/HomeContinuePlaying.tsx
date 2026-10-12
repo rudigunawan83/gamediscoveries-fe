@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ export function HomeContinuePlaying() {
   const t = useTranslations("Library");
   const tGame = useTranslations("Game");
   const fmt = useHistoryFormatter();
+  const titleId = useId();
   const query = useHistoryPreview(6);
   const item = query.data?.pages[0]?.items[0];
   if (!item) return null;
@@ -25,10 +27,10 @@ export function HomeContinuePlaying() {
   const { game } = item;
 
   return (
-    <section aria-labelledby="home-continue-title" className="space-y-3">
+    <section aria-labelledby={titleId} className="space-y-3">
       <div className="flex items-end justify-between gap-3">
         <h2
-          id="home-continue-title"
+          id={titleId}
           className="font-display text-xl font-semibold text-white"
         >
           {t("continuePlaying")}
