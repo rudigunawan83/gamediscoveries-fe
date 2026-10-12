@@ -401,7 +401,7 @@ function StatCard({
           <p className="text-xs text-[#c7c8d6]">{label}</p>
           <p className="text-2xl font-black tabular-nums">{stat ? stat.value.toLocaleString("en") : loading ? "…" : "—"}</p>
           <p className="flex items-center gap-1 text-[11px] text-[#8b8ca3]">
-            {stat ? <Change value={stat.changePercent} /> : null}
+            {stat?.changePercent != null ? <Change value={stat.changePercent} /> : null}
             <span>{hint}</span>
           </p>
         </div>

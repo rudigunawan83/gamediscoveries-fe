@@ -105,7 +105,7 @@ export function AdminShell({ section, children }: { section: AdminSection; child
             </span>
           </Link>
 
-          <nav className="mt-6 flex gap-1 overflow-x-auto lg:flex-col" aria-label="Admin">
+          <nav className="mt-6 flex shrink-0 gap-1 overflow-x-auto lg:flex-col lg:overflow-visible" aria-label="Admin">
             {adminPortalNav.map((item) => {
               const Icon = portalIcons[item.icon];
               const active = isPortalItemActive(pathname, item.href);
@@ -126,7 +126,7 @@ export function AdminShell({ section, children }: { section: AdminSection; child
             })}
           </nav>
 
-          <div className="mt-2">
+          <div className="mt-2 shrink-0">
             <Link
               href="/admin/monitoring"
               className={cn(
@@ -141,7 +141,7 @@ export function AdminShell({ section, children }: { section: AdminSection; child
               <ChevronDown className="hidden h-4 w-4 lg:block" aria-hidden />
             </Link>
             <nav
-              className="mt-1 flex gap-1 overflow-x-auto lg:ml-3 lg:flex-col lg:border-l lg:border-[#f5c542]/20 lg:pl-2"
+              className="mt-1 flex gap-1 overflow-x-auto lg:ml-3 lg:flex-col lg:overflow-visible lg:border-l lg:border-[#f5c542]/20 lg:pl-2"
               aria-label="Monitoring"
             >
               {monitoringNav.map((item) => {
@@ -168,7 +168,7 @@ export function AdminShell({ section, children }: { section: AdminSection; child
           </div>
 
           {user ? (
-            <div className="mt-6 hidden items-center gap-3 rounded-xl border border-white/10 bg-[#12141c] p-3 lg:mt-auto lg:flex">
+            <div className="mt-6 hidden shrink-0 items-center gap-3 rounded-xl border border-white/10 bg-[#12141c] p-3 lg:mt-auto lg:flex">
               {user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={user.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
