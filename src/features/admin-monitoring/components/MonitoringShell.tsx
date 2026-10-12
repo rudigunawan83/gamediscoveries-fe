@@ -128,8 +128,12 @@ export function MonitoringShell({ children }: { children: ReactNode }) {
         <div className="min-w-0">
           <header className="flex items-center justify-between gap-3 border-b border-white/5 px-4 py-3 sm:px-6">
             <div className="flex items-center gap-3 text-xs text-[#c7c8d6]">
-              <Link href="/" aria-label="Back to site" className="rounded-md p-1 hover:bg-white/5">
+              <Link
+                href="/"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[#f5c542]/30 px-3 py-1.5 font-semibold text-[#f5c542] hover:bg-[#f5c542]/10 focus-visible:outline-2 focus-visible:outline-[#f5c542]"
+              >
                 <ArrowLeft className="h-4 w-4" aria-hidden />
+                Back to site
               </Link>
               <nav aria-label="Breadcrumb" className="flex items-center gap-1">
                 <Link href="/admin/monitoring" className="hover:text-white">
