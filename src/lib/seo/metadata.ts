@@ -21,6 +21,7 @@ import type { Game } from "@/types/game";
 import { localizeCollection } from "@/features/seo/data/collections";
 import type { SeoCategory, SeoCollection } from "@/features/seo/types";
 import {
+  canonicalGamePath,
   shouldIndexCategory,
   shouldIndexCollection,
   shouldIndexGame,
@@ -151,7 +152,7 @@ export async function generateGameMetadata(game: Game): Promise<Metadata> {
   return createMetadata({
     title: gameTitle(t, game.title),
     description: gameDescription(t, game),
-    path: `/game/${game.slug}`,
+    path: canonicalGamePath(game),
     image: game.coverUrl ?? game.thumbnailUrl,
     noIndex: !decision.index,
     follow: decision.follow,

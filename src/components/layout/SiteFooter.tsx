@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { FooterCategoryLinks } from "@/components/layout/FooterCategoryLinks";
 import type { NavLabelKey } from "@/components/navigation/nav-config";
 import { SITE_NAME } from "@/lib/seo/constants";
 
@@ -35,6 +37,11 @@ export function SiteFooter() {
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} {SITE_NAME}. {t("footerTagline")}
         </p>
+      </div>
+      <div className="mx-auto max-w-7xl px-4 pb-8 md:px-6">
+        <Suspense fallback={null}>
+          <FooterCategoryLinks />
+        </Suspense>
       </div>
     </footer>
   );

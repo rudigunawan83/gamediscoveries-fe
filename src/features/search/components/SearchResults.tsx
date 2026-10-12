@@ -22,7 +22,6 @@ export function SearchResults({ query }: SearchResultsProps) {
       page: 1,
       pageSize: 48,
       search: normalized,
-      sort: "newest",
     }),
     enabled,
   });

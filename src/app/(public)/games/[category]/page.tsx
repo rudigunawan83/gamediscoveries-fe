@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -37,6 +37,7 @@ export default async function CategoryGamesPage({ params }: CategoryPageProps) {
   const { category: slug } = await params;
   const category = await fetchCategoryBySlug(slug);
   if (!category) notFound();
+  if (category.slug !== slug) permanentRedirect(`/games/${category.slug}`);
 
   const decision = shouldIndexCategory(category);
   const [popular, newest, mobile] = await Promise.all([

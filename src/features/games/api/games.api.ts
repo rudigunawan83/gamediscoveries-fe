@@ -1,8 +1,11 @@
+import { cache } from "react";
 import {
   getGameBySlug,
   getGames,
   getHomeDiscoveries,
+  getSitemapGames,
   type ListGamesParams,
+  type SitemapGameDto,
 } from "@/lib/api/games";
 import {
   mapGameDetail,
@@ -15,7 +18,7 @@ import {
 } from "@/features/games/mock/games.mock";
 import type { Game } from "@/types/game";
 import type { HomeDiscoveriesDto } from "@/lib/api/types.games";
-import type { ApiMeta } from "@/lib/api/types";
+import { ApiClientError, type ApiMeta } from "@/lib/api/types";
 
 // Opt-in only. Default is live API so production builds never bake mock catalogs.
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
@@ -65,7 +68,11 @@ export async function fetchGamesPage(
   };
 }
 
-export async function fetchGameBySlug(slug: string): Promise<Game | null> {
+const MISSING_STATUSES = new Set([400, 404, 422]);
+
+// Only a genuine "no such game" may become a 404; outages must surface as 5xx so
+// crawlers retry instead of dropping valid pages from the index.
+export const fetchGameBySlug = cache(async (slug: string): Promise<Game | null> => {
   if (USE_MOCK) {
     return getMockGameBySlug(slug) ?? null;
   }
@@ -73,9 +80,23 @@ export async function fetchGameBySlug(slug: string): Promise<Game | null> {
   try {
     const response = await getGameBySlug(slug);
     return mapGameDetail(response.data);
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof ApiClientError && MISSING_STATUSES.has(error.status)) {
+      return null;
+    }
+    throw error;
   }
+});
+
+export async function fetchSitemapGames(): Promise<SitemapGameDto[]> {
+  if (USE_MOCK) {
+    return mockGames.map((game) => ({
+      slug: game.slug,
+      lastModified: game.publishedAt ?? new Date(0).toISOString(),
+    }));
+  }
+  const response = await getSitemapGames();
+  return response.data ?? [];
 }
 
 export async function fetchHomeDiscoveries(): Promise<HomeDiscoveries> {

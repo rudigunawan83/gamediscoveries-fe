@@ -52,6 +52,16 @@ export async function getGameBySlug(
   );
 }
 
+export interface SitemapGameDto {
+  slug: string;
+  lastModified: string;
+}
+
+/** Published, playable, canonical games only (API applies the indexing rules). */
+export async function getSitemapGames(): Promise<ApiResponse<SitemapGameDto[]>> {
+  return apiClient.get<SitemapGameDto[]>("/api/v1/sitemap/games", { timeoutMs: 30_000 });
+}
+
 export async function getHomeDiscoveries(): Promise<
   ApiResponse<HomeDiscoveriesDto>
 > {

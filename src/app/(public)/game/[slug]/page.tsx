@@ -26,7 +26,7 @@ import {
   breadcrumbJsonLd,
   gameSoftwareJsonLd,
 } from "@/lib/seo/structured-data";
-import { shouldIndexGame } from "@/lib/seo/indexability";
+import { shouldIndexGamesLike } from "@/lib/seo/indexability";
 import { formatRating } from "@/lib/utils/format";
 
 interface GameDetailPageProps {
@@ -55,12 +55,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   const { slug } = await params;
   const game = await fetchGameBySlug(slug);
 
-  if (!game) {
-    notFound();
-  }
-
-  const indexDecision = shouldIndexGame(game);
-  if (!indexDecision.index && game.status === "archived") {
+  if (!game || game.status !== "published") {
     notFound();
   }
 
@@ -72,25 +67,25 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   const categorySlug = game.categories[0]?.slug;
   const categoryName = game.categories[0]?.name;
 
-  const similarGames = (
-    await fetchGames({
+  const [popularInCategory, newestInCategory] = await Promise.all([
+    fetchGames({
       page: 1,
       pageSize: 12,
       category: categoryName ?? categorySlug,
       sort: "popular",
-    })
-  )
-    .filter((item) => item.id !== game.id)
-    .slice(0, 6);
-
-  const moreCategoryGames = (
-    await fetchGames({
+    }),
+    fetchGames({
       page: 1,
       pageSize: 8,
       category: categorySlug ?? categoryName,
       sort: "newest",
-    })
-  ).filter((item) => item.id !== game.id);
+    }),
+  ]);
+  const otherPopular = popularInCategory.filter((item) => item.id !== game.id);
+  const similarGames = otherPopular.slice(0, 6);
+  // The games-like page 404s below its threshold; only link to it when it exists.
+  const gamesLikeAvailable = shouldIndexGamesLike(otherPopular.length).index;
+  const moreCategoryGames = newestInCategory.filter((item) => item.id !== game.id);
 
   const breadcrumbItems = [
     { name: tNav("home"), path: "/" },
@@ -236,7 +231,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
         </div>
       </section>
 
-      <GameReviewsSection slug={game.slug} />
+      <GameReviewsSection slug={game.slug} gameId={game.id} />
 
       <SimilarGamesSection gameId={game.id} fallbackGames={similarGames} />
 
@@ -284,7 +279,9 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           ...(categorySlug && categoryName
             ? [{ href: `/games/${categorySlug}`, label: t("categoryGames", { category: categoryName }) }]
             : []),
-          { href: `/games-like/${game.slug}`, label: t("gamesLike", { title: game.title }) },
+          ...(gamesLikeAvailable
+            ? [{ href: `/games-like/${game.slug}`, label: t("gamesLike", { title: game.title }) }]
+            : []),
           { href: `/game/${game.slug}/community`, label: tNav("community") },
           { href: "/collections", label: tNav("collections") },
           ...(game.mobileReady

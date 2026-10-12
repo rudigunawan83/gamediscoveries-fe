@@ -53,6 +53,14 @@ export function shouldIndexGame(game: Game | null | undefined): IndexDecision {
   return decide(true, true, ["published-playable"]);
 }
 
+/**
+ * Duplicate titles share one canonical page (the earliest published copy, chosen by the API).
+ * The same rule keeps the copies out of the sitemap.
+ */
+export function canonicalGamePath(game: Pick<Game, "slug" | "canonicalSlug">): string {
+  return `/game/${game.canonicalSlug || game.slug}`;
+}
+
 export function shouldIndexCategory(category: SeoCategory): IndexDecision {
   if (!SEO_CONFIG.enableProgrammaticPages) {
     return decide(false, true, ["programmatic-disabled"]);

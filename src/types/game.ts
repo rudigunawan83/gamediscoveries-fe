@@ -38,6 +38,9 @@ export interface Game {
   provider?: string;
   status?: "draft" | "published" | "archived";
   publishedAt?: string;
+  /** Slug that owns the canonical URL when this game duplicates another title. */
+  canonicalSlug?: string;
+  contentUpdatedAt?: string;
   /** @deprecated Prefer playUrl — kept for transitional catalog mapping. */
   gameUrl?: string;
   /**

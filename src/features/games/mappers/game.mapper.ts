@@ -94,6 +94,8 @@ export function mapGameDetail(dto: GameDetailDto): Game {
         ? dto.status
         : "published",
     publishedAt: dto.publishedAt ?? undefined,
+    canonicalSlug: dto.canonicalSlug ?? undefined,
+    contentUpdatedAt: dto.contentUpdatedAt ?? undefined,
     gameUrl: playUrl,
     playUrl,
     developer: dto.developer ?? undefined,

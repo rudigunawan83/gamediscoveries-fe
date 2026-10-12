@@ -20,7 +20,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
         {categories.map((category) => (
           <li key={category.id}>
             <Link
-              href={`/games?category=${category.slug}`}
+              href={`/games/${category.slug}`}
               className="flex h-full flex-col justify-between rounded-2xl border border-border/60 bg-card/60 p-4 transition-colors hover:border-primary/50 hover:bg-accent/40"
             >
               <span className="font-display text-lg font-semibold">{category.name}</span>

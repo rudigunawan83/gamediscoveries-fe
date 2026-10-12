@@ -34,6 +34,9 @@ export interface GameDetailDto {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string | null;
+  /** Published game with the same title that owns the canonical URL (itself when canonical). */
+  canonicalSlug?: string | null;
+  contentUpdatedAt?: string | null;
 }
 
 export interface HomeDiscoveriesDto {
