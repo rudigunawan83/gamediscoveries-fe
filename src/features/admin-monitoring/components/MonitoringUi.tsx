@@ -8,13 +8,14 @@ import { Sparkline } from "@/features/admin-monitoring/components/MonitoringChar
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   formatChange,
-  formatDateRange,
   formatDuration,
   rangeLabel,
 } from "@/features/admin-monitoring/monitoringFormat";
 import type {
   MonitoringCount,
   MonitoringDuration,
+  MonitoringPreset,
+  MonitoringQuery,
   MonitoringRange,
   MonitoringRatio,
   MonitoringUnavailable,
@@ -22,15 +23,34 @@ import type {
 import { ApiClientError, type ApiResponse } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
-const ranges: MonitoringRange[] = ["24h", "7d", "30d"];
+const presets: MonitoringPreset[] = ["24h", "7d", "30d"];
+const dateInputClass =
+  "rounded-lg border border-white/10 bg-[#12141c] px-2 py-2 text-xs text-[#c7c8d6] [color-scheme:dark] focus-visible:outline-2 focus-visible:outline-[#f5c542]";
 
 export function previousLabel(range: MonitoringRange) {
   if (range === "24h") return "vs previous 24 hours";
   if (range === "7d") return "vs previous 7 days";
-  return "vs previous 30 days";
+  if (range === "30d") return "vs previous 30 days";
+  return "vs previous period";
 }
 
-export function MonitoringFrame<T extends { from: string; to: string }>({
+function todayUtc(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function daysAgoUtc(days: number): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+function presetDraft(preset: MonitoringPreset): { from: string; to: string } {
+  if (preset === "24h") return { from: todayUtc(), to: todayUtc() };
+  if (preset === "7d") return { from: daysAgoUtc(6), to: todayUtc() };
+  return { from: daysAgoUtc(29), to: todayUtc() };
+}
+
+export function MonitoringFrame<T extends { from: string; to: string; range?: string }>({
   queryName,
   path,
   title,
@@ -44,20 +64,23 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
   title: string;
   description: string;
   icon: LucideIcon;
-  load: (range: MonitoringRange, refresh: boolean) => Promise<ApiResponse<T>>;
+  load: (selection: MonitoringQuery, refresh: boolean) => Promise<ApiResponse<T>>;
   children: (data: T, range: MonitoringRange) => ReactNode;
 }) {
   const { accessToken, user } = useAuth();
   const isSuperAdmin = user?.roles?.includes("SuperAdmin") ?? false;
-  const [range, setRange] = useState<MonitoringRange>("30d");
+  const [selection, setSelection] = useState<MonitoringQuery>({ range: "30d" });
+  const [draftFrom, setDraftFrom] = useState(() => presetDraft("30d").from);
+  const [draftTo, setDraftTo] = useState(() => presetDraft("30d").to);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState(false);
-  const queryKey = ["admin", "monitoring", queryName, range];
+  const queryKey = ["admin", "monitoring", queryName, selection];
   const query = useQuery({
     queryKey,
-    queryFn: async () => (await load(range, false)).data,
+    queryFn: async () => (await load(selection, false)).data,
     enabled: Boolean(accessToken && isSuperAdmin),
     staleTime: 60_000,
   });
@@ -86,6 +109,21 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
   }
 
   const busy = query.isFetching || refreshing;
+  const presetValue = selection.from ? "custom" : (selection.range ?? "30d");
+  const rangeForChildren = query.data?.range ?? (selection.from ? `custom:${selection.from}:${selection.to}` : selection.range ?? "30d");
+
+  const applyCustom = (from: string, to: string) => {
+    if (!from || !to) {
+      setDateError("Choose both start and end dates.");
+      return;
+    }
+    if (to < from) {
+      setDateError("End date must be on or after the start date.");
+      return;
+    }
+    setDateError(null);
+    setSelection({ from, to });
+  };
 
   return (
     <div className="space-y-4">
@@ -100,26 +138,70 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {query.data ? (
-            <span className="flex items-center gap-2 rounded-lg border border-white/10 bg-[#12141c] px-3 py-2 text-xs text-[#c7c8d6]">
-              <CalendarDays className="h-4 w-4" aria-hidden />
-              {formatDateRange(query.data.from, query.data.to)}
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-[#12141c] px-2 py-1">
+            <CalendarDays className="h-4 w-4 shrink-0 text-[#8b8ca3]" aria-hidden />
+            <label className="sr-only" htmlFor={`monitoring-from-${queryName}`}>
+              From date
+            </label>
+            <input
+              id={`monitoring-from-${queryName}`}
+              type="date"
+              value={draftFrom}
+              max={draftTo || todayUtc()}
+              onChange={(event) => {
+                const from = event.target.value;
+                setDraftFrom(from);
+                if (from && draftTo) applyCustom(from, draftTo);
+              }}
+              className={dateInputClass}
+            />
+            <span className="text-[#8b8ca3]" aria-hidden>
+              –
             </span>
-          ) : null}
+            <label className="sr-only" htmlFor={`monitoring-to-${queryName}`}>
+              To date
+            </label>
+            <input
+              id={`monitoring-to-${queryName}`}
+              type="date"
+              value={draftTo}
+              min={draftFrom || undefined}
+              max={todayUtc()}
+              onChange={(event) => {
+                const to = event.target.value;
+                setDraftTo(to);
+                if (draftFrom && to) applyCustom(draftFrom, to);
+              }}
+              className={dateInputClass}
+            />
+          </div>
           <label className="sr-only" htmlFor={`monitoring-range-${queryName}`}>
             Range
           </label>
           <select
             id={`monitoring-range-${queryName}`}
-            value={range}
-            onChange={(event) => setRange(event.target.value as MonitoringRange)}
+            value={presetValue}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value === "custom") {
+                applyCustom(draftFrom || daysAgoUtc(6), draftTo || todayUtc());
+                return;
+              }
+              const preset = value as MonitoringPreset;
+              const next = presetDraft(preset);
+              setDateError(null);
+              setDraftFrom(next.from);
+              setDraftTo(next.to);
+              setSelection({ range: preset });
+            }}
             className="rounded-lg border border-white/10 bg-[#12141c] px-3 py-2 text-xs"
           >
-            {ranges.map((value) => (
+            {presets.map((value) => (
               <option key={value} value={value}>
                 {rangeLabel(value)}
               </option>
             ))}
+            <option value="custom">Custom range</option>
           </select>
           <button
             type="button"
@@ -130,7 +212,7 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
             onClick={() => {
               setRefreshing(true);
               setRefreshError(false);
-              void load(range, true)
+              void load(selection, true)
                 .then((response) => {
                   queryClient.setQueryData(queryKey, response.data);
                 })
@@ -143,6 +225,11 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
         </div>
       </header>
 
+      {dateError ? (
+        <p role="alert" className="text-sm text-[#ff6b6b]">
+          {dateError}
+        </p>
+      ) : null}
       {refreshError ? (
         <p role="alert" className="text-sm text-[#ff6b6b]">
           Refresh failed. The last loaded numbers are still shown.
@@ -159,7 +246,7 @@ export function MonitoringFrame<T extends { from: string; to: string }>({
       {query.isPending && !query.isError ? (
         <p className="text-sm text-[#8b8ca3]">Loading monitoring data…</p>
       ) : null}
-      {query.data ? children(query.data, range) : null}
+      {query.data ? children(query.data, rangeForChildren) : null}
     </div>
   );
 }

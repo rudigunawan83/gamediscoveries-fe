@@ -82,7 +82,7 @@ describe("MonitoringTrafficView", () => {
     renderView();
 
     expect(await screen.findByText("3m 5s")).toBeInTheDocument();
-    expect(getMonitoringTraffic).toHaveBeenCalledWith("30d", false);
+    expect(getMonitoringTraffic).toHaveBeenCalledWith({ range: "30d" }, false);
     expect(screen.getByText("Country is not collected.")).toBeInTheDocument();
     expect(screen.getByText("Organic Search")).toBeInTheDocument();
     expect(screen.getAllByText("75.0%")).toHaveLength(2);

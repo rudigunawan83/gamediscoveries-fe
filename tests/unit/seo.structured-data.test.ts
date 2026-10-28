@@ -35,6 +35,15 @@ describe("structured data", () => {
     });
   });
 
+  it("uses the canonical game URL when an alternate slug exists", () => {
+    const data = gameSoftwareJsonLd(
+      { ...game, slug: "neon-drift-alt", canonicalSlug: "neon-drift" },
+      true,
+    );
+    expect(String(data.url)).toMatch(/\/game\/neon-drift$/);
+    expect(String(data.url)).not.toMatch(/neon-drift-alt/);
+  });
+
   it("builds breadcrumb list", () => {
     const data = breadcrumbJsonLd([
       { name: "Home", path: "/" },

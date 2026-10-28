@@ -8,6 +8,7 @@ import {
   getDiscoveryTrending,
   mapRankingItemToGame,
 } from "@/lib/api/discovery-rankings";
+import { gamePublicHref } from "@/lib/seo/indexability";
 import { createMetadata } from "@/lib/seo/metadata";
 import { itemListJsonLd } from "@/lib/seo/structured-data";
 
@@ -61,7 +62,7 @@ export default async function TrendingPage() {
                   #{item.rank}
                 </span>
                 <Link
-                  href={`/game/${item.game.slug}`}
+                  href={gamePublicHref(item.game)}
                   className="text-sm text-white hover:underline"
                 >
                   {item.game.title}

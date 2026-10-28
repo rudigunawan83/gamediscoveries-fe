@@ -46,6 +46,10 @@ export function shouldIndexGame(game: Game | null | undefined): IndexDecision {
   if (!game.slug || !game.title?.trim()) {
     return decide(false, false, ["incomplete-identity"]);
   }
+  if (game.canonicalSlug && game.canonicalSlug !== game.slug) {
+    // Obsolete slug: page should 301 to the canonical URL; do not index the duplicate.
+    return decide(false, true, ["non-canonical-slug"]);
+  }
   const hasPlay = Boolean(game.playUrl || game.gameUrl);
   if (!hasPlay) {
     return decide(false, true, ["unavailable"]);
@@ -59,6 +63,17 @@ export function shouldIndexGame(game: Game | null | undefined): IndexDecision {
  */
 export function canonicalGamePath(game: Pick<Game, "slug" | "canonicalSlug">): string {
   return `/game/${game.canonicalSlug || game.slug}`;
+}
+
+export function canonicalGamesLikePath(
+  game: Pick<Game, "slug" | "canonicalSlug">,
+): string {
+  return `/games-like/${game.canonicalSlug || game.slug}`;
+}
+
+/** Absolute public game path for links / share / JSON-LD (relative path). */
+export function gamePublicHref(game: Pick<Game, "slug" | "canonicalSlug">): string {
+  return canonicalGamePath(game);
 }
 
 export function shouldIndexCategory(category: SeoCategory): IndexDecision {

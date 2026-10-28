@@ -10,6 +10,7 @@ import {
   formatHistoryMeta,
   useHistoryFormatter,
 } from "@/features/my-games/utils/formatPlayTime";
+import { gamePublicHref } from "@/lib/seo/indexability";
 
 /**
  * Last game played on any device (web or app) with a one-click Continue that
@@ -44,7 +45,7 @@ export function HomeContinuePlaying() {
       </div>
       <div className="flex items-center gap-4 rounded-3xl border border-primary/40 bg-gradient-to-br from-card/80 via-card/50 to-transparent p-3 md:p-4">
         <Link
-          href={`/game/${game.slug}`}
+          href={gamePublicHref(game)}
           className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-muted md:size-24"
         >
           <Image
@@ -57,7 +58,7 @@ export function HomeContinuePlaying() {
         </Link>
         <div className="min-w-0 flex-1">
           <Link
-            href={`/game/${game.slug}`}
+            href={gamePublicHref(game)}
             className="block truncate font-display text-lg font-semibold text-white hover:underline"
           >
             {game.title}
@@ -67,7 +68,7 @@ export function HomeContinuePlaying() {
           </p>
         </div>
         <Link
-          href={`/game/${game.slug}/play`}
+          href={`${gamePublicHref(game)}/play`}
           className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Play className="size-4 fill-current" aria-hidden="true" />

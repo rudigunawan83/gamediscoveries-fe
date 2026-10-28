@@ -28,7 +28,7 @@ import {
   RatioCard,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
-import { formatDuration, sourceLabels } from "@/features/admin-monitoring/monitoringFormat";
+import { formatDuration, isHourlyMonitoring, sourceLabels } from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringUsers,
   type MonitoringRange,
@@ -75,7 +75,7 @@ export function MonitoringUsersView() {
 }
 
 function UsersData({ data, range }: { data: MonitoringUsers; range: MonitoringRange }) {
-  const hourly = data.range === "24h";
+  const hourly = isHourlyMonitoring(data);
   const vs = previousLabel(range);
   const buckets = data.activity.map((point) => point.bucket);
   const active = data.activity.map((point) => point.activeUsers);

@@ -114,7 +114,7 @@ describe("MonitoringSeoView", () => {
     renderView();
 
     expect(await screen.findAllByText("1,234")).toHaveLength(2);
-    expect(getMonitoringSeo).toHaveBeenCalledWith("30d", false);
+    expect(getMonitoringSeo).toHaveBeenCalledWith({ range: "30d" }, false);
     expect(screen.getByText("12.4")).toBeInTheDocument();
     expect(screen.getByText("/game/space-run")).toBeInTheDocument();
     expect(screen.getByText("space game")).toBeInTheDocument();

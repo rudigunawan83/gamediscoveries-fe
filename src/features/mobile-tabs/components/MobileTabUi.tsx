@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { gamePublicHref } from "@/lib/seo/indexability";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
 
@@ -87,7 +88,7 @@ export function MobileGameListTile({
   return (
     <div className="flex items-center gap-2 rounded-[18px] bg-[#17171f] p-2.5">
       <Link
-        href={`/game/${game.slug}`}
+        href={gamePublicHref(game)}
         className="flex min-w-0 flex-1 items-center gap-3"
       >
         <span className="relative h-[63px] w-[84px] shrink-0 overflow-hidden rounded-[14px] bg-[#1e1e29]">

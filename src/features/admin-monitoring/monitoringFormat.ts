@@ -73,5 +73,28 @@ export function formatAgo(iso: string, now = Date.now()): string {
 export function rangeLabel(range: string) {
   if (range === "24h") return "Last 24 hours";
   if (range === "7d") return "Last 7 days";
-  return "Last 30 days";
+  if (range === "30d") return "Last 30 days";
+  if (range === "custom" || range.startsWith("custom:")) return "Custom range";
+  return range;
+}
+
+/** Inclusive calendar day for a monitoring window bound. `to` is exclusive at midnight. */
+export function monitoringDay(iso: string, role: "from" | "to"): string {
+  const date = new Date(iso);
+  if (
+    role === "to" &&
+    date.getUTCHours() === 0 &&
+    date.getUTCMinutes() === 0 &&
+    date.getUTCSeconds() === 0 &&
+    date.getUTCMilliseconds() === 0
+  ) {
+    date.setUTCDate(date.getUTCDate() - 1);
+  }
+  return date.toISOString().slice(0, 10);
+}
+
+export function isHourlyMonitoring(data: { range: string; from: string; to: string }) {
+  if (data.range === "24h") return true;
+  const ms = Date.parse(data.to) - Date.parse(data.from);
+  return Number.isFinite(ms) && ms > 0 && ms <= 36 * 3600 * 1000;
 }

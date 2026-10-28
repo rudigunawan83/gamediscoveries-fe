@@ -11,5 +11,5 @@ export function generateMetadata() {
 }
 
 export default function AdminUsersLayout({ children }: { children: ReactNode }) {
-  return <AdminShell section="users">{children}</AdminShell>;
+  return <AdminShell section="portal">{children}</AdminShell>;
 }

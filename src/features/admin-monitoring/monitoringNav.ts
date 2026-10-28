@@ -16,15 +16,6 @@ export const monitoringNav = [
   { href: "/admin/monitoring/retention", label: "User & Retention" },
   { href: "/admin/monitoring/gamification", label: "Gamification Analytics" },
   { href: "/admin/monitoring/seo", label: "SEO Monitoring" },
-  { href: "/admin/monitoring/revenue", label: "Revenue & Monetization" },
-  { href: "/admin/monitoring/uptime", label: "Website & Uptime" },
-  { href: "/admin/monitoring/api", label: "API Performance" },
-  { href: "/admin/monitoring/database", label: "Database Monitoring" },
-  { href: "/admin/monitoring/infrastructure", label: "Infrastructure" },
-  { href: "/admin/monitoring/providers", label: "Provider Integration" },
-  { href: "/admin/monitoring/errors", label: "Errors & Logs" },
-  { href: "/admin/monitoring/security", label: "Security & Abuse" },
-  { href: "/admin/monitoring/alerts", label: "Alerts & Incidents" },
 ] as const;
 
 export const monitoringSections: Record<string, string> = {
@@ -33,13 +24,4 @@ export const monitoringSections: Record<string, string> = {
   retention: "User & Retention",
   gamification: "Gamification Analytics",
   seo: "SEO Monitoring",
-  revenue: "Revenue & Monetization",
-  uptime: "Website & Uptime",
-  api: "API Performance",
-  database: "Database Monitoring",
-  infrastructure: "Infrastructure",
-  providers: "Provider Integration",
-  errors: "Errors & Logs",
-  security: "Security & Abuse",
-  alerts: "Alerts & Incidents",
 };

@@ -37,6 +37,17 @@ describe("SEO indexability", () => {
     ).toBe(false);
   });
 
+  it("does not index non-canonical duplicate slug copies", () => {
+    const decision = shouldIndexGame({
+      ...baseGame,
+      slug: "subway-surfers-2",
+      canonicalSlug: "subway-surfers",
+    });
+    expect(decision.index).toBe(false);
+    expect(decision.follow).toBe(true);
+    expect(decision.reasons).toContain("non-canonical-slug");
+  });
+
   it("noindexes search", () => {
     const decision = shouldIndexSearch();
     expect(decision.index).toBe(false);

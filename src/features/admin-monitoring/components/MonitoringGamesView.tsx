@@ -25,7 +25,7 @@ import {
   Panel,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
-import { formatDuration } from "@/features/admin-monitoring/monitoringFormat";
+import { formatDuration, isHourlyMonitoring } from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringGames,
   type GameLaunchFunnel,
@@ -67,7 +67,7 @@ export function MonitoringGamesView() {
 }
 
 function GamesData({ data, range }: { data: MonitoringGames; range: MonitoringRange }) {
-  const hourly = data.range === "24h";
+  const hourly = isHourlyMonitoring(data);
   const vs = previousLabel(range);
   const buckets = data.trend.map((point) => point.bucket);
   const plays = data.trend.map((point) => point.plays);

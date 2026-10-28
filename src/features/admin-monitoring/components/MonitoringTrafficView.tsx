@@ -19,6 +19,7 @@ import {
 import {
   formatDuration,
   formatShare,
+  isHourlyMonitoring,
   sourceLabels,
 } from "@/features/admin-monitoring/monitoringFormat";
 import {
@@ -161,7 +162,7 @@ function TrafficData({ data, range }: { data: MonitoringTraffic; range: Monitori
           ) : (
             <LineChart
               buckets={data.trend.map((point) => point.bucket)}
-              hourly={data.range === "24h"}
+              hourly={isHourlyMonitoring(data)}
               label="Visitors and page views over time"
               series={[
                 { label: "Page Views", color: trendColors.pageViews, values: pageViewTrend },

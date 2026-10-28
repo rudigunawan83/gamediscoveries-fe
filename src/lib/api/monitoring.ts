@@ -1,6 +1,16 @@
 import { apiClient } from "@/lib/api/client";
 
-export type MonitoringRange = "24h" | "7d" | "30d";
+export type MonitoringPreset = "24h" | "7d" | "30d";
+/** @deprecated Prefer MonitoringPreset; kept for existing view props. */
+export type MonitoringRange = MonitoringPreset | string;
+
+export type MonitoringQuery = {
+  range?: MonitoringPreset;
+  /** Inclusive calendar day yyyy-MM-dd. Requires `to`. */
+  from?: string;
+  /** Inclusive calendar day yyyy-MM-dd. Requires `from`. */
+  to?: string;
+};
 
 export interface MonitoringCount {
   value: number;
@@ -432,42 +442,49 @@ export interface MonitoringSeo {
   indexCoverage: MonitoringUnavailable;
 }
 
-function monitoringQuery(range: MonitoringRange, refresh: boolean) {
-  const query = new URLSearchParams({ range });
+export function monitoringQuery(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
+  const query = new URLSearchParams();
+  const params = typeof selection === "string" ? { range: selection } : selection;
+  if (params.from && params.to) {
+    query.set("from", params.from);
+    query.set("to", params.to);
+  } else {
+    query.set("range", params.range ?? "30d");
+  }
   if (refresh) query.set("refresh", "true");
   return query;
 }
 
-export function getMonitoringOverview(range: MonitoringRange, refresh = false) {
+export function getMonitoringOverview(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
   return apiClient.get<MonitoringOverview>(
-    `/api/v1/admin/monitoring/overview?${monitoringQuery(range, refresh)}`,
+    `/api/v1/admin/monitoring/overview?${monitoringQuery(selection, refresh)}`,
   );
 }
 
-export function getMonitoringTraffic(range: MonitoringRange, refresh = false) {
+export function getMonitoringTraffic(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
   return apiClient.get<MonitoringTraffic>(
-    `/api/v1/admin/monitoring/traffic?${monitoringQuery(range, refresh)}`,
+    `/api/v1/admin/monitoring/traffic?${monitoringQuery(selection, refresh)}`,
   );
 }
 
-export function getMonitoringGames(range: MonitoringRange, refresh = false) {
+export function getMonitoringGames(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
   return apiClient.get<MonitoringGames>(
-    `/api/v1/admin/monitoring/games?${monitoringQuery(range, refresh)}`,
+    `/api/v1/admin/monitoring/games?${monitoringQuery(selection, refresh)}`,
   );
 }
 
-export function getMonitoringUsers(range: MonitoringRange, refresh = false) {
+export function getMonitoringUsers(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
   return apiClient.get<MonitoringUsers>(
-    `/api/v1/admin/monitoring/users?${monitoringQuery(range, refresh)}`,
+    `/api/v1/admin/monitoring/users?${monitoringQuery(selection, refresh)}`,
   );
 }
 
-export function getMonitoringSeo(range: MonitoringRange, refresh = false) {
-  return apiClient.get<MonitoringSeo>(`/api/v1/admin/monitoring/seo?${monitoringQuery(range, refresh)}`);
+export function getMonitoringSeo(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
+  return apiClient.get<MonitoringSeo>(`/api/v1/admin/monitoring/seo?${monitoringQuery(selection, refresh)}`);
 }
 
-export function getMonitoringGamification(range: MonitoringRange, refresh = false) {
+export function getMonitoringGamification(selection: MonitoringQuery | MonitoringPreset, refresh = false) {
   return apiClient.get<MonitoringGamification>(
-    `/api/v1/admin/monitoring/gamification?${monitoringQuery(range, refresh)}`,
+    `/api/v1/admin/monitoring/gamification?${monitoringQuery(selection, refresh)}`,
   );
 }

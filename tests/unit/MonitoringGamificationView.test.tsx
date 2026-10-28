@@ -89,7 +89,7 @@ describe("MonitoringGamificationView", () => {
     renderView();
 
     expect(await screen.findByText("245,032")).toBeInTheDocument();
-    expect(getMonitoringGamification).toHaveBeenCalledWith("30d", false);
+    expect(getMonitoringGamification).toHaveBeenCalledWith({ range: "30d" }, false);
     expect(screen.getByRole("img", { name: "Mission completions over time" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Completion Rate: 21" })).toBeInTheDocument();
     expect(screen.getAllByText("33.3%")).toHaveLength(2);

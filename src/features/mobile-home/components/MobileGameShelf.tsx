@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { gamePublicHref } from "@/lib/seo/indexability";
 import type { Game } from "@/types/game";
 
 /** Horizontal shelf matching the app's GameShelf: 148px cards with 4:3 art. */
@@ -41,7 +42,7 @@ function MobileGameCard({ game }: { game: Game }) {
   const category = game.categories[0]?.name;
 
   return (
-    <Link href={`/game/${game.slug}`} className="group block rounded-[18px] outline-none">
+    <Link href={gamePublicHref(game)} className="group block rounded-[18px] outline-none">
       <span className="relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-[#1e1e29] group-focus-visible:outline-2 group-focus-visible:-outline-offset-2 group-focus-visible:outline-primary">
         {game.thumbnailUrl ? (
           <Image

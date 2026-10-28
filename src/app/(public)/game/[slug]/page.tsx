@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { MonitorPlay, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,11 @@ import {
   breadcrumbJsonLd,
   gameSoftwareJsonLd,
 } from "@/lib/seo/structured-data";
-import { shouldIndexGamesLike } from "@/lib/seo/indexability";
+import {
+  canonicalGamePath,
+  gamePublicHref,
+  shouldIndexGamesLike,
+} from "@/lib/seo/indexability";
 import { formatRating } from "@/lib/utils/format";
 
 interface GameDetailPageProps {
@@ -48,6 +52,20 @@ export async function generateMetadata({ params }: GameDetailPageProps) {
     });
   }
 
+  if (game.status !== "published") {
+    return createMetadata({
+      title: game.title,
+      path: `/game/${slug}`,
+      noIndex: true,
+      follow: false,
+    });
+  }
+
+  const canonicalPath = canonicalGamePath(game);
+  if (canonicalPath !== `/game/${slug}`) {
+    permanentRedirect(canonicalPath);
+  }
+
   return generateGameMetadata(game);
 }
 
@@ -59,6 +77,11 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     notFound();
   }
 
+  const gamePath = canonicalGamePath(game);
+  if (gamePath !== `/game/${slug}`) {
+    permanentRedirect(gamePath);
+  }
+
   const t = await getTranslations("Game");
   const tNav = await getTranslations("Nav");
   const tDiscovery = await getTranslations("Discovery");
@@ -66,6 +89,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   const playable = isPlayableGame(game.status, game.playUrl ?? game.gameUrl);
   const categorySlug = game.categories[0]?.slug;
   const categoryName = game.categories[0]?.name;
+  const absoluteGameUrl = `${env.NEXT_PUBLIC_APP_URL}${gamePath}`;
 
   const [popularInCategory, newestInCategory] = await Promise.all([
     fetchGames({
@@ -93,7 +117,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     ...(categorySlug && categoryName
       ? [{ name: categoryName, path: `/games/${categorySlug}` }]
       : []),
-    { name: game.title, path: `/game/${game.slug}` },
+    { name: game.title, path: gamePath },
   ];
 
   return (
@@ -108,7 +132,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       <MobileGameDetail
         game={game}
         playable={playable}
-        shareUrl={`${env.NEXT_PUBLIC_APP_URL}/game/${game.slug}`}
+        shareUrl={absoluteGameUrl}
         fallbackSimilar={similarGames}
       />
     </div>
@@ -192,12 +216,12 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
             <ShareButton
               title={t("shareTitle", { title: game.title })}
               text={t("shareText", { title: game.title })}
-              url={`${env.NEXT_PUBLIC_APP_URL}/game/${game.slug}`}
+              url={absoluteGameUrl}
               entityType="game"
               entityId={game.id}
             />
             <Button asChild variant="outline">
-              <Link href={`/game/${game.slug}/community`}>{tNav("community")}</Link>
+              <Link href={`${gamePath}/community`}>{tNav("community")}</Link>
             </Button>
           </div>
 
@@ -252,7 +276,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
             {moreCategoryGames.slice(0, 4).map((item) => (
               <Link
                 key={item.id}
-                href={`/game/${item.slug}`}
+                href={gamePublicHref(item)}
                 className="group overflow-hidden rounded-xl border border-border/50 bg-card/40"
               >
                 <div className="relative aspect-video bg-muted">
@@ -282,7 +306,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           ...(gamesLikeAvailable
             ? [{ href: `/games-like/${game.slug}`, label: t("gamesLike", { title: game.title }) }]
             : []),
-          { href: `/game/${game.slug}/community`, label: tNav("community") },
+          { href: `${gamePath}/community`, label: tNav("community") },
           { href: "/collections", label: tNav("collections") },
           ...(game.mobileReady
             ? [{ href: "/mobile", label: tDiscovery("linkMobileGames") }]

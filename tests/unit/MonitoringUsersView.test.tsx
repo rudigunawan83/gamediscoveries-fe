@@ -94,7 +94,7 @@ describe("MonitoringUsersView", () => {
     renderView();
 
     expect(await screen.findByText("1,245")).toBeInTheDocument();
-    expect(getMonitoringUsers).toHaveBeenCalledWith("30d", false);
+    expect(getMonitoringUsers).toHaveBeenCalledWith({ range: "30d" }, false);
     expect(screen.getByText("42.6%")).toBeInTheDocument();
     expect(screen.getByText("Sep 28 – Oct 4")).toBeInTheDocument();
     expect(screen.getByText("31.3%")).toBeInTheDocument();

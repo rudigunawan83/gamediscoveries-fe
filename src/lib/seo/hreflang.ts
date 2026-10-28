@@ -4,6 +4,10 @@ import { buildCanonicalUrl } from "@/lib/seo/canonical";
 /**
  * Only emit hreflang when a real localized alternate exists.
  * Do not invent fake translations.
+ *
+ * Current limitation: the app serves one unprefixed URL set (default locale).
+ * Indonesian UI strings exist via next-intl, but there are no `/id/...` routes.
+ * Callers must pass availableLocales with ≥2 real locales before any alternates emit.
  */
 export function buildHreflangAlternates(input: {
   path: string;

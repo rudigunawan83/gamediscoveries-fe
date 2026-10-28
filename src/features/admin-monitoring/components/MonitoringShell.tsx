@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   Award,
   BarChart3,
-  Bell,
   ChevronDown,
   ChevronRight,
   Gamepad2,
@@ -40,15 +39,26 @@ const roleLabels: Record<string, string> = {
   Moderator: "Moderator",
 };
 
-type AdminSection = "monitoring" | "users";
+type AdminSection = "monitoring" | "portal";
 
 const sectionAccess: Record<AdminSection, { roles: string[]; denied: string }> = {
   monitoring: { roles: ["SuperAdmin"], denied: "Super admin access is required to view monitoring." },
-  users: { roles: ["Moderator", "Admin", "SuperAdmin"], denied: "Moderator or admin access is required to manage users." },
+  portal: {
+    roles: ["Moderator", "Admin", "SuperAdmin"],
+    denied: "Moderator or admin access is required for the admin portal.",
+  },
 };
 
 function isPortalItemActive(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`);
+  if (pathname === href) return true;
+  if (!pathname.startsWith(`${href}/`)) return false;
+  // Prefer a more specific sidebar item (e.g. Missions over Gamification).
+  return !adminPortalNav.some(
+    (item) =>
+      item.href !== href &&
+      item.href.startsWith(`${href}/`) &&
+      (pathname === item.href || pathname.startsWith(`${item.href}/`)),
+  );
 }
 
 export function MonitoringShell({ children }: { children: ReactNode }) {
@@ -65,7 +75,7 @@ export function AdminShell({ section, children }: { section: AdminSection; child
   const inMonitoring = section === "monitoring";
   const current = inMonitoring
     ? monitoringNav.find((item) => item.href === pathname)?.label ?? "Monitoring"
-    : adminPortalNav.find((item) => isPortalItemActive(pathname, item.href))?.label ?? "Admin";
+    : [...adminPortalNav].reverse().find((item) => isPortalItemActive(pathname, item.href))?.label ?? "Admin";
 
   let body: ReactNode = children;
   if (!accessToken) {
@@ -219,30 +229,19 @@ export function AdminShell({ section, children }: { section: AdminSection; child
               </nav>
             </div>
             {user ? (
-              <div className="flex items-center gap-4">
-                {roles.includes("SuperAdmin") ? (
-                  <Link
-                    href="/admin/monitoring/alerts"
-                    aria-label="Alerts & Incidents"
-                    className="rounded-md p-1 text-[#c7c8d6] hover:bg-white/5"
-                  >
-                    <Bell className="h-5 w-5" aria-hidden />
-                  </Link>
-                ) : null}
-                <div className="flex items-center gap-2">
-                  {user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
-                  ) : (
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f5c542]/20 text-xs font-bold text-[#f5c542]">
-                      {adminName.slice(0, 1).toUpperCase()}
-                    </span>
-                  )}
-                  <span className="hidden text-xs sm:block">
-                    <span className="block max-w-40 truncate font-semibold">{adminName}</span>
-                    <span className="block text-[#8b8ca3]">{roleLabel}</span>
+              <div className="flex items-center gap-2">
+                {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f5c542]/20 text-xs font-bold text-[#f5c542]">
+                    {adminName.slice(0, 1).toUpperCase()}
                   </span>
-                </div>
+                )}
+                <span className="hidden text-xs sm:block">
+                  <span className="block max-w-40 truncate font-semibold">{adminName}</span>
+                  <span className="block text-[#8b8ca3]">{roleLabel}</span>
+                </span>
               </div>
             ) : null}
           </header>

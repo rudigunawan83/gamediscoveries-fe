@@ -22,6 +22,7 @@ import { localizeCollection } from "@/features/seo/data/collections";
 import type { SeoCategory, SeoCollection } from "@/features/seo/types";
 import {
   canonicalGamePath,
+  canonicalGamesLikePath,
   shouldIndexCategory,
   shouldIndexCollection,
   shouldIndexGame,
@@ -58,12 +59,17 @@ export async function createMetadata({
   description ??= t("siteDescription");
   const ogLocale = OG_LOCALES[locale] ?? OG_LOCALES.en!;
   const url = buildCanonicalUrl(path);
-  const ogImage = image ?? "/favicon.png";
+  // Prefer a real social-size asset over the tiny favicon when no page image exists.
+  const ogImage = image?.trim() || "/icons/icon-512.png";
   const shouldFollow = follow ?? !noIndex;
   const languages = buildHreflangAlternates({
     path: normalizePath(path),
     availableLocales,
   });
+  // Only advertise OG alternate locales when real hreflang alternates exist.
+  const ogAlternateLocales = languages
+    ? Object.values(OG_LOCALES).filter((item) => item !== ogLocale)
+    : undefined;
 
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -107,7 +113,9 @@ export async function createMetadata({
     openGraph: {
       type,
       locale: ogLocale,
-      alternateLocale: Object.values(OG_LOCALES).filter((item) => item !== ogLocale),
+      ...(ogAlternateLocales?.length
+        ? { alternateLocale: ogAlternateLocales }
+        : {}),
       siteName: SITE_NAME,
       title: pageTitle,
       description,
@@ -207,7 +215,7 @@ export async function generateGamesLikeMetadata(
   return createMetadata({
     title: gamesLikeTitle(t, game.title),
     description: gamesLikeDescription(t, game.title, similarCount),
-    path: `/games-like/${game.slug}`,
+    path: canonicalGamesLikePath(game),
     image: game.thumbnailUrl ?? game.coverUrl,
     noIndex: !decision.index,
     follow: decision.follow,

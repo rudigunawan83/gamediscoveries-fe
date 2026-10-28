@@ -65,6 +65,20 @@ describe("sitemap eligibility", () => {
       expect(list).not.toContain(`${APP_URL}${blocked}`);
     }
   });
+
+  it("emits absolute URLs via the canonical builder", () => {
+    const list = urls(
+      buildSitemapEntries({
+        categories: [],
+        collections: [],
+        games: [{ slug: "space-runner", lastModified: "2026-10-05T00:00:00Z" }],
+      }),
+    );
+    for (const url of list) {
+      expect(url).toMatch(/^https?:\/\//);
+      expect(url.startsWith(APP_URL!)).toBe(true);
+    }
+  });
 });
 
 describe("canonical consistency", () => {
@@ -104,6 +118,35 @@ describe("page metadata", () => {
 
     const unplayable = await generateGameMetadata({ ...game, playUrl: undefined, gameUrl: undefined });
     expect(unplayable.robots).toMatchObject({ index: false, follow: true });
+  });
+
+  it("noindexes non-canonical slug copies while pointing canonical at the primary", async () => {
+    const metadata = await generateGameMetadata({
+      ...game,
+      slug: "space-runner-2",
+      canonicalSlug: "space-runner",
+    });
+    expect(metadata.robots).toMatchObject({ index: false, follow: true });
+    expect(metadata.alternates?.canonical).toBe(`${APP_URL}/game/space-runner`);
+  });
+
+  it("falls back to icon-512 for OG when no game image exists", async () => {
+    const metadata = await generateGameMetadata({
+      ...game,
+      thumbnailUrl: "",
+      coverUrl: undefined,
+    });
+    const images = metadata.openGraph?.images;
+    const first = Array.isArray(images) ? images[0] : images;
+    expect(first && typeof first === "object" && "url" in first ? first.url : first).toBe(
+      "/icons/icon-512.png",
+    );
+  });
+
+  it("does not emit hreflang or OG alternateLocale without real locale routes", async () => {
+    const metadata = await generateGameMetadata(game);
+    expect(metadata.alternates?.languages).toBeUndefined();
+    expect(metadata.openGraph?.alternateLocale).toBeUndefined();
   });
 
   it("noindexes thin categories but keeps links followable", async () => {

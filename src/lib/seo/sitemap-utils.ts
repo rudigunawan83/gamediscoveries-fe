@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { env } from "@/config/env";
+import { buildCanonicalUrl } from "@/lib/seo/canonical";
 import { SEO_CONFIG } from "@/lib/seo/config";
 
 export function sitemapEntry(
@@ -11,7 +11,7 @@ export function sitemapEntry(
   },
 ): MetadataRoute.Sitemap[number] {
   return {
-    url: `${env.NEXT_PUBLIC_APP_URL}${path === "/" ? "" : path}`,
+    url: buildCanonicalUrl(path),
     lastModified: options?.lastModified
       ? new Date(options.lastModified)
       : undefined,

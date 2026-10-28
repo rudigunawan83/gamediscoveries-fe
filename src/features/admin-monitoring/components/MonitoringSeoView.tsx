@@ -32,6 +32,7 @@ import {
   getMonitoringSeo,
   getMonitoringTraffic,
   type MonitoringCount,
+  type MonitoringQuery,
   type MonitoringRange,
   type MonitoringRatio,
   type MonitoringSeo,
@@ -111,12 +112,12 @@ function consoleUrl(siteUrl: string, report: "performance/search-analytics" | "i
   return `https://search.google.com/search-console/${report}?resource_id=${encodeURIComponent(siteUrl)}`;
 }
 
-async function loadSeo(range: MonitoringRange, refresh: boolean): Promise<ApiResponse<SeoPageData>> {
+async function loadSeo(selection: MonitoringQuery, refresh: boolean): Promise<ApiResponse<SeoPageData>> {
   const [seo, traffic] = await Promise.all([
-    getMonitoringSeo(range, refresh),
-    getMonitoringTraffic(range, refresh).catch(() => null),
+    getMonitoringSeo(selection, refresh),
+    getMonitoringTraffic(selection, refresh).catch(() => null),
   ]);
-  return { ...seo, data: { ...seo.data, sources: traffic?.data.sources ?? null } };
+  return { ...seo, data: { ...seo.data!, sources: traffic?.data?.sources ?? null } };
 }
 
 export function MonitoringSeoView() {

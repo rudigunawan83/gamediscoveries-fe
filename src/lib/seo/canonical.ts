@@ -25,9 +25,15 @@ export function isPrivateSeoPath(path: string): boolean {
     p.startsWith("/signup") ||
     p.startsWith("/my-games") ||
     p.startsWith("/account") ||
+    p.startsWith("/favorites") ||
+    p.startsWith("/history") ||
+    p.startsWith("/settings") ||
+    p.startsWith("/progress") ||
     p.startsWith("/notifications") ||
     p.startsWith("/admin") ||
     p.startsWith("/offline") ||
+    // Own profile hub only — public /profile/[username] stays eligible for community SEO.
+    p === "/profile" ||
     /\/play$/.test(p)
   );
 }

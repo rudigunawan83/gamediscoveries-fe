@@ -10,6 +10,7 @@ import { analytics } from "@/lib/analytics/client";
 import { displayRating } from "@/lib/utils/display-rating";
 import { useFormats } from "@/lib/i18n/format";
 import { formatRating } from "@/lib/utils/format";
+import { gamePublicHref } from "@/lib/seo/indexability";
 import { cn } from "@/lib/utils";
 import type { Game } from "@/types/game";
 
@@ -35,6 +36,7 @@ export function GameCard({
       .join(" · ") || t("fallbackCategory");
   const rating = displayRating(game.id, game.rating);
   const isDiscovery = variant === "discovery";
+  const href = gamePublicHref(game);
 
   return (
     <article
@@ -47,12 +49,12 @@ export function GameCard({
       )}
     >
       <Link
-        href={`/game/${game.slug}`}
+        href={href}
         className="block focus-visible:outline-none"
         onClick={() =>
           analytics.track("game_click", {
             gameId: game.id,
-            slug: game.slug,
+            slug: game.canonicalSlug || game.slug,
           })
         }
       >
@@ -124,7 +126,7 @@ export function GameCard({
           <FavoriteButton
             gameId={game.id}
             source="game_card"
-            callbackUrl={`/game/${game.slug}`}
+            callbackUrl={href}
           />
         </div>
       ) : null}

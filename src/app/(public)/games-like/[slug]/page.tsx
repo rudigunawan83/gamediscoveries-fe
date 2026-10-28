@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { GameSection } from "@/components/game/GameSection";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -10,7 +10,11 @@ import {
   breadcrumbJsonLd,
   itemListJsonLd,
 } from "@/lib/seo/structured-data";
-import { shouldIndexGamesLike } from "@/lib/seo/indexability";
+import {
+  canonicalGamePath,
+  canonicalGamesLikePath,
+  shouldIndexGamesLike,
+} from "@/lib/seo/indexability";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +39,11 @@ export async function generateMetadata({ params }: GamesLikePageProps) {
     );
   }
 
+  const likePath = canonicalGamesLikePath(game);
+  if (likePath !== `/games-like/${slug}`) {
+    permanentRedirect(likePath);
+  }
+
   const category = game.categories[0]?.slug ?? game.categories[0]?.name;
   const similar = (
     await fetchGames({
@@ -52,6 +61,12 @@ export default async function GamesLikePage({ params }: GamesLikePageProps) {
   const { slug } = await params;
   const game = await fetchGameBySlug(slug);
   if (!game) notFound();
+
+  const gamePath = canonicalGamePath(game);
+  const likePath = canonicalGamesLikePath(game);
+  if (likePath !== `/games-like/${slug}`) {
+    permanentRedirect(likePath);
+  }
 
   const category = game.categories[0];
   const similar = (
@@ -82,10 +97,10 @@ export default async function GamesLikePage({ params }: GamesLikePageProps) {
           breadcrumbJsonLd([
             { name: tNav("home"), path: "/" },
             { name: tNav("games"), path: "/games" },
-            { name: game.title, path: `/game/${game.slug}` },
-            { name: heading, path: `/games-like/${game.slug}` },
+            { name: game.title, path: gamePath },
+            { name: heading, path: likePath },
           ]),
-          itemListJsonLd(heading, `/games-like/${game.slug}`, similar),
+          itemListJsonLd(heading, likePath, similar),
         ]}
       />
 
@@ -102,7 +117,7 @@ export default async function GamesLikePage({ params }: GamesLikePageProps) {
           {t.rich("gamesLikeOriginal", {
             game: game.title,
             link: (chunks) => (
-              <Link href={`/game/${game.slug}`} className="text-primary hover:underline">
+              <Link href={gamePath} className="text-primary hover:underline">
                 {chunks}
               </Link>
             ),
@@ -139,7 +154,7 @@ export default async function GamesLikePage({ params }: GamesLikePageProps) {
               ]
             : []),
           {
-            href: `/game/${game.slug}/community`,
+            href: `${gamePath}/community`,
             label: tCommunity("gameCommunityTitle", { game: game.title }),
           },
           { href: "/collections", label: tNav("collections") },

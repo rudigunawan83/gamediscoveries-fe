@@ -31,11 +31,12 @@ import {
   UnavailablePanel,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
-import { formatAgo } from "@/features/admin-monitoring/monitoringFormat";
+import { formatAgo, isHourlyMonitoring, monitoringDay } from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringOverview,
   getMonitoringTraffic,
   type MonitoringOverview,
+  type MonitoringQuery,
   type MonitoringRange,
 } from "@/lib/api/monitoring";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ export function MonitoringOverviewView() {
 }
 
 function OverviewData({ data, range }: { data: MonitoringOverview; range: MonitoringRange }) {
-  const hourly = data.range === "24h";
+  const hourly = isHourlyMonitoring(data);
   const buckets = data.activity.map((point) => point.bucket);
   const hasPlayers = data.activity.some((point) => point.mau > 0);
   const hasPlays = data.activity.some((point) => point.plays > 0);
@@ -213,24 +214,12 @@ function OverviewData({ data, range }: { data: MonitoringOverview; range: Monito
             </table>
           )}
         </Panel>
-        <UnavailablePanel
-          title="Recent Errors"
-          metric={data.recentErrors}
-          action={<PanelLink href="/admin/monitoring/errors">View All</PanelLink>}
-        />
-        <UnavailablePanel
-          title="Recent Alerts"
-          metric={data.recentIncidents}
-          action={<PanelLink href="/admin/monitoring/alerts">View All</PanelLink>}
-        />
+        <UnavailablePanel title="Recent Errors" metric={data.recentErrors} />
+        <UnavailablePanel title="Recent Alerts" metric={data.recentIncidents} />
       </section>
 
       <section className="grid gap-3 xl:grid-cols-3">
-        <Panel
-          title="Platform Health"
-          subtitle="Current status of core services"
-          action={<PanelLink href="/admin/monitoring/uptime">View Details</PanelLink>}
-        >
+        <Panel title="Platform Health" subtitle="Current status of core services">
           <ul className="max-h-72 space-y-2 overflow-auto pr-1">
             {data.health.map((item) => {
               const Icon = healthIcons[item.name] ?? Server;
@@ -262,7 +251,13 @@ function OverviewData({ data, range }: { data: MonitoringOverview; range: Monito
             ))}
           </ul>
         </Panel>
-        <TrafficPanels range={range} />
+        <TrafficPanels
+          selection={
+            data.range.startsWith("custom:")
+              ? { from: monitoringDay(data.from, "from"), to: monitoringDay(data.to, "to") }
+              : { range: data.range as "24h" | "7d" | "30d" }
+          }
+        />
       </section>
 
       <p className="text-xs text-[#8b8ca3]">
@@ -272,10 +267,10 @@ function OverviewData({ data, range }: { data: MonitoringOverview; range: Monito
   );
 }
 
-function TrafficPanels({ range }: { range: MonitoringRange }) {
+function TrafficPanels({ selection }: { selection: MonitoringQuery }) {
   const traffic = useQuery({
-    queryKey: ["admin", "monitoring", "traffic", range],
-    queryFn: async () => (await getMonitoringTraffic(range)).data,
+    queryKey: ["admin", "monitoring", "traffic", selection],
+    queryFn: async () => (await getMonitoringTraffic(selection)).data,
     staleTime: 60_000,
   });
 

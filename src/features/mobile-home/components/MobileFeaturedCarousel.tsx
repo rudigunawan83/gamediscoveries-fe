@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { gamePublicHref } from "@/lib/seo/indexability";
 import type { Game } from "@/types/game";
 
 const MAX_FEATURED = 8;
@@ -21,7 +22,7 @@ export function MobileFeaturedCarousel({ games }: { games: Game[] }) {
         return (
           <li key={game.id} className="w-[88%] shrink-0 snap-start">
             <Link
-              href={`/game/${game.slug}`}
+              href={gamePublicHref(game)}
               aria-label={t("featuredLabel", { title: game.title })}
               className="relative block h-[200px] overflow-hidden rounded-3xl bg-[#15151d] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
             >

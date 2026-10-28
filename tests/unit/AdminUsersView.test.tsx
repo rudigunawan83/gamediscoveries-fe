@@ -71,7 +71,7 @@ function renderView() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <AdminShell section="users">
+      <AdminShell section="portal">
         <AdminUsersView />
       </AdminShell>
     </QueryClientProvider>,
@@ -93,7 +93,7 @@ describe("AdminUsersView", () => {
     useAuthStore.setState({ accessToken: "token", user: { roles: ["Player"] } as never });
     renderView();
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Moderator or admin access is required");
+    expect(screen.getByRole("alert")).toHaveTextContent("Moderator or admin access is required for the admin portal");
     expect(listAdminUserDirectory).not.toHaveBeenCalled();
   });
 

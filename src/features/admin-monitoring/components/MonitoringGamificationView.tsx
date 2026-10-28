@@ -18,7 +18,7 @@ import {
   PanelLink,
   previousLabel,
 } from "@/features/admin-monitoring/components/MonitoringUi";
-import { formatAgo } from "@/features/admin-monitoring/monitoringFormat";
+import { formatAgo, isHourlyMonitoring } from "@/features/admin-monitoring/monitoringFormat";
 import {
   getMonitoringGamification,
   type GamificationShare,
@@ -112,7 +112,7 @@ export function MonitoringGamificationView() {
 }
 
 function GamificationData({ data, range }: { data: MonitoringGamification; range: MonitoringRange }) {
-  const hourly = data.range === "24h";
+  const hourly = isHourlyMonitoring(data);
   const vs = previousLabel(range);
   const buckets = data.trend.map((point) => point.bucket);
   const xp = data.trend.map((point) => point.xp);

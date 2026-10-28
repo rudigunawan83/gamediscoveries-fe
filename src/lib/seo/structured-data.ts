@@ -2,6 +2,7 @@ import { env } from "@/config/env";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/constants";
 import { SEO_CONFIG } from "@/lib/seo/config";
 import { buildCanonicalUrl } from "@/lib/seo/canonical";
+import { canonicalGamePath } from "@/lib/seo/indexability";
 import type { Game } from "@/types/game";
 
 export type JsonLdObject = Record<string, unknown>;
@@ -63,7 +64,7 @@ export function gameSoftwareJsonLd(game: Game, playable: boolean): JsonLdObject 
     "@context": "https://schema.org",
     "@type": ["VideoGame", "SoftwareApplication"],
     name: game.title,
-    url: buildCanonicalUrl(`/game/${game.slug}`),
+    url: buildCanonicalUrl(canonicalGamePath(game)),
     applicationCategory: "Game",
     operatingSystem: "Any",
     gamePlatform: ["HTML5", "Web Browser"],
@@ -114,7 +115,7 @@ export function itemListJsonLd(
     itemListElement: games.slice(0, 24).map((game, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: buildCanonicalUrl(`/game/${game.slug}`),
+      url: buildCanonicalUrl(canonicalGamePath(game)),
       name: game.title,
     })),
   };

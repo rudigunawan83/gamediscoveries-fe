@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { createMetadata } from "@/lib/seo/metadata";
+import { AdminShell } from "@/features/admin-monitoring/components/MonitoringShell";
 
 export function generateMetadata() {
   return createMetadata({
@@ -9,11 +10,6 @@ export function generateMetadata() {
   });
 }
 
-/** Admin is excluded from i18n and stays in English. */
 export default function AdminSeoLayout({ children }: { children: ReactNode }) {
-  return (
-    <div lang="en" className="contents">
-      {children}
-    </div>
-  );
+  return <AdminShell section="portal">{children}</AdminShell>;
 }

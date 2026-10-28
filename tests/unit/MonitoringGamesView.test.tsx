@@ -96,7 +96,7 @@ describe("MonitoringGamesView", () => {
     renderView();
 
     expect(await screen.findByText("1,245")).toBeInTheDocument();
-    expect(getMonitoringGames).toHaveBeenCalledWith("30d", false);
+    expect(getMonitoringGames).toHaveBeenCalledWith({ range: "30d" }, false);
     expect(screen.getByText("8m 24s")).toBeInTheDocument();
     expect(screen.getByText("90%")).toBeInTheDocument();
     expect(screen.getByText("200 reported loads")).toBeInTheDocument();
