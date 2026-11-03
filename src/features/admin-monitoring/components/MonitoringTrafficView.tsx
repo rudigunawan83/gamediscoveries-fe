@@ -51,7 +51,7 @@ export function MonitoringTrafficView() {
       queryName="traffic"
       path="/admin/monitoring/traffic"
       title="Traffic & Growth"
-      description="Website and mobile app visits from analytics events and sessions. Missing sources stay unavailable."
+      description="Human visits only — bots and known automation (Lightpanda, Reflectionbot, crawlers, Firefox 120/121 clusters) are excluded. Missing sources stay unavailable."
       icon={TrendingUp}
       load={getMonitoringTraffic}
     >
